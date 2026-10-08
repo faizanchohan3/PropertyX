@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@source "../../../../packages/ui/src";
+
+/* ------------------------------------------------------------------ */
+/* PropertyX design tokens                                              */
+/* Emerald (trust, growth) + warm gold (premium) on white / slate.      */
+/* ------------------------------------------------------------------ */
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+  --color-brand-950: #022c22;
+
+  --color-gold-50: #fdf8ec;
+  --color-gold-100: #faefcf;
+  --color-gold-200: #f3dc9b;
+  --color-gold-300: #ecc565;
+  --color-gold-400: #e2ad3d;
+  --color-gold-500: #c9922a;
+  --color-gold-600: #a87420;
+  --color-gold-700: #86581d;
+  --color-gold-800: #6e481e;
+  --color-gold-900: #5c3d1c;
+
+  --color-ink: #0f172a;
+  --color-night: #0b1220;
+  --color-night-2: #111a2c;
+  --color-night-3: #1a2540;
+
+  --radius-card: 1rem;
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px rgb(15 23 42 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.05), 0 12px 32px rgb(15 23 42 / 0.10);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-slate-800 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+  h1, h2, h3, h4 {
+    @apply text-slate-900 tracking-tight;
+  }
+}
+
+@utility container-px {
+  @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8;
+}
+@utility card {
+  @apply rounded-2xl border border-slate-200/80 bg-white shadow-[var(--shadow-soft)];
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap;
+}
+@utility btn-primary {
+  @apply btn bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900;
+}
+@utility btn-gold {
+  @apply btn bg-gold-500 text-white hover:bg-gold-600;
+}
+@utility btn-outline {
+  @apply btn border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50;
+}
+@utility btn-ghost {
+  @apply btn text-slate-700 hover:bg-slate-100;
+}
+@utility btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700;
+}
+@utility btn-sm {
+  @apply px-3 py-1.5 text-xs rounded-lg;
+}
+@utility input {
+  @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-600/10 disabled:bg-slate-50;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-slate-700;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:border-slate-400;
+}
+@utility chip-active {
+  @apply border-brand-700 bg-brand-50 text-brand-800;
+}
+@utility badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-5;
+}
+@utility section-title {
+  @apply text-2xl font-bold text-slate-900 sm:text-3xl;
+}
+
+@layer components {
+  .prose-px {
+    @apply text-slate-700 leading-relaxed;
+  }
+  .prose-px h2 { @apply mt-8 mb-3 text-xl font-bold text-slate-900; }
+  .prose-px h3 { @apply mt-6 mb-2 text-lg font-semibold text-slate-900; }
+  .prose-px p { @apply my-3; }
+  .prose-px ul { @apply my-3 list-disc pl-6 space-y-1; }
+  .prose-px ol { @apply my-3 list-decimal pl-6 space-y-1; }
+  .prose-px a { @apply text-brand-700 underline underline-offset-2; }
+  .prose-px blockquote { @apply my-4 border-l-4 border-gold-400 bg-gold-50 px-4 py-2 italic; }
+  .prose-px table { @apply my-4 w-full text-sm; }
+  .prose-px th { @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-left font-semibold; }
+  .prose-px td { @apply border-b border-slate-100 px-3 py-2; }
+  .prose-px strong { @apply font-semibold text-slate-900; }
+
+  /* dark analytics surfaces */
+  .dark-panel {
+    @apply rounded-2xl border border-white/10 bg-night-2 text-slate-200;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.leaflet-container { font-family: inherit; }

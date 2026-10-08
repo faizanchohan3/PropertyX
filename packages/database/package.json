@@ -1,0 +1,25 @@
+{
+  "name": "@propertyx/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx ../../scripts/seed.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9",
+    "@propertyx/shared": "*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11"
+  }
+}

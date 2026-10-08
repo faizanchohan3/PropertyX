@@ -1,0 +1,1 @@
+CREATE INDEX "listings_description_trgm" ON "property_listings" USING gin ("description" gin_trgm_ops);

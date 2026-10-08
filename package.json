@@ -1,0 +1,47 @@
+{
+  "name": "propertyx",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "PropertyX Pakistan — real estate marketplace monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:start": "tsx scripts/dev-db.ts",
+    "db:stop": "tsx scripts/db-stop.ts",
+    "db:migrate": "tsx packages/database/src/migrate.ts",
+    "db:generate": "npm run generate -w @propertyx/database",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reference": "tsx scripts/seed.ts --reference-only",
+    "dev": "npm run dev -w @propertyx/web",
+    "build": "npm run build -w @propertyx/web",
+    "start": "npm run start -w @propertyx/web",
+    "worker": "tsx scripts/worker.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit && npm run typecheck -w @propertyx/web",
+    "lint": "npm run lint -w @propertyx/web",
+    "test": "vitest run",
+    "smoke:pages": "node scripts/smoke-pages.mjs",
+    "smoke:flows": "node scripts/smoke-flows.mjs"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "embedded-postgres": "^17.10.0-beta.17",
+    "postgres": "^3.4.9",
+    "tsx": "^4.23.15",
+    "typescript": "5.9",
+    "vitest": "^3.2.7"
+  },
+  "allowScripts": {
+    "@embedded-postgres/windows-x64@17.10.0-beta.17": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "unrs-resolver@1.12.2": true,
+    "sharp@0.35.5": true
+  }
+}
