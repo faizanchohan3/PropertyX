@@ -6,3 +6,5 @@ node_modules
 storage/
 *.tsbuildinfo
 coverage
+
+.next-build

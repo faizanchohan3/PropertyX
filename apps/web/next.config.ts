@@ -9,6 +9,8 @@ if (existsSync(rootEnv)) process.loadEnvFile(rootEnv);
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // lets a production build run alongside `next dev` (NEXT_DIST_DIR=.next-build)
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   transpilePackages: ["@propertyx/shared", "@propertyx/database", "@propertyx/auth", "@propertyx/search", "@propertyx/ai", "@propertyx/payments", "@propertyx/notifications", "@propertyx/core", "@propertyx/ui"],
   serverExternalPackages: ["sharp", "postgres", "bcryptjs"],
   outputFileTracingRoot: path.join(__dirname, "../.."),

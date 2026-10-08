@@ -2,12 +2,13 @@ import "server-only";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getDb } from "@propertyx/database";
+import { db as lazyDb } from "@propertyx/database";
 import { resolveSession, SESSION_COOKIE, type AuthUser } from "@propertyx/auth";
 import { getSetting } from "@propertyx/core";
 import type { Permission } from "@propertyx/shared";
 
-export const db = getDb();
+// lazy: connects on first query, so `next build` works without DATABASE_URL
+export const db = lazyDb;
 
 /** Current user for server components / route handlers (cookie or Bearer token). */
 export const getUser = cache(async (): Promise<AuthUser | null> => {

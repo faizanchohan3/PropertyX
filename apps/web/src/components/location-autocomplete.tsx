@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 
 export type Suggestion = { slug: string; name: string; fullName: string; kind: string; citySlug: string | null; activeListings: number };
@@ -26,6 +26,7 @@ export function LocationAutocomplete({
   const [loading, setLoading] = useState(false);
   const [hi, setHi] = useState(0);
   const box = useRef<HTMLDivElement>(null);
+  const listId = useId();
 
   useEffect(() => setTerm(value?.label ?? ""), [value?.label]);
   useEffect(() => {
@@ -88,12 +89,13 @@ export function LocationAutocomplete({
         className={inputClassName}
         role="combobox"
         aria-expanded={open}
+        aria-controls={listId}
         aria-autocomplete="list"
         autoComplete="off"
       />
       {loading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />}
       {open && items.length > 0 && (
-        <ul role="listbox" className="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-[var(--shadow-lift)]">
+        <ul id={listId} role="listbox" className="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-[var(--shadow-lift)]">
           {items.map((s, i) => (
             <li key={s.slug} role="option" aria-selected={i === hi}>
               <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => choose(s)} onMouseEnter={() => setHi(i)} className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left ${i === hi ? "bg-brand-50" : ""}`}>

@@ -78,7 +78,7 @@ export function LeafletMap({
     if (fitMarkers && markers.length > 1) m.fitBounds(leaflet.latLngBounds(markers.map((x) => [x.lat, x.lng] as [number, number])), { padding: [30, 30], maxZoom: 15 });
   };
 
-  useEffect(renderMarkers, [markers, circle, fitMarkers]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(renderMarkers, [markers, circle, fitMarkers]);
 
   return <div ref={el} className={`${className} z-0 overflow-hidden rounded-2xl`} />;
 }
