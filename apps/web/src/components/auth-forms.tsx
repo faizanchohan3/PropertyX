@@ -79,7 +79,7 @@ export function LoginForm({ showDemo }: { showDemo: boolean }) {
           <p className="mb-3 text-xs text-gold-800">One click signs in as a sample user (password Demo@12345). Available only while demo mode is on.</p>
           <div className="flex flex-wrap gap-1.5">
             {DEMO.map(([label, key]) => (
-              <button key={key} type="button" disabled={busy} onClick={() => submit(undefined, { email: `${key}@propertyx.test`, password: "Demo@12345" })} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-gold-200 hover:ring-gold-400">
+              <button key={key} type="button" disabled={busy} onClick={() => submit(undefined, { email: `${key}@bismillah.test`, password: "Demo@12345" })} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-gold-200 hover:ring-gold-400">
                 {label}
               </button>
             ))}

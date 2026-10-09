@@ -49,7 +49,7 @@ Stop the database with `npm run db:stop`.
 
 ### Demo accounts
 
-All demo accounts use the password `Demo@12345` (email `<role>@propertyx.test`), and the login page has one-click buttons while demo mode is on:
+All demo accounts use the password `Demo@12345` (email `<role>@bismillah.test`), and the login page has one-click buttons while demo mode is on:
 
 `buyer`, `seller`, `agent`, `agency`, `developer`, `landlord`, `tenant`, `investor`, `manager` (property manager), `builder`, `support`, `moderator`, `admin`, `superadmin`.
 

@@ -97,7 +97,7 @@ const resendProvider: ChannelProvider = {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "Bismillah <no-reply@propertyx.pk>", to: [m.to], subject: m.subject ?? "Bismillah", text: m.body }),
+      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "Bismillah <no-reply@bismillah.pk>", to: [m.to], subject: m.subject ?? "Bismillah", text: m.body }),
     });
     if (!res.ok) throw new Error(`resend ${res.status}`);
   },

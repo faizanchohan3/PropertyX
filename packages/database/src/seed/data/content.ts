@@ -249,7 +249,7 @@ The bank buys the property and sells it to the customer at a disclosed profit, p
 The **Bismillah Home Finance Calculator** lets you compare conventional and Islamic structures side by side. Rates shown are defaults set by our team for illustration — confirm current offers with your bank.`,
   },
   {
-    slug: "propertyx-verification-levels-explained",
+    slug: "bismillah-verification-levels-explained",
     title: "Bismillah Verification Levels Explained",
     category: "news",
     excerpt: "What each verification badge on Bismillah means, and how to get your listing or profile verified.",

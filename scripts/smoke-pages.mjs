@@ -30,7 +30,7 @@ for (const [role, pages] of Object.entries(PLAN)) {
   if (only && !only.split(",").includes(role)) continue;
   const list = pages;
   if (!list.length) continue;
-  const cookie = await login(`${role}@propertyx.test`);
+  const cookie = await login(`${role}@bismillah.test`);
   for (const p of list) {
     const t = Date.now();
     const res = await fetch(`${BASE}${p}`, { headers: { cookie }, redirect: "manual" });

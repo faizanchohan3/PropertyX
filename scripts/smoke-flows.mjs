@@ -33,10 +33,10 @@ function check(name, cond, extra = "") {
   console.log(`${cond ? "PASS" : "FAIL"}  ${name}${extra ? `  — ${extra}` : ""}`);
 }
 
-const seller = await session("seller@propertyx.test");
-const buyer = await session("buyer@propertyx.test");
-const admin = await session("admin@propertyx.test");
-const agent = await session("agent@propertyx.test");
+const seller = await session("seller@bismillah.test");
+const buyer = await session("buyer@bismillah.test");
+const admin = await session("admin@bismillah.test");
+const agent = await session("agent@bismillah.test");
 
 // ---------- listing creation ----------
 const tree = await seller.call("GET", "/api/v1/locations/tree");

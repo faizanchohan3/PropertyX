@@ -39,7 +39,7 @@ export function scamTextScore(text: string) {
 /** Spam score for chat messages (0-100). */
 export function messageSpamScore(body: string, recentCount: number) {
   let score = scamTextScore(body).score;
-  if (/(https?:\/\/|www\.)\S+/i.test(body) && !/propertyx/i.test(body)) score += 20;
+  if (/(https?:\/\/|www\.)\S+/i.test(body) && !/bismillah|propertyx/i.test(body)) score += 20;
   if (/(.)\1{7,}/.test(body)) score += 15;
   if (body.length > 20 && body.replace(/[^A-Z]/g, "").length / body.length > 0.6) score += 10;
   if (recentCount > 20) score += 30;

@@ -20,7 +20,7 @@ import { BLOG_POSTS, AREA_GUIDES } from "./data/content";
 import { generateListing } from "./listing-generator";
 
 export const DEMO_PASSWORD = "Demo@12345";
-export const DEMO_DOMAIN = "propertyx.test";
+export const DEMO_DOMAIN = "bismillah.test";
 
 export const DEMO_ACCOUNTS = [
   { key: "superadmin", email: `superadmin@${DEMO_DOMAIN}`, name: "Platform Super Admin", roles: ["super_admin"] },
