@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { sql } from "drizzle-orm";
-import { Home, Building, LandPlot, Store, Trees, HardHat, KeyRound, Sparkles, Calculator, TrendingUp, Landmark, Hammer, Scale, ArrowRight, ShieldCheck, BadgeCheck, LineChart } from "lucide-react";
+import { Home, Building, LandPlot, Store, Trees, HardHat, KeyRound, Sparkles, Calculator, TrendingUp, Landmark, Hammer, Scale, ArrowRight, ShieldCheck, BadgeCheck, LineChart, Building2, MapPinned, Ruler, Flame } from "lucide-react";
 import { createSearchEngine } from "@propertyx/search";
 import { listProjects, listPosts, recommendedFor, serveAds, getSetting, listAgents } from "@propertyx/core";
 import { formatPKR, PROJECT_STATUS_LABELS } from "@propertyx/shared";
@@ -31,6 +31,17 @@ const TOOLS = [
   { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
   { label: "Installment Planner", desc: "Full schedule for any payment plan.", href: "/tools/installment", icon: Calculator },
   { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
+];
+
+const EXPLORE = [
+  { label: "New Projects", desc: "The best investment opportunities", href: "/projects", icon: Building2 },
+  { label: "Construction Cost Calculator", desc: "Get construction cost estimate", href: "/tools/construction-cost", icon: Hammer },
+  { label: "Home Loan Calculator", desc: "Find affordable loan packages", href: "/tools/home-loan", icon: Landmark },
+  { label: "Area Guides", desc: "Explore housing societies in Pakistan", href: "/areas", icon: MapPinned },
+  { label: "Plot Finder", desc: "Find plots in any housing society", href: "/map", icon: LandPlot },
+  { label: "Property Index", desc: "Track changes in real estate prices", href: "/price-index", icon: LineChart },
+  { label: "Area Unit Converter", desc: "Convert any area unit instantly", href: "/tools/area-unit-converter", icon: Ruler },
+  { label: "Property Trends", desc: "Find popular areas to buy property", href: "/trends", icon: Flame },
 ];
 
 export default async function HomePage() {
@@ -82,6 +93,24 @@ export default async function HomePage() {
           <p className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-brand-600" /> Five-level verification on listings and agents</p>
           <p className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-gold-500" /> AI search that explains why each property matches</p>
           <p className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 text-brand-600" /> Fraud checks on prices, photos and phone numbers</p>
+        </div>
+      </section>
+
+      {/* EXPLORE MORE */}
+      <section className="container-px mt-14">
+        <h2 className="section-title">Explore more on Bismillah</h2>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {EXPLORE.map(({ label, desc, href, icon: Icon }) => (
+            <Link key={href} href={href} className="card group flex flex-col items-start gap-3 p-4 hover:border-brand-300 sm:flex-row sm:items-center sm:p-5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 transition group-hover:bg-brand-700 group-hover:text-white">
+                <Icon className="h-6 w-6" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold leading-snug text-slate-900 group-hover:text-brand-700">{label}</span>
+                <span className="mt-0.5 block text-xs text-slate-500 sm:text-sm">{desc}</span>
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
