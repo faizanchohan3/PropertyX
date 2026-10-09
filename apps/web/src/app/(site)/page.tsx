@@ -145,7 +145,7 @@ export default async function HomePage() {
       {homepage.sections.cities !== false && (
         <section className="container-px mt-16">
           <h2 className="section-title">Explore by city</h2>
-          <p className="mb-6 mt-1 text-slate-500">Live listing counts from PropertyX</p>
+          <p className="mb-6 mt-1 text-slate-500">Live listing counts from Bismillah</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {cityCounts
               .filter((c) => homepage.featuredCities.includes(c.slug))

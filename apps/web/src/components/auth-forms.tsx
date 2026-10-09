@@ -68,7 +68,7 @@ export function LoginForm({ showDemo }: { showDemo: boolean }) {
         </button>
       </form>
       <p className="mt-5 text-center text-sm text-slate-600">
-        New to PropertyX?{" "}
+        New to Bismillah?{" "}
         <Link href={`/register${sp.get("next") ? `?next=${encodeURIComponent(sp.get("next")!)}` : ""}`} className="font-semibold text-brand-700">
           Create an account
         </Link>

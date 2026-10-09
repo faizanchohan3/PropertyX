@@ -14,7 +14,7 @@ export default async function TenantPage() {
     return (
       <div>
         <PageHeader title="My tenancy" />
-        <Empty title="No lease linked to your account" body="Ask your landlord to add your lease on PropertyX using this account's email address. It will appear here automatically." />
+        <Empty title="No lease linked to your account" body="Ask your landlord to add your lease on Bismillah using this account's email address. It will appear here automatically." />
       </div>
     );
   const active = t.leases.find((l) => l.l.status === "active") ?? t.leases[0];

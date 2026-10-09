@@ -46,7 +46,7 @@ export default async function DashboardHome({ searchParams }: { searchParams: Pr
       {sp.denied && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">You don't have access to that page.</p>}
       {sp.welcome && (
         <div className="rounded-2xl bg-gradient-to-r from-brand-700 to-brand-900 p-5 text-white">
-          <p className="text-lg font-bold">Welcome to PropertyX 🎉</p>
+          <p className="text-lg font-bold">Welcome to Bismillah 🎉</p>
           <p className="mt-1 text-sm text-brand-100">Start by saving a search so we can alert you to new matches, or post your first property.</p>
         </div>
       )}

@@ -24,7 +24,7 @@ export default async function AdsPage() {
   ];
   return (
     <div>
-      <PageHeader title="Advertising" subtitle="Promote listings, projects and your brand across PropertyX." />
+      <PageHeader title="Advertising" subtitle="Promote listings, projects and your brand across Bismillah." />
       <AdCampaigns
         targets={targets}
         gateways={gatewaysForCheckout()}

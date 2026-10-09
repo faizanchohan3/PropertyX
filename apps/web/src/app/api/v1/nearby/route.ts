@@ -34,7 +34,7 @@ async function overpass(query: string): Promise<OverpassResult> {
       const res = await fetch(url, {
         method: "POST",
         body: new URLSearchParams({ data: query }),
-        headers: { "user-agent": "PropertyX-Pakistan/1.0 (nearby places)", accept: "application/json" },
+        headers: { "user-agent": "Bismillah-Pakistan/1.0 (nearby places)", accept: "application/json" },
         signal: AbortSignal.timeout(28_000),
         cache: "no-store",
       });

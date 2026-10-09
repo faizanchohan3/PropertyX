@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const isAgent = user.roles.includes("agent") || user.roles.includes("agency");
   return (
     <div className="space-y-6">
-      <PageHeader title="Public profile" subtitle="How buyers see you on PropertyX." />
+      <PageHeader title="Public profile" subtitle="How buyers see you on Bismillah." />
       {isAgent && (
         <Panel
           title="Agent profile"

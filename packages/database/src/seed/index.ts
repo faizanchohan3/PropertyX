@@ -368,7 +368,7 @@ export async function seedDemo(db: Database, opts: { log?: (m: string) => void }
         coverImage: cover,
         masterPlanUrl: "/floor-plans/sample-master-plan.svg",
         brochureUrl: null,
-        approvalStatus: "Approval documents submitted to PropertyX for review",
+        approvalStatus: "Approval documents submitted to Bismillah for review",
         isFeatured: !!p.featured,
         viewsCount: rng.int(400, 6000),
         isSeed: true,

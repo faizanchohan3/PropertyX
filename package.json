@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "PropertyX Pakistan — real estate marketplace monorepo",
+  "description": "Bismillah Pakistan — real estate marketplace monorepo",
   "workspaces": [
     "apps/*",
     "packages/*"

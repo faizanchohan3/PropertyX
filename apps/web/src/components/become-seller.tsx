@@ -28,7 +28,7 @@ export function BecomeSeller() {
   return (
     <div className="card mx-auto max-w-xl p-8 text-center">
       <h2 className="text-xl font-bold">How are you listing?</h2>
-      <p className="mt-1 text-sm text-slate-500">Your account is set up for buying. Choose how you'll use PropertyX to start posting — you keep your buyer features.</p>
+      <p className="mt-1 text-sm text-slate-500">Your account is set up for buying. Choose how you'll use Bismillah to start posting — you keep your buyer features.</p>
       <div className="mt-6 grid gap-3">
         {OPTIONS.map((o) => (
           <button key={o.role} onClick={() => pick(o.role)} disabled={!!busy} className="card flex items-center gap-3 p-4 text-left hover:border-brand-300">

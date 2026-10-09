@@ -87,7 +87,7 @@ function rulesCopy(d: ListingDraft): ListingCopy {
   if (d.notes?.trim()) paras.push(d.notes.trim());
   if (d.installmentAvailable) paras.push("Installment options are available — contact for the payment schedule.");
   if (d.price) paras.push(`Asking ${d.purpose === "rent" ? "rent" : "price"}: ${formatPKR(d.price)}${d.purpose === "rent" ? " per month" : ""}.`);
-  paras.push("Contact through PropertyX to arrange a visit.");
+  paras.push("Contact through Bismillah to arrange a visit.");
 
   const highlights = [f.has("corner") && "Corner property", f.has("park_facing") && "Park facing", d.condition === "brand_new" && "Brand new construction", f.has("possession") && "Possession available", d.installmentAvailable && "Installments available", d.furnishing === "furnished" && "Fully furnished", f.has("solar") && "Solar installed", f.has("main_boulevard") && "On main boulevard"].filter(Boolean) as string[];
   return { title, description: paras.join("\n\n"), highlights: highlights.slice(0, 5), source: "rules" };

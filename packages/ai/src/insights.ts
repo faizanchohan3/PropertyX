@@ -94,7 +94,7 @@ export async function answerSupport(question: string): Promise<{ answer: string;
     p.generateText({
       effort: "low",
       maxTokens: 1500,
-      system: "You are PropertyX customer support. Answer ONLY using the help articles provided. If they don't cover the question, say you'll connect the user with a human agent. Keep answers under 120 words.",
+      system: "You are Bismillah customer support. Answer ONLY using the help articles provided. If they don't cover the question, say you'll connect the user with a human agent. Keep answers under 120 words.",
       prompt: `Help articles:\n${scored.map((a) => `## ${a.title}\n${a.body}`).join("\n\n")}\n\nQuestion: ${question}`,
     }),
   );
@@ -123,7 +123,7 @@ export async function answerAreaQuestion(facts: AreaFacts, question: string): Pr
     `There are currently ${facts.activeListings} active listings in ${facts.name}.`,
     facts.medianSalePricePerSqft ? `The median asking price of listed properties is about PKR ${Math.round(facts.medianSalePricePerSqft).toLocaleString("en-PK")} per sq ft.` : "",
     facts.medianRent ? `The median asking rent of listed homes is about ${formatPKR(facts.medianRent)} per month.` : "",
-    facts.priceChange12m != null ? `Average asking price per sq ft has changed by ${facts.priceChange12m.toFixed(1)}% over the last 12 months on PropertyX.` : "",
+    facts.priceChange12m != null ? `Average asking price per sq ft has changed by ${facts.priceChange12m.toFixed(1)}% over the last 12 months on Bismillah.` : "",
     facts.isDemoData ? "(Figures are calculated from demo listings on this environment.)" : "",
   ]
     .filter(Boolean)

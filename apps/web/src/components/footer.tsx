@@ -20,7 +20,7 @@ export async function Footer() {
       ],
     },
     {
-      title: "PropertyX",
+      title: "Bismillah",
       links: [
         { label: "Post a property", href: "/post-property" },
         { label: "Pricing", href: "/pricing" },
@@ -62,7 +62,7 @@ export async function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-px flex flex-col gap-2 py-6 text-xs text-slate-500 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} PropertyX Pakistan. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bismillah Pakistan. All rights reserved.</p>
           <p>Prices and estimates are indicative. Always verify ownership documents before paying.</p>
         </div>
       </div>

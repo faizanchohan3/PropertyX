@@ -177,7 +177,7 @@ export function RentalsWorkspace({ data }: { data: Data }) {
       {tab === "rent" && (
         <Panel title="All rent dues">
           <DuesTable dues={data.payments} leaseOf={leaseOf} unitLabel={unitLabel} onPay={(p) => setModal({ pay: p })} />
-          <p className="mt-3 text-xs text-slate-500">Dues are generated automatically each month for active leases. Tenants with a PropertyX account receive reminders 3 days before and on the due date.</p>
+          <p className="mt-3 text-xs text-slate-500">Dues are generated automatically each month for active leases. Tenants with a Bismillah account receive reminders 3 days before and on the due date.</p>
         </Panel>
       )}
 
@@ -221,13 +221,13 @@ export function RentalsWorkspace({ data }: { data: Data }) {
       )}
 
       <Modal open={modal === "property"} onClose={() => setModal(null)} title="Add property">
-        {form([{ name: "name", label: "Name (e.g. Johar Town House)", required: true }, { name: "address", label: "Address", required: true }, { name: "cityName", label: "City" }, { name: "managerEmail", label: "Property manager's PropertyX email (optional)", type: "email" }, { name: "notes", label: "Notes", type: "textarea" }], "property", "Property added")}
+        {form([{ name: "name", label: "Name (e.g. Johar Town House)", required: true }, { name: "address", label: "Address", required: true }, { name: "cityName", label: "City" }, { name: "managerEmail", label: "Property manager's Bismillah email (optional)", type: "email" }, { name: "notes", label: "Notes", type: "textarea" }], "property", "Property added")}
       </Modal>
       <Modal open={modal === "unit"} onClose={() => setModal(null)} title="Add unit">
         {form([{ name: "managedPropertyId", label: "Property", options: data.properties.map((p) => ({ v: p.id, l: p.name })) }, { name: "label", label: "Unit label (e.g. Ground floor, Flat 101)", required: true }, { name: "beds", label: "Bedrooms", type: "number" }, { name: "baths", label: "Bathrooms", type: "number" }, { name: "areaSqft", label: "Area (sq ft)", type: "number" }, { name: "marketRent", label: "Market rent (PKR)", type: "number" }], "unit", "Unit added")}
       </Modal>
       <Modal open={modal === "lease"} onClose={() => setModal(null)} title="New lease">
-        {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "tenantName", label: "Tenant name", required: true }, { name: "tenantPhone", label: "Tenant mobile", required: true }, { name: "tenantEmail", label: "Tenant email (links their PropertyX account)", type: "email" }, { name: "startDate", label: "Start date", type: "date", def: today, required: true }, { name: "endDate", label: "End date", type: "date", def: inYear, required: true }, { name: "monthlyRent", label: "Monthly rent (PKR)", type: "number", required: true }, { name: "securityDeposit", label: "Security deposit (PKR)", type: "number" }, { name: "dueDay", label: "Rent due day (1–28)", type: "number", def: "5" }, { name: "annualIncreasePct", label: "Annual increase %", type: "number", def: "10" }, { name: "terms", label: "Key terms", type: "textarea" }], "lease", "Lease created — rent dues generated")}
+        {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "tenantName", label: "Tenant name", required: true }, { name: "tenantPhone", label: "Tenant mobile", required: true }, { name: "tenantEmail", label: "Tenant email (links their Bismillah account)", type: "email" }, { name: "startDate", label: "Start date", type: "date", def: today, required: true }, { name: "endDate", label: "End date", type: "date", def: inYear, required: true }, { name: "monthlyRent", label: "Monthly rent (PKR)", type: "number", required: true }, { name: "securityDeposit", label: "Security deposit (PKR)", type: "number" }, { name: "dueDay", label: "Rent due day (1–28)", type: "number", def: "5" }, { name: "annualIncreasePct", label: "Annual increase %", type: "number", def: "10" }, { name: "terms", label: "Key terms", type: "textarea" }], "lease", "Lease created — rent dues generated")}
       </Modal>
       <Modal open={modal === "maintenance"} onClose={() => setModal(null)} title="Log maintenance request">
         {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "title", label: "Title", required: true }, { name: "description", label: "Details", type: "textarea", required: true }, { name: "category", label: "Category", options: ["general", "plumbing", "electrical", "appliance", "structural", "cleaning", "pest"].map((v) => ({ v, l: v })) }, { name: "priority", label: "Priority", def: "normal", options: ["low", "normal", "high", "urgent"].map((v) => ({ v, l: v })) }], "maintenance", "Request logged")}

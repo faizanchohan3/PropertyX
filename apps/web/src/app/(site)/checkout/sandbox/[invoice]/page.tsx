@@ -34,7 +34,7 @@ export default async function SandboxCheckout({ params }: { params: Promise<{ in
           <div className="flex items-center gap-3">
             <LogoMark className="h-10 w-10" />
             <div>
-              <p className="font-bold">PropertyX Pakistan</p>
+              <p className="font-bold">Bismillah Pakistan</p>
               <p className="text-xs text-slate-500">Invoice {p.invoiceNumber}</p>
             </div>
           </div>

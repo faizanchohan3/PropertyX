@@ -1,6 +1,6 @@
 /**
  * Market analytics computed from listings on the platform (asking prices, not
- * transaction prices). Every consumer must label these as "based on PropertyX
+ * transaction prices). Every consumer must label these as "based on Bismillah
  * listings" — and as demo data while demo_mode is on.
  */
 import { sql, eq, and } from "drizzle-orm";

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Camera, ShieldCheck, Sparkles, LineChart, MessageSquare, CalendarDays, Plus } from "lucide-react";
 
-export const metadata: Metadata = { title: "Sell or rent out your property", description: "List your property on PropertyX for free. AI-written descriptions, verified badges, lead management and visit scheduling.", alternates: { canonical: "/sell" } };
+export const metadata: Metadata = { title: "Sell or rent out your property", description: "List your property on Bismillah for free. AI-written descriptions, verified badges, lead management and visit scheduling.", alternates: { canonical: "/sell" } };
 
 const STEPS = [
   { icon: Sparkles, title: "Describe it in minutes", body: "An 11-step wizard with AI Assist that turns your details into a clear title and description — without inventing anything." },

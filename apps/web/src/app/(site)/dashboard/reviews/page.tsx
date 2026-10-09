@@ -14,7 +14,7 @@ export default async function ReviewsPage() {
     <div>
       <PageHeader title="Reviews" subtitle={rows.length ? `${avg.toFixed(1)} average from ${rows.length} published reviews` : "Reviews from clients appear here after moderation."} />
       {rows.length === 0 ? (
-        <Empty title="No published reviews yet" body="Clients who enquired through PropertyX can review you. Reviews are moderated before publishing and marked when the reviewer had a verified interaction." />
+        <Empty title="No published reviews yet" body="Clients who enquired through Bismillah can review you. Reviews are moderated before publishing and marked when the reviewer had a verified interaction." />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

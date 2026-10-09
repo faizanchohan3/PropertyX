@@ -41,12 +41,12 @@ export async function searchMetadata(query: SearchQuery, canonicalPath: string):
   const ctx = await createSearchEngine(db).resolveContext(query);
   const title = searchTitle(query, ctx);
   const { total } = await createSearchEngine(db).search({ ...query, pageSize: 1 });
-  const description = `Browse ${total.toLocaleString()} ${title.toLowerCase()} on PropertyX. Compare prices, view verified listings, photos, maps and contact agents directly.`;
+  const description = `Browse ${total.toLocaleString()} ${title.toLowerCase()} on Bismillah. Compare prices, view verified listings, photos, maps and contact agents directly.`;
   return {
     title,
     description,
     alternates: { canonical: canonicalPath },
-    openGraph: { title: `${title} | PropertyX Pakistan`, description, url: canonicalPath },
+    openGraph: { title: `${title} | Bismillah Pakistan`, description, url: canonicalPath },
     robots: query.page && query.page > 1 ? { index: false, follow: true } : undefined,
   };
 }

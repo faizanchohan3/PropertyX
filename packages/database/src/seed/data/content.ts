@@ -48,9 +48,9 @@ If an agent is involved, insist on meeting the registered owner in person, or ve
 
 Use bank transfers or pay orders in the owner's name and always get a signed receipt. Avoid cash payments, especially to intermediaries.
 
-## How PropertyX helps
+## How Bismillah helps
 
-Listings on PropertyX show a **verification level** from 0 to 5. Level 4 means our team has reviewed ownership documents and confirmed the location; Level 5 adds a physical inspection. Verification reduces risk but is **not** a legal title guarantee — always complete your own due diligence with a qualified lawyer.`,
+Listings on Bismillah show a **verification level** from 0 to 5. Level 4 means our team has reviewed ownership documents and confirmed the location; Level 5 adds a physical inspection. Verification reduces risk but is **not** a legal title guarantee — always complete your own due diligence with a qualified lawyer.`,
   },
   {
     slug: "marla-kanal-square-feet-explained",
@@ -76,7 +76,7 @@ Revenue records historically use a 272.25 sq ft marla, while most planned societ
 
 ## Comparing prices
 
-Because unit sizes vary, compare listings on **price per square foot**. PropertyX normalises every listing to square feet (using a 225 sq ft marla) and shows price per sq ft on each property page and in the comparison tool.
+Because unit sizes vary, compare listings on **price per square foot**. Bismillah normalises every listing to square feet (using a 225 sq ft marla) and shows price per sq ft on each property page and in the comparison tool.
 
 ## Covered area vs plot area
 
@@ -94,12 +94,12 @@ A house listing usually quotes the **plot** size. The **covered area** (total bu
 1. **Is the project approved?** Ask for the approval letter (NOC) from the relevant development authority and check it independently.
 2. **Who owns the land?** Is the land owned by the developer, or held under a joint venture?
 3. **What exactly is included in the price?** Development charges, parking, corner or park-facing premiums and utility connection charges are often extra.
-4. **What is the full payment schedule?** Get every monthly, quarterly and balloon payment in writing. Use the PropertyX Installment Calculator to see the total payable.
+4. **What is the full payment schedule?** Get every monthly, quarterly and balloon payment in writing. Use the Bismillah Installment Calculator to see the total payable.
 5. **What happens if a payment is late?** Ask about late fees, grace periods and cancellation terms.
 6. **Can I transfer or resell before possession?** Check transfer fees and whether a booking can be sold.
 7. **What is the possession timeline and what if it slips?** Look for penalty clauses for developer delays.
 8. **Is there an escrow account?** Some developers ring-fence buyer payments for construction.
-9. **What is the construction progress today?** Visit the site. PropertyX project pages show the developer-reported construction status.
+9. **What is the construction progress today?** Visit the site. Bismillah project pages show the developer-reported construction status.
 10. **What does the developer's track record look like?** Look at completed projects and reviews from verified buyers.
 
 > Tip: Never pay booking amounts in cash to individuals. Pay the developer's company account and keep receipts.`,
@@ -129,7 +129,7 @@ Agreements are usually written on stamp paper and signed in front of witnesses.
 
 In Punjab and Islamabad, landlords are required to register tenants with the local police, and other provinces have similar requirements. Registration can usually be done online or at the local police station or service centre. Check the current procedure with your provincial police website.
 
-## Using PropertyX rental tools
+## Using Bismillah rental tools
 
 Landlords can record leases, generate monthly rent dues, send rent reminders and log maintenance requests in **Dashboard → Rentals**. Tenants who are invited get a tenant portal to see rent history, lease details and raise maintenance requests.`,
   },
@@ -160,7 +160,7 @@ Finishing covers everything you see and use: tiles and flooring, paint, doors an
 
 ## Estimate your project
 
-The PropertyX **Construction Cost Calculator** breaks an estimate into grey structure, finishing, electrical, plumbing, woodwork, kitchen, bathrooms and labour using rates maintained by our team. Treat it as a planning estimate and get detailed quotes from contractors before you start.`,
+The Bismillah **Construction Cost Calculator** breaks an estimate into grey structure, finishing, electrical, plumbing, woodwork, kitchen, bathrooms and labour using rates maintained by our team. Treat it as a planning estimate and get detailed quotes from contractors before you start.`,
   },
   {
     slug: "selling-your-property-checklist",
@@ -177,7 +177,7 @@ The PropertyX **Construction Cost Calculator** breaks an estimate into grey stru
 
 ## Price it realistically
 
-Look at comparable listings in your block or sector and compare **price per square foot**, not just total price. The PropertyX **"What's My Property Worth?"** tool gives an indicative range based on comparable listings.
+Look at comparable listings in your block or sector and compare **price per square foot**, not just total price. The Bismillah **"What's My Property Worth?"** tool gives an indicative range based on comparable listings.
 
 ## Create a strong listing
 
@@ -217,7 +217,7 @@ Total return = net rental income + appreciation − buying and selling costs. Wh
 
 ## Try it
 
-The **PropertyX Investment Advisor** calculates yield, cash flow, ROI, total return and a break-even period, and gives an indicative score. Results are estimates based on your assumptions — they are not financial advice.`,
+The **Bismillah Investment Advisor** calculates yield, cash flow, ROI, total return and a break-even period, and gives an indicative score. Results are estimates based on your assumptions — they are not financial advice.`,
   },
   {
     slug: "islamic-home-financing-options",
@@ -246,16 +246,16 @@ The bank buys the property and sells it to the customer at a disclosed profit, p
 - Maximum financing as a percentage of value and the maximum tenure
 - Processing fees, takaful (insurance) and early settlement terms
 
-The **PropertyX Home Finance Calculator** lets you compare conventional and Islamic structures side by side. Rates shown are defaults set by our team for illustration — confirm current offers with your bank.`,
+The **Bismillah Home Finance Calculator** lets you compare conventional and Islamic structures side by side. Rates shown are defaults set by our team for illustration — confirm current offers with your bank.`,
   },
   {
     slug: "propertyx-verification-levels-explained",
-    title: "PropertyX Verification Levels Explained",
+    title: "Bismillah Verification Levels Explained",
     category: "news",
-    excerpt: "What each verification badge on PropertyX means, and how to get your listing or profile verified.",
+    excerpt: "What each verification badge on Bismillah means, and how to get your listing or profile verified.",
     tags: ["platform", "verification", "trust"],
     image: "houseExterior",
-    body: `Every listing and agent on PropertyX carries a verification level so buyers know how much has been checked.
+    body: `Every listing and agent on Bismillah carries a verification level so buyers know how much has been checked.
 
 | Level | Meaning |
 | --- | --- |
@@ -264,7 +264,7 @@ The **PropertyX Home Finance Calculator** lets you compare conventional and Isla
 | 2 — Identity Verified | Our team reviewed the owner's or agent's CNIC |
 | 3 — Documents Submitted | Ownership documents received and awaiting review |
 | 4 — Property Verified | Ownership documents reviewed and location confirmed |
-| 5 — Premium Verified | A PropertyX officer physically inspected the property |
+| 5 — Premium Verified | A Bismillah officer physically inspected the property |
 
 ## How to get verified
 
@@ -285,11 +285,11 @@ Verification reduces risk but does not replace independent legal due diligence.`
     image: "office",
     body: `A good agent saves time and helps you avoid mistakes. Look for:
 
-- **A verifiable identity and office.** Verified agents on PropertyX have had their identity reviewed.
+- **A verifiable identity and office.** Verified agents on Bismillah have had their identity reviewed.
 - **Local expertise.** Agents who specialise in a society know its blocks, prices and transfer process.
 - **Transparency about commission.** Agree on commission in writing before viewings start.
 - **Real listings.** Be wary of agents advertising prices far below the market — this is a common lure.
-- **Reviews from verified interactions.** Reviews on PropertyX are moderated and marked when the reviewer had a recorded interaction with the agent.
+- **Reviews from verified interactions.** Reviews on Bismillah are moderated and marked when the reviewer had a recorded interaction with the agent.
 
 ## Red flags
 

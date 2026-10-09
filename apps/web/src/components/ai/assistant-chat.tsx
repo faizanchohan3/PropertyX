@@ -246,7 +246,7 @@ export function AssistantChat() {
             </button>
           </form>
           <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400">
-            <Info className="h-3 w-3" /> Results come only from live PropertyX listings. Prices and affordability figures are estimates, not financial advice.
+            <Info className="h-3 w-3" /> Results come only from live Bismillah listings. Prices and affordability figures are estimates, not financial advice.
             {lastAssistant?.data.provider && <span className="ml-auto">engine: {lastAssistant.data.provider}</span>}
           </p>
         </div>

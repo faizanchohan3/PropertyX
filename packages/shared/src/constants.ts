@@ -169,10 +169,10 @@ export type SortKey = (typeof SORT_OPTIONS)[number]["key"];
 export const VERIFICATION_LEVELS = [
   { level: 0, key: "unverified", label: "Unverified", description: "No verification performed." },
   { level: 1, key: "phone", label: "Phone Verified", description: "Contact phone number confirmed by one-time code." },
-  { level: 2, key: "identity", label: "Identity Verified", description: "Owner/agent CNIC reviewed by PropertyX staff." },
+  { level: 2, key: "identity", label: "Identity Verified", description: "Owner/agent CNIC reviewed by Bismillah staff." },
   { level: 3, key: "documents", label: "Documents Submitted", description: "Ownership documents submitted and awaiting final check." },
   { level: 4, key: "property", label: "Property Verified", description: "Ownership documents checked and location confirmed." },
-  { level: 5, key: "premium", label: "Premium Verified", description: "Physically inspected by a PropertyX verification officer." },
+  { level: 5, key: "premium", label: "Premium Verified", description: "Physically inspected by a Bismillah verification officer." },
 ] as const;
 export function verificationInfo(level: number) {
   return VERIFICATION_LEVELS[Math.max(0, Math.min(5, level))];

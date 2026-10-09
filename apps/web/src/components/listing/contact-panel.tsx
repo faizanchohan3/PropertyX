@@ -118,7 +118,7 @@ export function ContactPanel(p: ContactProps) {
           </button>
         )}
         <a
-          href={contactsDisabled || !p.active ? undefined : `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, I saw “${p.title}” on PropertyX. Is it available?`)}`}
+          href={contactsDisabled || !p.active ? undefined : `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, I saw “${p.title}” on Bismillah. Is it available?`)}`}
           target="_blank"
           rel="noopener noreferrer"
           aria-disabled={contactsDisabled}

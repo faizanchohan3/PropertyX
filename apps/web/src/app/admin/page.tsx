@@ -26,7 +26,7 @@ export default async function AdminHome() {
   ];
   return (
     <div className="space-y-6">
-      <AdminHeader title="Platform overview" subtitle={`Welcome back, ${user.name}. Live figures from the PropertyX database.`} />
+      <AdminHeader title="Platform overview" subtitle={`Welcome back, ${user.name}. Live figures from the Bismillah database.`} />
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard dark label="Users" value={c.users.toLocaleString()} hint={`+${c.users_30d} in 30 days`} icon={Users} href="/admin/users" />
         <StatCard dark label="Active listings" value={c.active_listings.toLocaleString()} hint={`${c.pending_listings} pending review`} icon={Building2} href="/admin/listings" />

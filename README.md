@@ -1,4 +1,4 @@
-# PropertyX Pakistan
+# Bismillah Pakistan
 
 A real estate marketplace for Pakistan — buy, sell and rent homes, plots and commercial property, with AI search, verification, fraud detection, agent/agency/developer tools, rental management and an admin panel.
 

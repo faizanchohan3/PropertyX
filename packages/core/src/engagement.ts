@@ -458,7 +458,7 @@ export async function visitsIcs(db: Database, actor: Actor) {
   const visits = (await listVisits(db, actor)).filter((v) => ["requested", "confirmed"].includes(v.status));
   const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const esc = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PropertyX Pakistan//Visits//EN", "CALSCALE:GREGORIAN"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Bismillah Pakistan//Visits//EN", "CALSCALE:GREGORIAN"];
   for (const v of visits) {
     const start = new Date(v.scheduledAt);
     const end = new Date(start.getTime() + v.durationMins * 60_000);

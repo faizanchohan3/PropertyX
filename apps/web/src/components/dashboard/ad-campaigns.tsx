@@ -141,7 +141,7 @@ export function AdCampaigns({ ads, targets, gateways }: { ads: Ad[]; targets: Ta
             <textarea id="ad-body" className="input" maxLength={200} value={f.body} onChange={set("body")} />
           </div>
           <div>
-            <label className="label" htmlFor="ad-link">Link (a PropertyX path like /project/... or an https:// URL)</label>
+            <label className="label" htmlFor="ad-link">Link (a Bismillah path like /project/... or an https:// URL)</label>
             <input id="ad-link" className="input" value={f.linkUrl} onChange={set("linkUrl")} />
             <FieldError msg={fieldError(err, "linkUrl")} />
           </div>

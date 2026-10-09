@@ -92,7 +92,7 @@ export async function createManagedProperty(db: Database, actor: Actor | null, r
   let managerId: string | null = actor.roles.includes("property_manager") ? actor.id : null;
   if (d.managerEmail) {
     const [m] = await db.select({ id: s.users.id }).from(s.users).where(eq(s.users.email, d.managerEmail.toLowerCase()));
-    if (!m) throw badRequest("No PropertyX account found for that manager email");
+    if (!m) throw badRequest("No Bismillah account found for that manager email");
     managerId = m.id;
   }
   const [mp] = await db.insert(s.managedProperties).values({ ownerId: actor.id, managerId, name: d.name, address: d.address, cityName: d.cityName ?? null, notes: d.notes ?? null }).returning();
@@ -139,7 +139,7 @@ export async function createLease(db: Database, actor: Actor | null, raw: unknow
   const [lease] = await db.insert(s.leases).values({ ...d, tenantEmail: d.tenantEmail || null, tenantUserId, landlordId: mp.ownerId, terms: d.terms ?? null }).returning();
   await db.update(s.rentalUnits).set({ occupancy: "occupied" }).where(eq(s.rentalUnits.id, u.id));
   await generateRentDues(db, lease.id);
-  if (tenantUserId) await notify(db, { userId: tenantUserId, type: "rent", title: "Your lease is on PropertyX", body: `${mp.name} — ${u.label}. Rent ${formatPKR(d.monthlyRent)} due on day ${d.dueDay} each month.`, link: "/dashboard/tenant" });
+  if (tenantUserId) await notify(db, { userId: tenantUserId, type: "rent", title: "Your lease is on Bismillah", body: `${mp.name} — ${u.label}. Rent ${formatPKR(d.monthlyRent)} due on day ${d.dueDay} each month.`, link: "/dashboard/tenant" });
   return lease;
 }
 

@@ -32,7 +32,7 @@ export async function register(db: Database, raw: unknown, meta: { ip?: string |
   // tenants invited to a lease before signing up get linked automatically
   await db.update(s.leases).set({ tenantUserId: u.id }).where(and(eq(s.leases.tenantEmail, d.email), sql`${s.leases.tenantUserId} is null`));
   await audit(db, { actorId: u.id, action: "user.register", entityType: "user", entityId: u.id, ip: meta.ip });
-  await notify(db, { userId: u.id, type: "system", title: "Welcome to PropertyX", body: "Verify your phone number to start posting and messaging with a trusted badge.", link: "/account" });
+  await notify(db, { userId: u.id, type: "system", title: "Welcome to Bismillah", body: "Verify your phone number to start posting and messaging with a trusted badge.", link: "/account" });
   const session = await createSession(db, u.id, meta);
   return { user: u, ...session };
 }
@@ -66,7 +66,7 @@ export async function requestPhoneOtp(db: Database, actor: Actor | null, phoneRa
   const [taken] = await db.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.phone, phone), sql`${s.users.phoneVerifiedAt} is not null`, sql`${s.users.id} <> ${actor.id}`));
   if (taken) throw conflict("This number is already verified on another account");
   const code = await createOtp(db, { userId: actor.id, target: phone, purpose: "phone_verify" });
-  await sendDirect(db, "sms", phone, `Your PropertyX verification code is ${code}. It expires in 10 minutes.`);
+  await sendDirect(db, "sms", phone, `Your Bismillah verification code is ${code}. It expires in 10 minutes.`);
   // In development the code is also returned so testers can verify without an SMS gateway.
   return { sent: true, devCode: process.env.NODE_ENV !== "production" && (process.env.SMS_PROVIDER ?? "console") === "console" ? code : undefined };
 }

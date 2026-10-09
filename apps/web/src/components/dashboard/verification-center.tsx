@@ -100,7 +100,7 @@ export function VerificationCenter({ subjects, docs: initialDocs, requests, phon
           <ShieldCheck className="h-5 w-5 text-brand-600" /> New verification request
         </h2>
         <p className="mb-5 flex items-center gap-1.5 text-xs text-slate-500">
-          <Lock className="h-3.5 w-3.5" /> Documents are stored privately and are only visible to you and PropertyX verification staff.
+          <Lock className="h-3.5 w-3.5" /> Documents are stored privately and are only visible to you and Bismillah verification staff.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

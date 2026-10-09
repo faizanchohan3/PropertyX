@@ -321,7 +321,7 @@ export function generateListing(rng: Rng, city: CitySeed, loc: LocSeed, type: Pr
   }
   const nearby = ["mosque_nearby", "school_nearby", "market_nearby", "hospital_nearby"].filter((f) => features.has(f)).map((f) => f.replace("_nearby", ""));
   if (nearby.length) paras.push(`Nearby: ${nearby.join(", ")}.`);
-  paras.push("Contact through PropertyX to arrange a visit. Please verify all documents independently before making any payment.");
+  paras.push("Contact through Bismillah to arrange a visit. Please verify all documents independently before making any payment.");
 
   const highlights: string[] = [];
   if (corner) highlights.push("Corner property");

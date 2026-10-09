@@ -9,10 +9,10 @@ const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: { default: "PropertyX Pakistan — Homes, Plots & Commercial Property", template: "%s | PropertyX Pakistan" },
+  title: { default: "Bismillah Pakistan — Homes, Plots & Commercial Property", template: "%s | Bismillah Pakistan" },
   description: "Search verified houses, flats, plots and commercial property for sale and rent across Pakistan. AI-powered search, price index, valuation and investment tools.",
-  applicationName: "PropertyX Pakistan",
-  openGraph: { type: "website", siteName: "PropertyX Pakistan", locale: "en_PK" },
+  applicationName: "Bismillah Pakistan",
+  openGraph: { type: "website", siteName: "Bismillah Pakistan", locale: "en_PK" },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/icon.svg" },
 };

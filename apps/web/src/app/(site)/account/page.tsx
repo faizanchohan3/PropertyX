@@ -54,7 +54,7 @@ export default async function AccountPage() {
           <p className="mt-2 text-xs text-slate-500">Changing your password signs out all sessions.</p>
         </Panel>
       </div>
-      <Panel title="How you use PropertyX">
+      <Panel title="How you use Bismillah">
         <p className="mb-3 text-sm text-slate-600">Add roles to unlock features — for example become a landlord to manage rentals. Staff roles are assigned by administrators.</p>
         <RolesForm roles={user.roles} />
       </Panel>

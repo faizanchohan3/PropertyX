@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { requireUser, db } from "@/lib/server";
 import { AdminNav, type AdminNavItem } from "@/components/admin/admin-nav";
 
-export const metadata = { title: { default: "Admin", template: "%s · Admin | PropertyX" }, robots: { index: false } };
+export const metadata = { title: { default: "Admin", template: "%s · Admin | Bismillah" }, robots: { index: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser("/admin");
