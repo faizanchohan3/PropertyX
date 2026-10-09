@@ -1,13 +1,15 @@
 import Link from "next/link";
 
-/** Original Bismillah mark: a roofline crossed beams with a gold keystone. */
+/** Bismillah mark: a home with an arched gold doorway and a crescent. Keep in sync with public/icon.svg. */
 export function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
       <rect width="40" height="40" rx="11" fill="#047857" />
-      <path d="M9 19.5 20 10l11 9.5" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13.5 30 26.5 18M13.5 18 26.5 30" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
-      <circle cx="20" cy="24" r="2.6" fill="#e2ad3d" />
+      <path d="M8 20 20 9.5 32 20" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M11.5 18v12.5h17V18" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17.5 30.5v-5a2.5 2.5 0 0 1 5 0v5z" fill="#e2ad3d" />
+      <circle cx="29.5" cy="8.5" r="3.4" fill="#e2ad3d" />
+      <circle cx="31" cy="7.4" r="2.9" fill="#047857" />
     </svg>
   );
 }
