@@ -11,11 +11,20 @@ declare global {
   var __propertyxDb: { sql: postgres.Sql; db: Database } | undefined;
 }
 
+/**
+ * Transaction-mode poolers (Supabase pooler on port 6543, PgBouncer, Neon "-pooler" hosts)
+ * don't support prepared statements. Override with DB_PREPARE=true|false.
+ */
+function usePrepared(url: string) {
+  if (process.env.DB_PREPARE) return process.env.DB_PREPARE === "true";
+  return !/:6543\b|pgbouncer=true|-pooler\./.test(url);
+}
+
 function create(url: string) {
   const sql = postgres(url, {
     max: Number(process.env.DB_POOL_MAX ?? 10),
     idle_timeout: 30,
-    prepare: true,
+    prepare: usePrepared(url),
     onnotice: () => {},
   });
   return { sql, db: drizzle(sql, { schema, casing: "snake_case" }) };
