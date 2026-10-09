@@ -12,21 +12,28 @@ declare global {
 }
 
 /**
- * Transaction-mode poolers (Supabase pooler on port 6543, PgBouncer, Neon "-pooler" hosts)
- * don't support prepared statements. Override with DB_PREPARE=true|false.
+ * Connection options that work for a local PostgreSQL as well as hosted ones
+ * (Supabase, Neon, RDS…):
+ * - transaction-mode poolers (Supabase pooler on port 6543, PgBouncer, Neon "-pooler" hosts)
+ *   don't support prepared statements. Override with DB_PREPARE=true|false.
+ * - remote hosts get TLS unless the URL already says otherwise (sslmode=…)
+ * - serverless (Vercel) keeps a tiny pool per function instance
  */
-function usePrepared(url: string) {
-  if (process.env.DB_PREPARE) return process.env.DB_PREPARE === "true";
-  return !/:6543\b|pgbouncer=true|-pooler\./.test(url);
+export function connectionOptions(rawUrl: string) {
+  const url = new URL(rawUrl);
+  const local = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname);
+  const pooled = url.port === "6543" || url.searchParams.get("pgbouncer") === "true" || url.hostname.includes("-pooler.");
+  const prepare = process.env.DB_PREPARE ? process.env.DB_PREPARE === "true" : !pooled;
+  // postgres.js forwards unknown URL params to the server as settings; pgbouncer=… is Prisma-only
+  url.searchParams.delete("pgbouncer");
+  const ssl = local || url.searchParams.has("sslmode") ? undefined : ("require" as const);
+  const max = Number(process.env.DB_POOL_MAX ?? (process.env.VERCEL ? 3 : 10));
+  return { url: url.toString(), options: { max, idle_timeout: 30, connect_timeout: 15, prepare, ssl, onnotice: () => {} } };
 }
 
-function create(url: string) {
-  const sql = postgres(url, {
-    max: Number(process.env.DB_POOL_MAX ?? 10),
-    idle_timeout: 30,
-    prepare: usePrepared(url),
-    onnotice: () => {},
-  });
+function create(rawUrl: string) {
+  const { url, options } = connectionOptions(rawUrl);
+  const sql = postgres(url, options);
   return { sql, db: drizzle(sql, { schema, casing: "snake_case" }) };
 }
 

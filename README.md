@@ -68,6 +68,21 @@ See `.env.example`. Key settings:
 
 For production, load only reference data with `npm run db:reference` (never the demo seed).
 
+### Supabase (or another hosted PostgreSQL)
+
+In Supabase → **Connect**, copy two connection strings:
+
+- `DATABASE_URL` — the **Transaction pooler** URL (port `6543`). Use this in Vercel. Prepared statements are switched off automatically for it.
+- `DIRECT_URL` — the **Session pooler** or direct URL (port `5432`). Used by `db:migrate` and `db:seed`.
+
+TLS is turned on automatically for non-local hosts. Then, from your machine (put both URLs in `.env`, or export them in the shell):
+
+```bash
+npm run db:migrate
+npm run db:reference     # roles, plans, settings, all Pakistani cities
+# npm run db:seed        # optional: wipes the database and loads the demo data
+```
+
 ## Testing
 
 ```bash
