@@ -29,6 +29,28 @@ export const registerSchema = z.object({
   companyName: z.string().trim().max(120).optional(),
 });
 
+/** Accounts a super admin creates on someone's behalf (agents, agencies, developers, ...). */
+export const ADMIN_CREATABLE_ROLES = ["agent", "agency", "developer", "construction_company", "property_manager", "landlord", "seller", "buyer"] as const;
+export const adminAccountSchema = z
+  .object({
+    name: z.string().trim().min(2, "Enter the person's name").max(80),
+    email: z.string().trim().toLowerCase().email("Enter a valid email"),
+    phone: optionalPkPhone,
+    password: passwordSchema,
+    role: z.enum(ADMIN_CREATABLE_ROLES),
+    agencyName: z.string().trim().max(120).optional(),
+    companyName: z.string().trim().max(120).optional(),
+    /** attach a new agent to an existing agency */
+    agencyId: z.string().uuid().optional().or(z.literal("").transform(() => undefined)),
+    cityId: z.string().uuid().optional().or(z.literal("").transform(() => undefined)),
+    verificationLevel: z.coerce.number().int().min(0).max(5).default(0),
+  })
+  .superRefine((d, ctx) => {
+    if (d.role === "agency" && !d.agencyName) ctx.addIssue({ code: "custom", path: ["agencyName"], message: "Enter the agency name" });
+    if ((d.role === "developer" || d.role === "construction_company") && !d.companyName) ctx.addIssue({ code: "custom", path: ["companyName"], message: "Enter the company name" });
+  });
+export type AdminAccountInput = z.input<typeof adminAccountSchema>;
+
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1).max(128),

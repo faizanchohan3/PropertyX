@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, Building2, Users, ShieldCheck, ShieldAlert, Flag, Star, HardHat, MapPinned, Newspaper, MessagesSquare, Megaphone, CreditCard, Settings, ScrollText, Menu, X, ArrowLeft, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Building2, Users, ShieldCheck, ShieldAlert, Flag, Star, HardHat, MapPinned, Newspaper, MessagesSquare, Megaphone, CreditCard, Settings, ScrollText, Briefcase, Menu, X, ArrowLeft, type LucideIcon } from "lucide-react";
 import { Logo } from "../logo";
 
-const ICONS: Record<string, LucideIcon> = { LayoutDashboard, Building2, Users, ShieldCheck, ShieldAlert, Flag, Star, HardHat, MapPinned, Newspaper, MessagesSquare, Megaphone, CreditCard, Settings, ScrollText };
+const ICONS: Record<string, LucideIcon> = { LayoutDashboard, Building2, Users, ShieldCheck, ShieldAlert, Flag, Star, HardHat, MapPinned, Newspaper, MessagesSquare, Megaphone, CreditCard, Settings, ScrollText, Briefcase };
 
 export type AdminNavItem = { href: string; label: string; icon: string; count?: number; alert?: boolean };
 

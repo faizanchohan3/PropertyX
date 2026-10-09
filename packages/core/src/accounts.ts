@@ -8,6 +8,37 @@ import { defaultsFor } from "@propertyx/notifications";
 import { AppError, badRequest, conflict, forbidden, notFound, requireActor, tooMany, unauthorized, type Actor } from "./errors";
 import { createSearchEngine } from "@propertyx/search";
 
+/** Creates the user plus the profile rows their role needs (agent / agency / developer / builder). Shared by sign-up and admin-created accounts. */
+export async function insertAccount(
+  db: Database,
+  d: { name: string; email: string; phone?: string | null; password: string; role: Role; agencyName?: string; companyName?: string; agencyId?: string; cityId?: string; verificationLevel?: number; createdBy?: string },
+) {
+  const role = d.role;
+  const level = d.verificationLevel ?? 0;
+  const [u] = await db
+    .insert(s.users)
+    .values({ email: d.email, name: d.name, phone: d.phone ?? null, passwordHash: await hashPassword(d.password), primaryRole: role, cityId: d.cityId ?? null, verificationLevel: level })
+    .returning();
+  await assignRole(db, u.id, role, d.createdBy);
+  if (role !== "buyer") await assignRole(db, u.id, "buyer", d.createdBy); // everyone can browse, save and enquire
+  const agentRow = (agencyId: string | null) => ({ userId: u.id, agencyId, slug: `${slugify(d.name)}-${shortId(4)}`, displayName: d.name, phone: d.phone ?? null, whatsapp: d.phone ?? null, verificationLevel: level });
+  if (role === "agency" && d.agencyName) {
+    const [ag] = await db.insert(s.agencies).values({ ownerId: u.id, name: d.agencyName, slug: `${slugify(d.agencyName)}-${shortId(3)}`, phone: d.phone ?? null, cityId: d.cityId ?? null, verificationLevel: level }).returning();
+    await db.insert(s.agencyMembers).values({ agencyId: ag.id, userId: u.id, role: "admin" });
+    await assignRole(db, u.id, "agent", d.createdBy);
+    await db.insert(s.agents).values(agentRow(ag.id));
+  }
+  if (role === "agent") {
+    await db.insert(s.agents).values(agentRow(d.agencyId ?? null));
+    if (d.agencyId) await db.insert(s.agencyMembers).values({ agencyId: d.agencyId, userId: u.id, role: "agent" });
+  }
+  if (role === "developer" && d.companyName) await db.insert(s.developers).values({ ownerId: u.id, name: d.companyName, slug: `${slugify(d.companyName)}-${shortId(3)}`, phone: d.phone ?? null, email: d.email, cityId: d.cityId ?? null, verificationLevel: level });
+  if (role === "construction_company" && d.companyName) await db.insert(s.constructionCompanies).values({ ownerId: u.id, name: d.companyName, slug: `${slugify(d.companyName)}-${shortId(3)}`, cityId: d.cityId ?? null });
+  // tenants invited to a lease before signing up get linked automatically
+  await db.update(s.leases).set({ tenantUserId: u.id }).where(and(eq(s.leases.tenantEmail, d.email), sql`${s.leases.tenantUserId} is null`));
+  return u;
+}
+
 export async function register(db: Database, raw: unknown, meta: { ip?: string | null; userAgent?: string | null; client?: string }) {
   const rl = await rateLimit(db, `register:${meta.ip ?? "unknown"}`, 10, 3600);
   if (!rl.ok) throw tooMany("Too many sign-ups from this network. Try again later.");
@@ -16,21 +47,7 @@ export async function register(db: Database, raw: unknown, meta: { ip?: string |
   const d = parsed.data;
   const [exists] = await db.select({ id: s.users.id }).from(s.users).where(eq(s.users.email, d.email));
   if (exists) throw conflict("An account with this email already exists");
-  const role = d.role as Role;
-  const [u] = await db.insert(s.users).values({ email: d.email, name: d.name, phone: d.phone ?? null, passwordHash: await hashPassword(d.password), primaryRole: role }).returning();
-  await assignRole(db, u.id, role);
-  if (role !== "buyer") await assignRole(db, u.id, "buyer"); // everyone can browse, save and enquire
-  if (role === "agency" && d.agencyName) {
-    const [ag] = await db.insert(s.agencies).values({ ownerId: u.id, name: d.agencyName, slug: `${slugify(d.agencyName)}-${shortId(3)}` }).returning();
-    await db.insert(s.agencyMembers).values({ agencyId: ag.id, userId: u.id, role: "admin" });
-    await assignRole(db, u.id, "agent");
-    await db.insert(s.agents).values({ userId: u.id, agencyId: ag.id, slug: `${slugify(d.name)}-${shortId(4)}`, displayName: d.name, phone: d.phone ?? null, whatsapp: d.phone ?? null });
-  }
-  if (role === "agent") await db.insert(s.agents).values({ userId: u.id, slug: `${slugify(d.name)}-${shortId(4)}`, displayName: d.name, phone: d.phone ?? null, whatsapp: d.phone ?? null });
-  if (role === "developer" && d.companyName) await db.insert(s.developers).values({ ownerId: u.id, name: d.companyName, slug: `${slugify(d.companyName)}-${shortId(3)}` });
-  if (role === "construction_company" && d.companyName) await db.insert(s.constructionCompanies).values({ ownerId: u.id, name: d.companyName, slug: `${slugify(d.companyName)}-${shortId(3)}` });
-  // tenants invited to a lease before signing up get linked automatically
-  await db.update(s.leases).set({ tenantUserId: u.id }).where(and(eq(s.leases.tenantEmail, d.email), sql`${s.leases.tenantUserId} is null`));
+  const u = await insertAccount(db, { ...d, role: d.role as Role });
   await audit(db, { actorId: u.id, action: "user.register", entityType: "user", entityId: u.id, ip: meta.ip });
   await notify(db, { userId: u.id, type: "system", title: "Welcome to Bismillah", body: "Verify your phone number to start posting and messaging with a trusted badge.", link: "/account" });
   const session = await createSession(db, u.id, meta);

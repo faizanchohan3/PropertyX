@@ -4,6 +4,7 @@ import {
   adminUpdateListing,
   setUserStatus,
   setUserRole,
+  adminCreateAccount,
   reviewVerification,
   reviewFraudFlag,
   scanAllListings,
@@ -36,6 +37,7 @@ const ACTIONS: Record<string, (u: AuthUser, b: B) => Promise<unknown>> = {
   "listing.update": (u, b) => adminUpdateListing(db, u, b.id, b),
   "user.status": (u, b) => setUserStatus(db, u, b.userId, b.status, b.reason),
   "user.role": (u, b) => setUserRole(db, u, b.userId, b.role, !!b.grant),
+  "account.create": (u, b) => adminCreateAccount(db, u, b),
   "verification.review": (u, b) => reviewVerification(db, u, b.id, b.decision, b.notes, b.level ? Number(b.level) : undefined),
   "fraud.review": (u, b) => reviewFraudFlag(db, u, b.id, b.decision, b.note),
   "fraud.scan": async (u) => {

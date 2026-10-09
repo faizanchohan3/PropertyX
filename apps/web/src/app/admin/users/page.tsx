@@ -18,7 +18,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
   const qs = (p: number) => `?q=${sp.q ?? ""}&role=${sp.role ?? ""}&status=${sp.status ?? ""}&page=${p}`;
   return (
     <div>
-      <AdminHeader title="Users" subtitle={`${r.total.toLocaleString()} accounts`} />
+      <AdminHeader title="Users" subtitle={`${r.total.toLocaleString()} accounts`} actions={user.permissions.includes("user.create") ? <Link href="/admin/accounts?new=1" className={`${okBtn} px-3 py-2 text-sm`}>Create account</Link> : null} />
       <form className="mb-4 flex flex-wrap gap-2">
         <input name="q" defaultValue={sp.q} placeholder="Name, email or phone" className={`${darkInput} max-w-sm`} />
         <select name="role" defaultValue={sp.role ?? ""} className={`${darkInput} w-auto`}>

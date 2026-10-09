@@ -3,8 +3,9 @@ import type { Database } from "@propertyx/database";
 import * as s from "@propertyx/database";
 import { assignRole, removeRole, audit, revokeAllSessions } from "@propertyx/auth";
 import { notify } from "@propertyx/notifications";
-import { STAFF_ROLES, ROLE_KEYS, slugify, type Role } from "@propertyx/shared";
-import { badRequest, forbidden, notFound, requirePerm, type Actor } from "./errors";
+import { STAFF_ROLES, ROLE_KEYS, slugify, adminAccountSchema, type Role } from "@propertyx/shared";
+import { badRequest, conflict, forbidden, notFound, requirePerm, type Actor } from "./errors";
+import { insertAccount } from "./accounts";
 
 export async function searchUsers(db: Database, actor: Actor | null, opts: { q?: string; role?: string; status?: string; page?: number } = {}) {
   requirePerm(actor, "user.read");
@@ -211,4 +212,59 @@ export async function adminLocations(db: Database, actor: Actor | null, opts: { 
       ${opts.city ? sql`and l.city_id = (select id from cities where slug = ${opts.city})` : sql``}
       ${opts.q ? sql`and l.full_name ilike ${"%" + opts.q + "%"}` : sql``}
     order by l.kind = 'city' desc, l.active_listings desc limit 200`);
+}
+
+/** Super admin: create an agent / agency / developer / other account on someone's behalf. */
+export async function adminCreateAccount(db: Database, actor: Actor | null, raw: unknown) {
+  requirePerm(actor, "user.create");
+  const parsed = adminAccountSchema.safeParse(raw);
+  if (!parsed.success) throw badRequest("Please fix the highlighted fields", parsed.error.flatten());
+  const d = parsed.data;
+  const [exists] = await db.select({ id: s.users.id }).from(s.users).where(eq(s.users.email, d.email));
+  if (exists) throw conflict("An account with this email already exists");
+  if (d.agencyId) {
+    const [ag] = await db.select({ id: s.agencies.id }).from(s.agencies).where(eq(s.agencies.id, d.agencyId));
+    if (!ag) throw notFound("Agency");
+  }
+  const u = await db.transaction((tx) => insertAccount(tx as unknown as Database, { ...d, role: d.role as Role, agencyId: d.role === "agent" ? d.agencyId : undefined, createdBy: actor.id }));
+  await audit(db, { actorId: actor.id, action: "user.create", entityType: "user", entityId: u.id, metadata: { role: d.role, email: d.email } });
+  await notify(db, { userId: u.id, type: "system", title: "Welcome to Bismillah", body: "Your account was created by the Bismillah team. Sign in and change your password from your account page.", link: "/account" });
+  return { id: u.id, email: u.email };
+}
+
+export type DirectoryKind = "agents" | "agencies" | "developers";
+
+/** Admin directory of agents, agencies and developers with their listing counts. */
+export async function adminDirectory(db: Database, actor: Actor | null, kind: DirectoryKind, opts: { q?: string; page?: number } = {}) {
+  requirePerm(actor, "user.read");
+  const page = opts.page ?? 1;
+  const like = opts.q ? "%" + opts.q + "%" : null;
+  const paging = sql`limit 50 offset ${(page - 1) * 50}`;
+  const rows =
+    kind === "agents"
+      ? await db.execute<Record<string, unknown>>(sql`
+          select a.id, a.display_name as name, a.slug, a.phone, a.verification_level, a.created_at, a.is_seed, u.email, u.status, u.id as user_id,
+            ag.name as parent, c.name as city,
+            (select count(*)::int from property_listings l where l.agent_id = a.id and l.status = 'active') as active_listings,
+            count(*) over() as total
+          from agents a join users u on u.id = a.user_id left join agencies ag on ag.id = a.agency_id left join cities c on c.id = u.city_id
+          where true ${like ? sql`and (a.display_name ilike ${like} or u.email ilike ${like} or a.phone ilike ${like} or ag.name ilike ${like})` : sql``}
+          order by a.created_at desc ${paging}`)
+      : kind === "agencies"
+        ? await db.execute<Record<string, unknown>>(sql`
+            select ag.id, ag.name, ag.slug, ag.phone, ag.verification_level, ag.created_at, ag.is_seed, ag.status, u.email, u.id as user_id, u.name as parent, c.name as city,
+              (select count(*)::int from agents a where a.agency_id = ag.id) as agents,
+              (select count(*)::int from property_listings l where l.agency_id = ag.id and l.status = 'active') as active_listings,
+              count(*) over() as total
+            from agencies ag left join users u on u.id = ag.owner_id left join cities c on c.id = ag.city_id
+            where true ${like ? sql`and (ag.name ilike ${like} or u.email ilike ${like} or ag.phone ilike ${like})` : sql``}
+            order by ag.created_at desc ${paging}`)
+        : await db.execute<Record<string, unknown>>(sql`
+            select d.id, d.name, d.slug, d.phone, d.verification_level, d.created_at, d.is_seed, coalesce(u.status, 'active') as status, coalesce(u.email, d.email) as email, u.id as user_id, u.name as parent, c.name as city,
+              (select count(*)::int from projects p where p.developer_id = d.id) as projects,
+              count(*) over() as total
+            from developers d left join users u on u.id = d.owner_id left join cities c on c.id = d.city_id
+            where true ${like ? sql`and (d.name ilike ${like} or u.email ilike ${like} or d.email ilike ${like} or d.phone ilike ${like})` : sql``}
+            order by d.created_at desc ${paging}`);
+  return { items: rows, total: Number(rows[0]?.total ?? 0) };
 }

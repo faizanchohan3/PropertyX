@@ -54,6 +54,7 @@ export const PERMISSIONS = {
   "user.read": "View user accounts",
   "user.suspend": "Suspend / reactivate users",
   "role.manage": "Assign staff roles",
+  "user.create": "Create accounts for agents, agencies, developers and other users",
   "content.manage": "Manage blog posts, guides and areas",
   "forum.post": "Post in the community forum",
   "forum.moderate": "Moderate the forum",
@@ -93,7 +94,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   super_admin: [] as Permission[],
 };
 const ALL = Object.keys(PERMISSIONS) as Permission[];
-ROLE_PERMISSIONS.admin = ALL.filter((p) => p !== "role.manage");
+ROLE_PERMISSIONS.admin = ALL.filter((p) => p !== "role.manage" && p !== "user.create");
 ROLE_PERMISSIONS.super_admin = ALL;
 
 export function permissionsFor(roles: readonly string[]): Set<Permission> {

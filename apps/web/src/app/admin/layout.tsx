@@ -25,6 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/reports", label: "Reports", icon: "Flag", count: c.reports, alert: c.reports > 0, show: p("report.manage") },
     { href: "/admin/reviews", label: "Reviews", icon: "Star", count: c.reviews, show: p("review.moderate") },
     { href: "/admin/users", label: "Users", icon: "Users", show: p("user.read") },
+    { href: "/admin/accounts", label: "Agents & developers", icon: "Briefcase", show: p("user.read") },
     { href: "/admin/projects", label: "Projects", icon: "HardHat", count: c.projects, show: p("project.manage.any") },
     { href: "/admin/areas", label: "Areas & guides", icon: "MapPinned", show: p("content.manage") },
     { href: "/admin/content", label: "Content (CMS)", icon: "Newspaper", show: p("content.manage") },
