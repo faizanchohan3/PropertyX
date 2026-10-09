@@ -1,5 +1,5 @@
 /**
- * Seed geography for 8 launch cities. Place names are real Pakistani localities;
+ * Seed geography for the demo cities. Place names are real Pakistani localities;
  * coordinates are approximate centroids. Price levels are indicative demo values
  * used only to generate realistic-looking DEMO listings (all flagged is_seed) —
  * they are not market statistics.
@@ -229,6 +229,74 @@ export const CITIES: CitySeed[] = [
       { name: "Regi Model Town", kind: "society", lat: 34.0200, lng: 71.4050, house: 1_400_000, plot: 700_000, rent: 3_500, mix: SOCIETY, blocks: ["Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5"], authority: "PDA", weight: 0.7, description: "A large PDA scheme west of the city with zones of residential plots.", highlights: ["PDA scheme", "Affordable plots"] },
       { name: "Gulbahar", kind: "area", lat: 34.0220, lng: 71.5820, house: 2_000_000, plot: 1_400_000, rent: 5_000, mix: HOMES, weight: 0.6, description: "A dense, central Peshawar neighbourhood with family homes and markets.", highlights: ["Central location"] },
       { name: "Warsak Road", kind: "area", lat: 34.0400, lng: 71.5200, house: 1_500_000, plot: 900_000, rent: 4_000, agriAcre: 10_000_000, mix: { ...HOMES, agricultural_land: 10, farmhouse: 8 }, weight: 0.6, description: "A growing corridor north-west of the city with new homes, schools and farmland.", highlights: ["Growing corridor", "Farmland"] },
+    ],
+  },
+  {
+    name: "Sahiwal",
+    province: "Punjab",
+    district: "Sahiwal",
+    lat: 30.6682,
+    lng: 73.1114,
+    unit: "marla",
+    listings: 50,
+    description:
+      "A divisional headquarters on the N-5 between Lahore and Multan, known for its livestock and dairy economy. The market is mostly family houses in established colonies, with newer plotted schemes along the main roads and agricultural land on the outskirts.",
+    locs: [
+      { name: "Farid Town", kind: "area", lat: 30.6560, lng: 73.0960, house: 2_100_000, plot: 1_200_000, rent: 4_500, commercial: 12_000, mix: HOMES, blocks: ["Block A", "Block B", "Block C"], description: "One of Sahiwal's best-known residential neighbourhoods, with larger family houses, schools and clinics nearby." },
+      { name: "Civil Lines Sahiwal", kind: "area", lat: 30.6700, lng: 73.1060, house: 2_400_000, plot: 1_500_000, rent: 5_000, commercial: 14_000, mix: { house: 55, upper_portion: 10, lower_portion: 10, residential_plot: 10, office: 8, shop: 7 }, weight: 0.7, description: "Central, older part of the city close to district offices, courts and the main hospitals." },
+      { name: "Pakpattan Road", kind: "area", lat: 30.6450, lng: 73.1250, house: 1_600_000, plot: 750_000, rent: 3_500, commercial: 10_000, mix: { ...HOMES, residential_plot: 28, commercial_plot: 6 }, description: "Growing corridor towards Pakpattan with newer housing schemes and roadside commercial plots." },
+      { name: "GT Road Sahiwal", kind: "area", lat: 30.6800, lng: 73.0850, house: 1_700_000, plot: 900_000, rent: 3_800, commercial: 11_000, mix: { ...HOMES, shop: 10, commercial_plot: 8, warehouse: 3 }, weight: 0.8, description: "Property along the N-5 national highway, mixing homes with shops, showrooms and small warehouses." },
+      { name: "Sahiwal Outskirts", kind: "area", lat: 30.7000, lng: 73.1600, house: 1_200_000, plot: 450_000, rent: 3_000, agriAcre: 6_500_000, mix: FARM, weight: 0.5, description: "Farmland and farmhouses around the city, mostly canal-irrigated agricultural land." },
+    ],
+  },
+  {
+    name: "Burewala",
+    province: "Punjab",
+    district: "Vehari",
+    lat: 30.1667,
+    lng: 72.65,
+    unit: "marla",
+    listings: 40,
+    description:
+      "A cotton-belt city in Vehari district with a large grain market and a textile industry. Demand is mostly from local families and traders, for houses, shops and plots near the main roads, plus agricultural land in the surrounding villages.",
+    locs: [
+      { name: "Model Town Burewala", kind: "area", lat: 30.1600, lng: 72.6650, house: 1_700_000, plot: 900_000, rent: 3_500, mix: HOMES, blocks: ["Block A", "Block B"], description: "Planned residential area with family houses and wide streets, popular with local business families." },
+      { name: "Vehari Road Burewala", kind: "area", lat: 30.1550, lng: 72.6300, house: 1_400_000, plot: 650_000, rent: 3_000, commercial: 9_000, mix: { ...HOMES, residential_plot: 26, commercial_plot: 6 }, description: "Expanding road towards Vehari with newer housing schemes and roadside commercial plots." },
+      { name: "Ghalla Mandi Burewala", kind: "area", lat: 30.1700, lng: 72.6500, house: 1_500_000, plot: 1_100_000, rent: 3_500, commercial: 12_000, mix: { shop: 30, warehouse: 15, house: 30, upper_portion: 10, commercial_plot: 10, office: 5 }, weight: 0.7, description: "The commercial heart around the grain market, with shops, godowns and older houses." },
+      { name: "Arifwala Road Burewala", kind: "area", lat: 30.1850, lng: 72.6750, house: 1_200_000, plot: 500_000, rent: 2_800, agriAcre: 5_500_000, mix: { ...FARM, residential_plot: 20 }, weight: 0.6, description: "Edge of the city towards Arifwala, with plots, farmhouses and agricultural land." },
+    ],
+  },
+  {
+    name: "Vehari",
+    province: "Punjab",
+    district: "Vehari",
+    lat: 30.0453,
+    lng: 72.3489,
+    unit: "marla",
+    listings: 35,
+    description:
+      "A district headquarters in southern Punjab surrounded by cotton and wheat farmland. Most transactions involve family houses, residential plots and agricultural land.",
+    locs: [
+      { name: "Model Town Vehari", kind: "area", lat: 30.0400, lng: 72.3550, house: 1_600_000, plot: 850_000, rent: 3_300, mix: HOMES, blocks: ["Block A", "Block B"], description: "Established residential neighbourhood close to schools and the city centre." },
+      { name: "Multan Road Vehari", kind: "area", lat: 30.0350, lng: 72.3200, house: 1_300_000, plot: 600_000, rent: 2_900, commercial: 9_000, mix: { ...HOMES, residential_plot: 26, commercial_plot: 6, shop: 6 }, description: "Main approach road from Multan with new plotted schemes and roadside shops." },
+      { name: "Burewala Road Vehari", kind: "area", lat: 30.0550, lng: 72.3750, house: 1_300_000, plot: 550_000, rent: 2_800, mix: { ...HOMES, residential_plot: 28 }, weight: 0.8, description: "Growing residential belt along the road to Burewala." },
+      { name: "Mailsi Road Vehari", kind: "area", lat: 30.0200, lng: 72.3400, house: 1_100_000, plot: 400_000, rent: 2_500, agriAcre: 5_000_000, mix: FARM, weight: 0.5, description: "Agricultural land and farmhouses south of the city." },
+    ],
+  },
+  {
+    name: "Mian Channu",
+    province: "Punjab",
+    district: "Khanewal",
+    lat: 30.44,
+    lng: 72.355,
+    unit: "marla",
+    listings: 30,
+    description:
+      "A town in Khanewal district on the N-5, between Sahiwal and Multan, serving the surrounding farming villages. The market is small: family houses, shops along the highway and agricultural land.",
+    locs: [
+      { name: "Model Town Mian Channu", kind: "area", lat: 30.4450, lng: 72.3600, house: 1_400_000, plot: 700_000, rent: 3_000, mix: HOMES, description: "Residential area with family houses close to the town centre." },
+      { name: "GT Road Mian Channu", kind: "area", lat: 30.4400, lng: 72.3450, house: 1_300_000, plot: 800_000, rent: 3_000, commercial: 9_000, mix: { ...HOMES, shop: 12, commercial_plot: 10 }, description: "Highway frontage with shops, petrol-pump plots and homes behind the main road." },
+      { name: "Tulamba Road Mian Channu", kind: "area", lat: 30.4600, lng: 72.3300, house: 1_000_000, plot: 400_000, rent: 2_500, agriAcre: 5_000_000, mix: { ...FARM, residential_plot: 18 }, weight: 0.7, description: "Road towards historic Tulamba with plots, farmhouses and agricultural land." },
     ],
   },
 ];

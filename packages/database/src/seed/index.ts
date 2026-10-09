@@ -10,6 +10,7 @@ import { slugify, PROPERTY_TYPE_LABELS, propertyTypeInfo, type PropertyType } fr
 import bcrypt from "bcryptjs";
 import type { Database } from "../client";
 import * as s from "../schema";
+import { syncGeography } from "../geography";
 import { syncReferenceData, CITY_COST_MULTIPLIERS, DEFAULT_CONSTRUCTION_RATES } from "../reference";
 import { createRng } from "./rng";
 import { CITIES } from "./data/locations";
@@ -75,7 +76,7 @@ export async function seedDemo(db: Database, opts: { log?: (m: string) => void }
   log("• wiping tables");
   await wipeAll(db);
   log("• reference data");
-  await syncReferenceData(db);
+  await syncReferenceData(db, { geography: false });
   await db.insert(s.siteSettings).values({ key: "demo_mode", value: true }).onConflictDoUpdate({ target: s.siteSettings.key, set: { value: true } });
 
   const roleRows = await db.select().from(s.roles);
@@ -152,6 +153,8 @@ export async function seedDemo(db: Database, opts: { log?: (m: string) => void }
     locRefs.push(refs);
   }
   for (const part of chunk(locationRows)) await db.insert(s.locations).values(part);
+  // every other Pakistani city (no localities / demo listings)
+  await syncGeography(db);
   const allLocs = await db.select({ id: s.locations.id, slug: s.locations.slug, kind: s.locations.kind, refId: s.locations.refId }).from(s.locations);
   const locBySlug = new Map(allLocs.map((l) => [l.slug, l]));
   // parent links
@@ -444,7 +447,7 @@ export async function seedDemo(db: Database, opts: { log?: (m: string) => void }
       const daysAgo = closed ? rng.int(90, 730) : status === "active" ? Math.floor(Math.pow(rng.next(), 1.6) * 200) : rng.int(0, 20);
       const monthsAgo = daysAgo / 30;
       const priceNow = g.price;
-      const historicPrice = Math.round((priceNow / Math.pow(1 + monthlyGrowth[ci], monthsAgo)) / 10_000) * 10_000;
+      const historicPrice = Math.round((priceNow / Math.pow(1 + (monthlyGrowth[ci] ?? 0.006), monthsAgo)) / 10_000) * 10_000;
       let price = closed ? historicPrice : priceNow;
       let finalStatus: LStatus = status;
       if (status === "sold" && g.purpose === "rent") finalStatus = "rented";

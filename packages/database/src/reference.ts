@@ -6,6 +6,7 @@
 import { sql } from "drizzle-orm";
 import { ROLES, PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, FEATURES, DEFAULT_FINANCING_PRODUCTS, type ConstructionRates } from "@propertyx/shared";
 import type { Database } from "./client";
+import { syncGeography } from "./geography";
 import { roles, permissions, rolePermissions, features, subscriptionPlans, siteSettings, constructionRates } from "./schema";
 
 export const DEFAULT_CONSTRUCTION_RATES: ConstructionRates = {
@@ -30,6 +31,10 @@ export const CITY_COST_MULTIPLIERS: Record<string, number> = {
   faisalabad: 0.95,
   gujranwala: 0.94,
   peshawar: 0.97,
+  sahiwal: 0.92,
+  vehari: 0.9,
+  burewala: 0.9,
+  "mian-channu": 0.9,
 };
 
 export const PLANS = [
@@ -123,7 +128,8 @@ export const DEFAULT_SETTINGS: Record<string, unknown> = {
   demo_mode: true,
 };
 
-export async function syncReferenceData(db: Database) {
+/** opts.geography=false lets the demo seed insert its own cities first (it then calls syncGeography itself). */
+export async function syncReferenceData(db: Database, opts: { geography?: boolean } = {}) {
   // roles
   for (const r of ROLES) {
     await db
@@ -161,4 +167,6 @@ export async function syncReferenceData(db: Database) {
 
   const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(constructionRates);
   if (n === 0) await db.insert(constructionRates).values({ cityId: null, rates: DEFAULT_CONSTRUCTION_RATES });
+
+  if (opts.geography !== false) await syncGeography(db);
 }

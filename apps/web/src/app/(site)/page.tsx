@@ -47,7 +47,7 @@ export default async function HomePage() {
     db.execute<{ slug: string; name: string; n: number }>(sql`
       select c.slug, c.name, count(l.id)::int as n from cities c
       left join properties p on p.city_id = c.id left join property_listings l on l.property_id = p.id and l.status = 'active'
-      group by c.slug, c.name, c.sort_order order by c.sort_order`),
+      group by c.slug, c.name, c.sort_order having count(l.id) > 0 order by c.sort_order, c.name`),
     listAgents(db, { verified: true }),
   ]);
   const saved = user ? await savedIdsFor(user.id) : [];

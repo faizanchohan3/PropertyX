@@ -7,7 +7,7 @@ import { db } from "@/lib/server";
 export const GET = route(async ({ req }) => {
   const cityId = req.nextUrl.searchParams.get("cityId");
   if (!cityId) {
-    const list = await db.select({ id: cities.id, name: cities.name, slug: cities.slug, lat: cities.lat, lng: cities.lng }).from(cities).orderBy(cities.sortOrder);
+    const list = await db.select({ id: cities.id, name: cities.name, slug: cities.slug, lat: cities.lat, lng: cities.lng }).from(cities).orderBy(cities.sortOrder, cities.name);
     return json({ cities: list });
   }
   const [a, s, b] = await Promise.all([

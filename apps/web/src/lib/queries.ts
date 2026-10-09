@@ -9,4 +9,4 @@ export async function savedIdsFor(userId: string) {
   return rows.map((r) => r.id);
 }
 
-export const allCities = cache(async () => db.select({ id: cities.id, name: cities.name, slug: cities.slug, lat: cities.lat, lng: cities.lng }).from(cities).orderBy(cities.sortOrder));
+export const allCities = cache(async () => db.select({ id: cities.id, name: cities.name, slug: cities.slug, lat: cities.lat, lng: cities.lng }).from(cities).orderBy(cities.sortOrder, cities.name));
