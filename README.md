@@ -40,6 +40,7 @@ cp .env.example .env              # review values; AI keys are optional
 npm run db:start                  # terminal 1 — keeps running (port 54329)
 npm run db:migrate                # terminal 2
 npm run db:seed                   # reference data + demo data (~1,400 listings, 8 cities)
+npm run db:add-listings           # add 50 more demo listings to an existing database (no wipe; pass a number for more)
 npm run dev                       # http://localhost:3100
 ```
 

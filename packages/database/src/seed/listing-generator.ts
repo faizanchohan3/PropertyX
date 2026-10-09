@@ -119,9 +119,11 @@ function locationIntro(rng: Rng, loc: LocSeed, city: CitySeed, block?: string) {
   ]);
 }
 
-export function generateListing(rng: Rng, city: CitySeed, loc: LocSeed, type: PropertyType, block: string | undefined, now: Date): GeneratedListing {
+export function generateListing(rng: Rng, city: CitySeed, loc: LocSeed, type: PropertyType, block: string | undefined, now: Date, forcePurpose?: Purpose): GeneratedListing {
   const info = propertyTypeInfo(type)!;
-  let purpose: Purpose = rng.chance(SALE_SHARE[type]) ? "sale" : "rent";
+  // always draw, so the default seed sequence is unchanged when forcePurpose is set
+  const rolledSale = rng.chance(SALE_SHARE[type]);
+  let purpose: Purpose = forcePurpose ?? (rolledSale ? "sale" : "rent");
   let { value: areaValue, unit: areaUnit } = pickSize(rng, type, city, loc);
 
   let beds: number | null = null;
