@@ -26,7 +26,7 @@
     "smoke:flows": "node scripts/smoke-flows.mjs"
   },
   "engines": {
-    "node": ">=20.12"
+    "node": "22.x"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
