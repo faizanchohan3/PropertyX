@@ -1,6 +1,8 @@
 import postgres from "postgres";
 import { publicAppUrl } from "@propertyx/shared";
-import { connectionOptions } from "@propertyx/database";
+import { connectionOptions, db, sql as q } from "@propertyx/database";
+import { createSearchEngine } from "@propertyx/search";
+import { getSetting, listProjects, listPosts, listAgents } from "@propertyx/core";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -10,7 +12,7 @@ export const maxDuration = 30;
  * Reports booleans, counts, timings and (truncated) query text of stuck sessions — never secret values.
  * Uses its own single connection with a 5 s statement timeout so it answers even when the app's queries hang.
  */
-export async function GET() {
+export async function GET(req: Request) {
   const url = process.env.DATABASE_URL ?? "";
   const checks: Record<string, unknown> = {
     DATABASE_URL: url ? "set" : process.env.NODE_ENV === "production" ? "MISSING — add it in Vercel → Settings → Environment Variables" : "not set (local dev database in use)",
@@ -61,6 +63,26 @@ export async function GET() {
     }
     await sql.end({ timeout: 2 }).catch(() => {});
   }
-  const ok = !checks.fix && Object.values(checks).every((v) => (typeof v === "string" ? !/MISSING|FAILED/.test(v) : !(v && typeof v === "object" && "ok" in v && !(v as { ok: boolean }).ok)));
+  // ?app=1 — the same reads the homepage makes, through the app's shared connection pool, each with its own timer
+  if (dbUrl && new URL(req.url).searchParams.get("app")) {
+    const appSteps: Record<string, unknown> = {};
+    const timed = async (name: string, fn: () => Promise<unknown>) => {
+      const t0 = Date.now();
+      const r = await Promise.race([fn().then(() => "ok", (e: Error) => `error: ${e.message.slice(0, 160)}`), new Promise<string>((res) => setTimeout(() => res("TIMEOUT"), 6000))]);
+      appSteps[name] = { result: r, ms: Date.now() - t0 };
+    };
+    const engine = createSearchEngine(db);
+    await timed("select_1", () => db.execute(q`select 1`));
+    await Promise.all([
+      timed("setting", () => getSetting(db, "homepage")),
+      timed("search_sale", () => engine.search({ sort: "recommended", pageSize: 8, purpose: "sale" })),
+      timed("search_rent", () => engine.search({ sort: "newest", pageSize: 4, purpose: "rent" })),
+      timed("projects", () => listProjects(db)),
+      timed("posts", () => listPosts(db, {})),
+      timed("agents", () => listAgents(db, { verified: true })),
+    ]);
+    checks["7_app_pool"] = appSteps;
+  }
+  const ok =!checks.fix && Object.values(checks).every((v) => (typeof v === "string" ? !/MISSING|FAILED/.test(v) : !(v && typeof v === "object" && "ok" in v && !(v as { ok: boolean }).ok)));
   return Response.json({ ok, ...checks }, { status: ok ? 200 : 503, headers: { "cache-control": "no-store" } });
 }
