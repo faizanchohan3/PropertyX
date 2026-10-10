@@ -61,7 +61,10 @@ export function Inbox({ conversations: initial, activeId }: { conversations: Con
     }, 20000);
     return () => clearInterval(t);
   }, [activeId]);
-  useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [thread?.messages.length]);
+  useEffect(() => {
+    // braces matter: newer browsers return a Promise from scrollIntoView, which React would treat as a cleanup function
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [thread?.messages.length]);
 
   const send = async (form?: FormData) => {
     if (!activeId || (!form && !text.trim())) return;
