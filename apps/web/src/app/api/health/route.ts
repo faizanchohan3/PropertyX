@@ -1,40 +1,65 @@
-import { getSql } from "@propertyx/database";
+import postgres from "postgres";
+import { connectionOptions } from "@propertyx/database";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 /**
- * Deployment self-check. Reports only booleans / counts and short error messages, never secret values.
- * Open /api/health after deploying to see which setup step is missing.
+ * Deployment self-check. Open /api/health after deploying to see which setup step is missing.
+ * Reports booleans, counts, timings and (truncated) query text of stuck sessions — never secret values.
+ * Uses its own single connection with a 5 s statement timeout so it answers even when the app's queries hang.
  */
 export async function GET() {
   const url = process.env.DATABASE_URL ?? "";
   const checks: Record<string, unknown> = {
-    DATABASE_URL: url ? "set" : "MISSING — add it in Vercel → Settings → Environment Variables",
+    DATABASE_URL: url ? "set" : process.env.NODE_ENV === "production" ? "MISSING — add it in Vercel → Settings → Environment Variables" : "not set (local dev database in use)",
     databaseHost: url ? (url.match(/@([^:/?]+)/)?.[1] ?? "unparseable") : null,
     AUTH_SECRET: (process.env.AUTH_SECRET?.length ?? 0) >= 32 ? "set" : process.env.NODE_ENV === "production" ? "MISSING or shorter than 32 characters" : "not set (development fallback in use)",
     APP_URL: process.env.APP_URL || "not set (optional, used in emails and links)",
+    region: process.env.VERCEL_REGION ?? null,
   };
-  // locally the app falls back to the embedded dev database, so check it too
-  if (url || process.env.NODE_ENV !== "production") {
-    try {
-      const sql = getSql();
-      await sql`select 1`;
-      checks.databaseConnection = "ok";
-      const [t] = await sql<{ n: number }[]>`select count(*)::int as n from information_schema.tables where table_schema = 'public' and table_name in ('users', 'site_settings', 'property_listings', 'cities')`;
-      if (t.n < 4) checks.tables = "MISSING — run `npm run db:migrate` against this database";
-      else {
-        checks.tables = "ok";
-        const [c] = await sql<{ cities: number; settings: number; listings: number; users: number }[]>`
-          select (select count(*)::int from cities) as cities, (select count(*)::int from site_settings) as settings,
-                 (select count(*)::int from property_listings) as listings, (select count(*)::int from users) as users`;
-        checks.data = c;
-        if (!c.cities || !c.settings) checks.referenceData = "MISSING — run `npm run db:reference` (or `npm run db:seed` for demo data)";
-        else checks.referenceData = "ok";
+  const dbUrl = url || (process.env.NODE_ENV !== "production" ? "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx" : "");
+  if (dbUrl) {
+    const { url: u, options } = connectionOptions(dbUrl);
+    const sql = postgres(u, { ...options, max: 1, connect_timeout: 8, connection: { statement_timeout: 5000, application_name: "health-check" } });
+    const step = async <T,>(name: string, fn: () => Promise<T>) => {
+      const t0 = Date.now();
+      try {
+        const r = await fn();
+        checks[name] = { ok: true, ms: Date.now() - t0, ...(r === undefined ? {} : { result: r }) };
+        return r;
+      } catch (e) {
+        checks[name] = { ok: false, ms: Date.now() - t0, error: (e as Error).message.replace(dbUrl, "[DATABASE_URL]").slice(0, 300) };
+        return undefined;
       }
-    } catch (e) {
-      checks.databaseConnection = `FAILED — ${(e as Error).message.replace(url, "[DATABASE_URL]").slice(0, 300)}`;
+    };
+    const connected = await step("1_connect", async () => void (await sql`select 1`));
+    if (checks["1_connect"] && (checks["1_connect"] as { ok: boolean }).ok) {
+      void connected;
+      // sessions that are running long or waiting on locks — the usual cause of timeouts
+      await step("2_sessions", async () =>
+        sql`select pid, state, application_name as app, wait_event_type as waiting_on, round(extract(epoch from now() - query_start))::int as seconds,
+                   pg_blocking_pids(pid) as blocked_by, left(regexp_replace(query, '\\s+', ' ', 'g'), 70) as query
+            from pg_stat_activity
+            where datname = current_database() and pid <> pg_backend_pid() and state <> 'idle'
+            order by query_start limit 15`);
+      const tables = await step("3_tables", async () => {
+        const [t] = await sql<{ n: number }[]>`select count(*)::int as n from information_schema.tables where table_schema = 'public'`;
+        return t.n;
+      });
+      if (!tables) checks.fix = "No tables — run `npm run db:migrate` against this database";
+      else {
+        await step("4_cities", async () => (await sql<{ n: number }[]>`select count(*)::int as n from cities`)[0].n);
+        await step("5_settings", async () => (await sql<{ n: number }[]>`select count(*)::int as n from site_settings`)[0].n);
+        await step("6_listings", async () => (await sql<{ n: number }[]>`select count(*)::int as n from property_listings`)[0].n);
+        const c = checks["4_cities"] as { ok: boolean; result?: number };
+        const st = checks["5_settings"] as { ok: boolean; result?: number };
+        if (c.ok && st.ok && (!c.result || !st.result)) checks.fix = "Tables are empty — run `npm run db:reference` (or `npm run db:seed` for demo data)";
+        if (!c.ok || !st.ok) checks.fix = "Queries on tables time out — see 2_sessions for the session holding a lock (blocked_by), and end it in Supabase with select pg_terminate_backend(<pid>)";
+      }
     }
+    await sql.end({ timeout: 2 }).catch(() => {});
   }
-  const ok = Object.values(checks).every((v) => typeof v !== "string" || !/MISSING|FAILED/.test(v));
+  const ok = !checks.fix && Object.values(checks).every((v) => (typeof v === "string" ? !/MISSING|FAILED/.test(v) : !(v && typeof v === "object" && "ok" in v && !(v as { ok: boolean }).ok)));
   return Response.json({ ok, ...checks }, { status: ok ? 200 : 503, headers: { "cache-control": "no-store" } });
 }
