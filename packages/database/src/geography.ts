@@ -5,10 +5,10 @@
  * by `npm run db:reference` so every city can be searched and listed in, even
  * before it has localities or listings.
  */
-import { sql } from "drizzle-orm";
+import { sql, inArray } from "drizzle-orm";
 import { slugify as slug } from "@propertyx/shared";
 import type { Database } from "./client";
-import { provinces, cities, locations } from "./schema";
+import { provinces, cities, locations, areas, societies } from "./schema";
 
 type CityRow = [name: string, lat: number, lng: number];
 
@@ -274,6 +274,22 @@ const MAJOR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Mu
  * Idempotently adds any missing provinces and cities (plus their `locations` index rows).
  * Existing rows — including demo cities with localities — are left untouched.
  */
+type LocalityRow = [name: string, kind: "area" | "society", lat: number, lng: number];
+
+/**
+ * Real housing societies and areas added on top of the demo seed, keyed by city slug.
+ * Coordinates are approximate (within the city); admins can refine them in Admin → Areas.
+ */
+export const PAKISTAN_LOCALITIES: Record<string, LocalityRow[]> = {
+  burewala: [
+    ["Fine City", "society", 30.1545, 72.6385],
+    ["Fine City Executive", "society", 30.1525, 72.6355],
+    ["Royal Garden", "society", 30.1765, 72.6625],
+    ["Liberty Living", "society", 30.1605, 72.6765],
+    ["City Housing", "society", 30.1825, 72.6485],
+  ],
+};
+
 export async function syncGeography(db: Database) {
   const provinceNames = Object.keys(PAKISTAN_CITIES);
   await db.insert(provinces).values(provinceNames.map((name) => ({ name, slug: slug(name) }))).onConflictDoNothing({ target: provinces.slug });
@@ -299,4 +315,23 @@ export async function syncGeography(db: Database) {
   await db.execute(sql`
     update locations l set parent_id = p.id from cities c, locations p
     where l.kind = 'city' and l.parent_id is null and c.id = l.ref_id and p.kind = 'province' and p.ref_id = c.province_id`);
+  await syncLocalities(db);
+}
+
+/** Inserts PAKISTAN_LOCALITIES that are missing; existing rows (matched by slug) are left untouched. */
+async function syncLocalities(db: Database) {
+  const citySlugs = Object.keys(PAKISTAN_LOCALITIES);
+  const cityRows = await db.select({ id: cities.id, name: cities.name, slug: cities.slug }).from(cities).where(inArray(cities.slug, citySlugs));
+  const cityLocs = await db.select({ id: locations.id, refId: locations.refId }).from(locations).where(inArray(locations.refId, cityRows.map((c) => c.id)));
+  for (const city of cityRows) {
+    const parentId = cityLocs.find((l) => l.refId === city.id)?.id ?? null;
+    for (const [name, kind, lat, lng] of PAKISTAN_LOCALITIES[city.slug]) {
+      const base = slug(name);
+      const locSlug = base.includes(city.slug) ? base : `${base}-${city.slug}`;
+      const table = kind === "area" ? areas : societies;
+      await db.insert(table).values({ cityId: city.id, name, slug: locSlug, lat, lng }).onConflictDoNothing({ target: table.slug });
+      const [row] = await db.select({ id: table.id }).from(table).where(sql`${table.slug} = ${locSlug}`);
+      await db.insert(locations).values({ kind, refId: row.id, cityId: city.id, parentId, name, fullName: `${name}, ${city.name}`, slug: locSlug, lat, lng }).onConflictDoNothing();
+    }
+  }
 }
