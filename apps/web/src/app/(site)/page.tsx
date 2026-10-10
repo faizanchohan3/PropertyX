@@ -74,7 +74,7 @@ export default async function HomePage() {
           {homepage.announcement && <p className="mb-4 inline-block rounded-full bg-gold-500/20 px-4 py-1 text-sm text-gold-100 ring-1 ring-gold-400/40">{homepage.announcement}</p>}
           <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] text-white sm:text-6xl">{homepage.heroTitle}</h1>
           <p className="mt-4 max-w-2xl text-lg text-brand-50/90">{homepage.heroSubtitle}</p>
-          <div className="mt-8 max-w-5xl">
+          <div className="mt-8 max-w-3xl">
             <HeroSearch />
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
