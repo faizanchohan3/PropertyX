@@ -7,6 +7,11 @@ export const CITY_LINKS = [
   { slug: "faisalabad", name: "Faisalabad" },
   { slug: "gujranwala", name: "Gujranwala" },
   { slug: "peshawar", name: "Peshawar" },
+  { slug: "sahiwal", name: "Sahiwal" },
+  { slug: "burewala", name: "Burewala" },
+  { slug: "vehari", name: "Vehari" },
+  { slug: "mian-channu", name: "Mian Channu" },
+  { slug: "chichawatni", name: "Chichawatni" },
 ];
 
 export interface NavItem {
