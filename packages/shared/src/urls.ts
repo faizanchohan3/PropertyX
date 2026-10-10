@@ -43,3 +43,13 @@ export const agentPath = (slug: string) => `/agents/${slug}`;
 export const agencyPath = (slug: string) => `/agencies/${slug}`;
 export const developerPath = (slug: string) => `/developers/${slug}`;
 export const blogPath = (slug: string) => `/blog/${slug}`;
+
+/**
+ * Public base URL of the site: APP_URL if set, otherwise the production domain Vercel
+ * provides to every deployment, otherwise the local dev server.
+ */
+export function publicAppUrl() {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/+$/, "");
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return "http://localhost:3100";
+}

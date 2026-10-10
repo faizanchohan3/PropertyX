@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db as lazyDb } from "@propertyx/database";
 import { resolveSession, SESSION_COOKIE, type AuthUser } from "@propertyx/auth";
 import { getSetting } from "@propertyx/core";
-import type { Permission } from "@propertyx/shared";
+import { publicAppUrl, type Permission } from "@propertyx/shared";
 
 // lazy: connects on first query, so `next build` works without DATABASE_URL
 export const db = lazyDb;
@@ -34,5 +34,5 @@ export async function requirePermission(p: Permission, next?: string): Promise<A
 export const isDemoMode = cache(async () => !!(await getSetting<boolean>(db, "demo_mode")));
 
 export function appUrl() {
-  return process.env.APP_URL ?? "http://localhost:3000";
+  return publicAppUrl();
 }

@@ -7,7 +7,7 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "@propertyx/database";
 import { notifications, notificationPreferences, notificationDeliveries, users, pushTokens } from "@propertyx/database";
-import type { NotificationChannel, NotificationType } from "@propertyx/shared";
+import { publicAppUrl, type NotificationChannel, type NotificationType } from "@propertyx/shared";
 
 export interface NotifyInput {
   userId: string;
@@ -51,7 +51,7 @@ export async function notify(db: Database, input: NotifyInput) {
     const [n] = await db.insert(notifications).values({ userId: input.userId, type: input.type, title: input.title, body: input.body, link: input.link, data: input.data ?? {} }).returning({ id: notifications.id });
     notificationId = n.id;
   }
-  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const appUrl = publicAppUrl();
   const text = `${input.title}\n${input.body}${input.link ? `\n${appUrl}${input.link}` : ""}`;
   const outbox: (typeof notificationDeliveries.$inferInsert)[] = [];
   if (prefs.email && user.email) outbox.push({ notificationId, userId: input.userId, channel: "email", to: user.email, subject: input.title, body: text });

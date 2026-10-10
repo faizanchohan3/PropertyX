@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { publicAppUrl } from "@propertyx/shared";
 import { connectionOptions } from "@propertyx/database";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export async function GET() {
     DATABASE_URL: url ? "set" : process.env.NODE_ENV === "production" ? "MISSING — add it in Vercel → Settings → Environment Variables" : "not set (local dev database in use)",
     databaseHost: url ? (url.match(/@([^:/?]+)/)?.[1] ?? "unparseable") : null,
     AUTH_SECRET: (process.env.AUTH_SECRET?.length ?? 0) >= 32 ? "set" : process.env.NODE_ENV === "production" ? "MISSING or shorter than 32 characters" : "not set (development fallback in use)",
-    APP_URL: process.env.APP_URL || "not set (optional, used in emails and links)",
+    APP_URL: publicAppUrl() + (process.env.APP_URL ? "" : " (auto)"),
     region: process.env.VERCEL_REGION ?? null,
   };
   const dbUrl = url || (process.env.NODE_ENV !== "production" ? "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx" : "");

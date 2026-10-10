@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/toast";
+import { publicAppUrl } from "@propertyx/shared";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
 
-const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
+const APP_URL = publicAppUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
