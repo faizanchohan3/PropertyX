@@ -21,8 +21,11 @@ function usePrepared(url: string) {
 }
 
 function create(url: string) {
+  const pooled = !usePrepared(url);
   const sql = postgres(url, {
-    max: Number(process.env.DB_POOL_MAX ?? 10),
+    // serverless instances behind a transaction pooler should hold very few connections each
+    max: Number(process.env.DB_POOL_MAX ?? (pooled ? 3 : 10)),
+    connect_timeout: 15,
     idle_timeout: 30,
     prepare: usePrepared(url),
     onnotice: () => {},

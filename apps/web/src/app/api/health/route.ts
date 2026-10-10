@@ -18,8 +18,9 @@ export async function GET() {
   if (url || process.env.NODE_ENV !== "production") {
     try {
       const sql = getSql();
+      const t0 = Date.now();
       await sql`select 1`;
-      checks.databaseConnection = "ok";
+      checks.databaseConnection = `ok (${Date.now() - t0} ms)`;
       const [t] = await sql<{ n: number }[]>`select count(*)::int as n from information_schema.tables where table_schema = 'public' and table_name in ('users', 'site_settings', 'property_listings', 'cities')`;
       if (t.n < 4) checks.tables = "MISSING — run `npm run db:migrate` against this database";
       else {
@@ -32,7 +33,10 @@ export async function GET() {
         else checks.referenceData = "ok";
       }
     } catch (e) {
-      checks.databaseConnection = `FAILED — ${(e as Error).message.replace(url, "[DATABASE_URL]").slice(0, 300)}`;
+      const msg = (e as Error).message.replace(url, "[DATABASE_URL]").slice(0, 300);
+      checks.databaseConnection = `FAILED — ${msg}`;
+      if (/statement timeout|check out|too many|max client/i.test(msg))
+        checks.hint = "The database is busy: a seed may still be running, or connections are exhausted. Wait a minute and reload; check Supabase → Database → Roles/Connections.";
     }
   }
   const ok = Object.values(checks).every((v) => typeof v !== "string" || !/MISSING|FAILED/.test(v));
