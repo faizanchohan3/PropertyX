@@ -469,6 +469,9 @@ export interface ConstructionResult {
   rangeHigh: number;
 }
 
+/** Flat amount taken off the construction estimate for each storey (PKR 50 lakh). */
+export const CONSTRUCTION_DEDUCTION_PER_FLOOR = 5_000_000;
+
 export function estimateConstructionCost(input: ConstructionInput, rates: ConstructionRates): ConstructionResult {
   const floors = Math.max(1, Math.round(input.floors));
   // Typical by-laws allow roughly 70-80% ground coverage on small plots; use 75% when not given.
@@ -488,7 +491,11 @@ export function estimateConstructionCost(input: ConstructionInput, rates: Constr
     { key: "kitchen", label: "Kitchen", amount: kitchens * rates.kitchenPerUnit[q] },
     { key: "bathrooms", label: "Bathrooms (fixtures)", amount: bathrooms * rates.bathroomPerUnit[q] },
     { key: "labor", label: "Labour", amount: covered * rates.laborPerSqft },
-  ].map((i) => ({ ...i, amount: Math.round(i.amount * m) }));
+  ].map((i) => ({ ...i, amount: i.amount * m }));
+  // Reduce the estimate by a flat PKR 50 lakh per storey, spread proportionally across the line items.
+  const gross = items.reduce((s, i) => s + i.amount, 0);
+  const scale = gross ? Math.max(0, gross - floors * CONSTRUCTION_DEDUCTION_PER_FLOOR) / gross : 0;
+  for (const i of items) i.amount = Math.round(i.amount * scale);
   const total = items.reduce((s, i) => s + i.amount, 0);
   return {
     coveredAreaSqft: covered,
