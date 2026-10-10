@@ -28,7 +28,10 @@ export function connectionOptions(rawUrl: string) {
   url.searchParams.delete("pgbouncer");
   const ssl = local || url.searchParams.has("sslmode") ? undefined : ("require" as const);
   const max = Number(process.env.DB_POOL_MAX ?? (process.env.VERCEL ? 3 : 10));
-  return { url: url.toString(), options: { max, idle_timeout: 30, connect_timeout: 15, prepare, ssl, onnotice: () => {} } };
+  // postgres.js pipelines extra queries onto busy connections; Supavisor in transaction mode can stall
+  // on pipelined queries (seen as a backend stuck "waiting on Client"), so send one query per connection at a time
+  const max_pipeline = pooled ? 0 : 100;
+  return { url: url.toString(), options: { max, idle_timeout: 30, connect_timeout: 15, prepare, ssl, max_pipeline, onnotice: () => {} } };
 }
 
 function create(rawUrl: string) {
