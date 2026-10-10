@@ -53,11 +53,13 @@ export function ContactPanel(p: ContactProps) {
     }
   };
 
+  const [text, setText] = useState(`Hi, I'm interested in “${p.title}”. Is it still available?`);
   const message = async () => {
     if (!p.user) return loginFirst();
+    if (!text.trim()) return toast("Write a message first", "error");
     setBusy(true);
     try {
-      const r = await api<{ id: string }>("/api/v1/conversations", { body: { listingId: p.listingId, message: `Hi, I'm interested in “${p.title}”. Is it still available?` } });
+      const r = await api<{ id: string }>("/api/v1/conversations", { body: { listingId: p.listingId, message: text.trim() } });
       track(p.listingId, "message");
       router.push(`/messages/${r.id}`);
     } catch (e) {
@@ -128,9 +130,19 @@ export function ContactPanel(p: ContactProps) {
           <MessageCircle className="h-4 w-4" /> WhatsApp
         </a>
       </div>
-      <button className="btn-outline w-full" onClick={message} disabled={busy || !p.active}>
-        {busy && !modal ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />} Message
-      </button>
+      <form
+        className="rounded-xl border border-slate-200 p-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          message();
+        }}
+      >
+        <label className="label" htmlFor="cp-msg">Message {p.contactName.split(" ")[0]}</label>
+        <textarea id="cp-msg" className="input min-h-24 resize-y" value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} disabled={!p.active} />
+        <button type="submit" className="btn-outline mt-2 w-full" disabled={busy || !p.active || !text.trim()}>
+          {busy && !modal ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />} {p.user ? "Send message" : "Log in to send"}
+        </button>
+      </form>
       <div className="grid grid-cols-2 gap-2">
         <button className="btn-outline" disabled={!p.active} onClick={() => (p.user ? setModal("visit") : loginFirst())}>
           <CalendarDays className="h-4 w-4" /> Request Visit
