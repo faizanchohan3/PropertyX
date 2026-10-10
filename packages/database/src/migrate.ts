@@ -1,9 +1,11 @@
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 import { createDb } from "./client";
 
-export async function runMigrations(url = process.env.DATABASE_URL ?? "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx") {
+// DIRECT_URL: a non-pooled connection (Supabase "Session"/direct, port 5432) for DDL
+export async function runMigrations(url = process.env.DIRECT_URL || process.env.DATABASE_URL || "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx") {
   const { sql, db } = createDb(url);
   try {
     await sql.unsafe("CREATE EXTENSION IF NOT EXISTS pg_trgm");
@@ -15,6 +17,8 @@ export async function runMigrations(url = process.env.DATABASE_URL ?? "postgres:
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  // variables already set in the shell win over .env
+  if (existsSync(".env")) process.loadEnvFile(".env");
   runMigrations()
     .then(() => console.log("✔ migrations applied"))
     .catch((e) => {

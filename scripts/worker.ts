@@ -6,6 +6,10 @@
  */
 import { getDb, closeDb } from "@propertyx/database";
 import { runScheduledJobs } from "@propertyx/core";
+import { existsSync } from "node:fs";
+
+// variables already set in the shell win over .env
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 const once = process.argv.includes("--once");
 const INTERVAL = Number(process.env.WORKER_INTERVAL_MS ?? 120_000);

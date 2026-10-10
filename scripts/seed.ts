@@ -6,9 +6,13 @@ import { createDb } from "@propertyx/database";
 import { syncReferenceData } from "@propertyx/database/reference";
 import { seedDemo } from "@propertyx/database/seed/index";
 import { postSeed } from "./post-seed";
+import { existsSync } from "node:fs";
+
+// variables already set in the shell win over .env
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 async function main() {
-  const url = process.env.DATABASE_URL ?? "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx";
+  const url = process.env.DIRECT_URL || process.env.DATABASE_URL || "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx";
   const { db, sql } = createDb(url);
   const t = Date.now();
   try {
