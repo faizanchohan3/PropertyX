@@ -25,7 +25,9 @@ function repoRoot() {
 }
 
 function baseDir(v: Visibility) {
-  const configured = v === "public" ? process.env.STORAGE_PUBLIC_DIR ?? "./storage/public" : process.env.STORAGE_PRIVATE_DIR ?? "./storage/private";
+  // serverless hosts (Vercel) only allow writes under /tmp, and it does not persist — configure a real store for production
+  const fallback = process.env.VERCEL ? `/tmp/storage/${v}` : `./storage/${v}`;
+  const configured = (v === "public" ? process.env.STORAGE_PUBLIC_DIR : process.env.STORAGE_PRIVATE_DIR) ?? fallback;
   return path.isAbsolute(configured) ? configured : path.resolve(repoRoot(), configured);
 }
 

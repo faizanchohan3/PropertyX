@@ -14,6 +14,13 @@ const config: NextConfig = {
   transpilePackages: ["@propertyx/shared", "@propertyx/database", "@propertyx/auth", "@propertyx/search", "@propertyx/ai", "@propertyx/payments", "@propertyx/notifications", "@propertyx/core", "@propertyx/ui"],
   serverExternalPackages: ["sharp", "postgres", "bcryptjs"],
   outputFileTracingRoot: path.join(__dirname, "../.."),
+  // storage.ts resolves upload dirs from process.cwd() at runtime, so the tracer adds the whole app
+  // directory to every function — including .next/cache, which Vercel restores from earlier builds.
+  // That pushed each function past the size limit (~350 MB), so routes could not be grouped and the
+  // Hobby plan's 12-function cap was exceeded. Globs are joined to this dir (they match on Linux builds).
+  outputFileTracingExcludes: {
+    "**/*": ["**/.next/cache/**/*", "**/*.tsbuildinfo"],
+  },
   images: {
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
