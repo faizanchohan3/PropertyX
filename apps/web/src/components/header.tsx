@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, HousePlus, LogIn, MessageSquare } from "lucide-react";
+import { Heart, HousePlus, MessageSquare, UserRound } from "lucide-react";
 import { unreadCount } from "@propertyx/notifications";
 import { unreadMessages } from "@propertyx/core";
 import { db, getUser } from "@/lib/server";
@@ -34,7 +34,7 @@ export async function Header() {
             <UserMenu user={{ name: user.name, email: user.email, roles: user.roles, isStaff: user.isStaff, avatarUrl: user.avatarUrl }} />
           ) : (
             <Link href="/login" className="btn-primary px-2.5" title="Login / Register" aria-label="Login / Register">
-              <LogIn className="h-5 w-5" />
+              <UserRound className="h-5 w-5" />
               <span className="hidden 2xl:inline">Login / Register</span>
             </Link>
           )}
