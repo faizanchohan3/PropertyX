@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, ChevronDown, LayoutDashboard, LogOut, Menu, Settings, Shield, User, X, Plus, Sparkles } from "lucide-react";
+import { Bell, ChevronDown, LayoutDashboard, LogOut, Menu, Settings, Shield, User, X, HousePlus, LogIn, Sparkles } from "lucide-react";
 import { NAV } from "./nav-data";
 import { api } from "@/lib/client";
 import { Logo } from "./logo";
@@ -109,7 +109,7 @@ export function MobileMenu({ user }: { user: { name: string } | null }) {
               </button>
             </div>
             <Link href="/post-property" className="btn-gold mb-4 w-full">
-              <Plus className="h-4 w-4" /> Post Property
+              <HousePlus className="h-4 w-4" /> Post Property
             </Link>
             <Link href="/ai" className="btn-outline mb-4 w-full">
               <Sparkles className="h-4 w-4 text-gold-500" /> Ask the AI assistant
@@ -136,7 +136,7 @@ export function MobileMenu({ user }: { user: { name: string } | null }) {
                 </details>
               ))}
             </nav>
-            <div className="mt-auto border-t border-slate-200 pt-4 text-sm text-slate-500">{user ? `Signed in as ${user.name}` : <Link href="/login" className="btn-primary w-full">Login / Register</Link>}</div>
+            <div className="mt-auto border-t border-slate-200 pt-4 text-sm text-slate-500">{user ? `Signed in as ${user.name}` : <Link href="/login" className="btn-primary w-full"><LogIn className="h-4 w-4" /> Login / Register</Link>}</div>
           </div>
         </div>
       )}

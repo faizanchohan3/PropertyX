@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, MessageSquare, Plus } from "lucide-react";
+import { Heart, HousePlus, LogIn, MessageSquare } from "lucide-react";
 import { unreadCount } from "@propertyx/notifications";
 import { unreadMessages } from "@propertyx/core";
 import { db, getUser } from "@/lib/server";
@@ -26,14 +26,16 @@ export async function Header() {
             {msgs > 0 && <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">{msgs > 9 ? "9+" : msgs}</span>}
           </Link>
           {user && <NotificationBell count={notif} />}
-          <Link href="/post-property" className="btn-gold hidden sm:inline-flex">
-            <Plus className="h-4 w-4" /> <span className="hidden xl:inline">Post Property</span><span className="xl:hidden">Post</span>
+          <Link href="/post-property" className="btn-gold hidden px-2.5 sm:inline-flex" title="Post Property" aria-label="Post Property">
+            <HousePlus className="h-5 w-5" />
+            <span className="hidden 2xl:inline">Post Property</span>
           </Link>
           {user ? (
             <UserMenu user={{ name: user.name, email: user.email, roles: user.roles, isStaff: user.isStaff, avatarUrl: user.avatarUrl }} />
           ) : (
-            <Link href="/login" className="btn-primary">
-              <span className="hidden 2xl:inline">Login / Register</span><span className="2xl:hidden">Login</span>
+            <Link href="/login" className="btn-primary px-2.5" title="Login / Register" aria-label="Login / Register">
+              <LogIn className="h-5 w-5" />
+              <span className="hidden 2xl:inline">Login / Register</span>
             </Link>
           )}
         </div>
