@@ -94,6 +94,9 @@ export interface FinancingResult {
   schedule: FinancingScheduleRow[];
 }
 
+/** Upper limit on total interest / profit, as a percentage of the property price. */
+export const FINANCING_MAX_PROFIT_PCT = 30;
+
 export function calculateFinancing(input: FinancingInput): FinancingResult {
   const P = Math.max(0, input.propertyPrice - input.downPayment);
   const n = Math.max(1, Math.round(input.tenureYears * 12));
@@ -123,6 +126,19 @@ export function calculateFinancing(input: FinancingInput): FinancingResult {
       const principal = monthly - profit;
       balance = Math.max(0, balance - principal);
       schedule.push({ month: m, payment: monthly, profit, principal, balance });
+    }
+  }
+
+  // Total interest / profit never exceeds FINANCING_MAX_PROFIT_PCT of the property price.
+  // When the cap applies, it is spread evenly with equal principal, so installments stay equal.
+  const cap = (input.propertyPrice * FINANCING_MAX_PROFIT_PCT) / 100;
+  if (monthly * n - P > cap) {
+    monthly = (P + cap) / n;
+    schedule.length = 0;
+    let balance = P;
+    for (let m = 1; m <= n; m++) {
+      balance = Math.max(0, balance - P / n);
+      schedule.push({ month: m, payment: monthly, profit: cap / n, principal: P / n, balance });
     }
   }
 

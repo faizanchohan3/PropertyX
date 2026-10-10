@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { calculateFinancing, formatPKR, formatPKRFull, type FinancingProduct } from "@propertyx/shared";
+import { calculateFinancing, formatPKR, formatPKRFull, FINANCING_MAX_PROFIT_PCT, type FinancingProduct } from "@propertyx/shared";
 
 export function HomeLoanCalculator({ products }: { products: FinancingProduct[] }) {
   const [productKey, setProductKey] = useState(products[0].key);
@@ -129,7 +129,7 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
                 </table>
               </div>
             </details>
-            <p className="mt-5 text-xs text-slate-400">Estimate only. Actual rates, fees, insurance and eligibility depend on the bank and on KIBOR at the time you apply.</p>
+            <p className="mt-5 text-xs text-slate-400">Total {result.labels.profit.toLowerCase()} is capped at {FINANCING_MAX_PROFIT_PCT}% of the property price. Estimate only. Actual rates, fees, insurance and eligibility depend on the bank and on KIBOR at the time you apply.</p>
           </>
         ) : (
           <p className="py-16 text-center text-slate-500">Enter a property price to see your installment.</p>

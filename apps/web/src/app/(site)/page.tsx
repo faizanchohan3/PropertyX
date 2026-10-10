@@ -173,8 +173,15 @@ export default async function HomePage() {
       {/* CITIES */}
       {homepage.sections.cities !== false && (
         <section className="container-px mt-16">
-          <h2 className="section-title">Explore by city</h2>
-          <p className="mb-6 mt-1 text-slate-500">Live listing counts from Bismillah</p>
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="section-title">Explore by city</h2>
+              <p className="mt-1 text-slate-500">Live listing counts from Bismillah</p>
+            </div>
+            <Link href="/areas" className="flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">
+              All cities <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {cityCounts
               .filter((c) => homepage.featuredCities.includes(c.slug))
