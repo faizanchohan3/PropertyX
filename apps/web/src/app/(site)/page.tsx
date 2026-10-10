@@ -10,6 +10,7 @@ import { HeroSearch } from "@/components/hero-search";
 import { PropertyGrid } from "@/components/property-card";
 import { VerificationBadge } from "@/components/badges";
 import { AiPromptBox } from "@/components/ai-prompt-box";
+import { FloatingAssistant } from "@/components/ai/floating-assistant";
 import { savedIdsFor } from "@/lib/queries";
 
 export const revalidate = 0;
@@ -320,6 +321,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <FloatingAssistant />
     </>
   );
 }
