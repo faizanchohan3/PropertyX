@@ -386,3 +386,91 @@ export async function trackSearch(db: Database, userId: string | null, anonId: s
   if (!userId && !anonId) return;
   await db.insert(s.userEvents).values({ userId, anonId, type: "search", payload: q as Record<string, unknown> });
 }
+
+/* ------------------------------------------------------------------ */
+/* Area guide directory & property trends                               */
+/* ------------------------------------------------------------------ */
+
+/** Areas and societies grouped under their city, busiest first (live active-listing counts). */
+export async function listAreaDirectory(db: Database, opts: { city?: string; q?: string; perCity?: number } = {}) {
+  const perCity = opts.perCity ?? 12;
+  const rows = await db.execute<Row>(sql`
+    with counts as (
+      select loc.id, count(l.id)::int as n
+      from locations loc
+      join properties p on (loc.kind = 'society' and p.society_id = loc.ref_id) or (loc.kind = 'area' and p.area_id = loc.ref_id)
+      join property_listings l on l.property_id = p.id and l.status = 'active'
+      group by loc.id
+    ), ranked as (
+      select loc.slug, loc.name, loc.kind, c.slug as city_slug, c.name as city_name, c.sort_order, coalesce(k.n, 0) as n,
+        row_number() over (partition by c.id order by coalesce(k.n, 0) desc, loc.name) as rk
+      from locations loc join cities c on c.id = loc.city_id left join counts k on k.id = loc.id
+      where loc.kind in ('area', 'society')
+        ${opts.city ? sql`and c.slug = ${opts.city}` : sql``}
+        ${opts.q ? sql`and loc.full_name ilike ${"%" + opts.q + "%"}` : sql``}
+    )
+    select * from ranked where rk <= ${perCity} order by sort_order, city_name, rk`);
+  const cities = new Map<string, { slug: string; name: string; areas: { slug: string; name: string; kind: string; activeListings: number }[] }>();
+  for (const r of rows) {
+    const key = r.city_slug as string;
+    if (!cities.has(key)) cities.set(key, { slug: key, name: r.city_name as string, areas: [] });
+    cities.get(key)!.areas.push({ slug: r.slug as string, name: r.name as string, kind: r.kind as string, activeListings: Number(r.n) });
+  }
+  return [...cities.values()];
+}
+
+/** Popular areas by buyer interest: views and enquiries in the last 30 days vs the 30 before, plus supply, median price and price change. */
+export async function propertyTrends(db: Database, opts: { city?: string; purpose?: "sale" | "rent"; limit?: number } = {}) {
+  const purpose = opts.purpose ?? "sale";
+  const marla = (await getSetting<number>(db, "marla_sqft")) ?? 225;
+  const rows = await db.execute<Row>(sql`
+    with ev as (
+      select listing_id,
+        count(*) filter (where type = 'view' and created_at > now() - interval '30 days')::int as views,
+        count(*) filter (where type = 'view' and created_at <= now() - interval '30 days')::int as prev_views,
+        count(*) filter (where type in ('lead', 'visit_request', 'message') and created_at > now() - interval '30 days')::int as enquiries
+      from listing_events where created_at > now() - interval '60 days' group by 1
+    )
+    select loc.slug, loc.name, c.slug as city_slug, c.name as city_name,
+      count(*) filter (where l.status = 'active')::int as active,
+      percentile_cont(0.5) within group (order by l.price / nullif(p.area_sqft, 0)) filter (where l.status = 'active') as ppsf,
+      percentile_cont(0.5) within group (order by l.price / nullif(p.area_sqft, 0)) filter (where l.published_at > now() - interval '6 months') as recent_ppsf,
+      percentile_cont(0.5) within group (order by l.price / nullif(p.area_sqft, 0)) filter (where l.published_at between now() - interval '18 months' and now() - interval '6 months') as earlier_ppsf,
+      count(*) filter (where l.published_at > now() - interval '6 months')::int as recent_n,
+      count(*) filter (where l.published_at between now() - interval '18 months' and now() - interval '6 months')::int as earlier_n,
+      coalesce(sum(ev.views), 0)::int as views, coalesce(sum(ev.prev_views), 0)::int as prev_views, coalesce(sum(ev.enquiries), 0)::int as enquiries
+    from property_listings l
+    join properties p on p.id = l.property_id
+    join cities c on c.id = p.city_id
+    join locations loc on (loc.kind = 'society' and loc.ref_id = p.society_id) or (p.society_id is null and loc.kind = 'area' and loc.ref_id = p.area_id)
+    left join ev on ev.listing_id = l.id
+    where l.purpose = ${purpose} and l.status in ('active', 'sold', 'rented', 'expired', 'paused')
+      ${opts.city ? sql`and c.slug = ${opts.city}` : sql``}
+    group by loc.id, loc.slug, loc.name, c.slug, c.name
+    having count(*) filter (where l.status = 'active') > 0
+    order by views desc, enquiries desc, active desc
+    limit ${opts.limit ?? 20}`);
+  return rows.map((r) => {
+    const views = Number(r.views);
+    const prev = Number(r.prev_views);
+    const ppsf = r.ppsf != null ? Number(r.ppsf) : null;
+    // only report a price change when both periods have enough listings to be meaningful
+    const enough = Number(r.recent_n) >= 5 && Number(r.earlier_n) >= 5;
+    const recent = enough && r.recent_ppsf != null ? Number(r.recent_ppsf) : null;
+    const earlier = enough && r.earlier_ppsf != null ? Number(r.earlier_ppsf) : null;
+    return {
+      slug: r.slug as string,
+      name: r.name as string,
+      citySlug: r.city_slug as string,
+      cityName: r.city_name as string,
+      activeListings: Number(r.active),
+      views,
+      enquiries: Number(r.enquiries),
+      interestChangePct: prev > 0 ? Math.round(((views - prev) / prev) * 1000) / 10 : null,
+      pricePerSqft: ppsf != null ? Math.round(ppsf) : null,
+      pricePerMarla: ppsf != null ? Math.round(ppsf * marla) : null,
+      /** median asking price per sq ft, last 6 months vs the 12 months before */
+      priceChangePct: recent && earlier ? Math.round(((recent - earlier) / earlier) * 1000) / 10 : null,
+    };
+  });
+}
