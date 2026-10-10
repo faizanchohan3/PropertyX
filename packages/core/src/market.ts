@@ -198,7 +198,7 @@ export async function valueProperty(db: Database, v: ValuationInput) {
   const marla = (await getSetting<number>(db, "marla_sqft")) ?? 225;
   const sqft = toSqft(v.areaValue, v.areaUnit, marla);
   const purpose = v.purpose ?? "sale";
-  const similarTypes = TYPE_GROUPS.homes.includes(v.type) ? (["house", "villa"].includes(v.type) ? ["house", "villa"] : [v.type]) : [v.type];
+  const similarTypes = ["house", "villa"].includes(v.type) ? ["house", "villa"] : ["flat", "apartment"].includes(v.type) ? ["flat", "apartment"] : [v.type];
   const run = async (scope: "location" | "city", band: number) => {
     const where = await locationFilter(db, scope === "location" && v.location ? { location: v.location, types: similarTypes } : { city: v.city, types: similarTypes });
     return db.execute<Row>(sql`

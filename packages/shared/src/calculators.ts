@@ -226,10 +226,11 @@ export function calculateInstallmentPlan(input: InstallmentInput): InstallmentRe
   if (input.downPayment > input.totalPrice) warnings.push("Down payment exceeds the total price.");
 
   let monthly = input.monthlyInstallment;
-  if (monthly == null || monthly <= 0) {
-    monthly = Math.max(0, (afterDown - quarterly * quarterlyCount - balloon) / months);
-  }
-  monthly = Math.round(monthly);
+  const solved = monthly == null || monthly <= 0;
+  if (solved) monthly = Math.max(0, (afterDown - quarterly * quarterlyCount - balloon) / months);
+  monthly = Math.round(monthly!);
+  // a solved plan absorbs the rounding difference in the last monthly installment so it pays off exactly
+  const lastMonthly = solved && monthly > 0 ? Math.max(0, afterDown - quarterly * quarterlyCount - balloon - monthly * (months - 1)) : monthly;
 
   const start = input.startDate ?? new Date().toISOString().slice(0, 10);
   const schedule: InstallmentRow[] = [];
@@ -250,7 +251,7 @@ export function calculateInstallmentPlan(input: InstallmentInput): InstallmentRe
   };
   push(0, "Down payment", input.downPayment);
   for (let m = 1; m <= months; m++) {
-    push(m, `Monthly installment ${m}`, monthly);
+    push(m, `Monthly installment ${m}`, m === months ? lastMonthly : monthly);
     if (quarterly > 0 && m % 3 === 0) push(m, `Quarterly installment ${m / 3}`, quarterly);
     if (balloon > 0 && m === balloonMonth) push(m, "Balloon / possession payment", balloon);
   }
