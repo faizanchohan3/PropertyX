@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BedDouble, Bath, Maximize, Car, Building2, CalendarClock, Layers, Sofa, Hammer, Hash, Clock, CheckCircle2, ShieldAlert, Calculator, TrendingUp } from "lucide-react";
-import { getListingDetail, similarListings } from "@propertyx/core";
+import { getBoundaries, getListingDetail, similarListings } from "@propertyx/core";
 import { formatPKR, formatArea, formatPriceWords, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, CONDITION_LABELS, FEATURE_GROUP_LABELS, verificationInfo, describeSqft, truncate } from "@propertyx/shared";
 import { db, getUser, appUrl } from "@/lib/server";
 import { savedIdsFor } from "@/lib/queries";
@@ -37,7 +37,12 @@ export default async function PropertyPage({ params }: Props) {
   const d = await getListingDetail(db, slug, user);
   if (!d) notFound();
   const { listing: l, property: p } = d;
-  const similar = await similarListings(db, d);
+  const [similar, boundaryRows] = await Promise.all([
+    similarListings(db, d),
+    // outline of the listing's society / area for the location map (traced, or approximate from listings)
+    d.area && p.lat != null && p.lng != null ? getBoundaries(db, [p.lng - 0.05, p.lat - 0.05, p.lng + 0.05, p.lat + 0.05], { slugs: [d.area.slug] }).catch(() => []) : Promise.resolve([]),
+  ]);
+  const boundary = boundaryRows[0] ? { name: boundaryRows[0].name, polygon: boundaryRows[0].polygon, source: boundaryRows[0].source } : null;
   const saved = user ? await savedIdsFor(user.id) : [];
   const reduced = !!l.priceReducedAt && !!l.previousPrice;
   const recentlyUpdated = Date.now() - l.updatedAt.getTime() < 7 * 86400_000;
@@ -191,7 +196,7 @@ export default async function PropertyPage({ params }: Props) {
           {p.lat != null && p.lng != null && (
             <section className="card p-6">
               <h2 className="mb-3 text-lg font-bold">Location & nearby</h2>
-              <LocationSection lat={p.lat} lng={p.lng} address={p.address ?? location} />
+              <LocationSection lat={p.lat} lng={p.lng} address={p.address ?? location} boundary={boundary} />
               {d.area && (
                 <Link href={`/area/${d.area.slug}`} className="mt-4 inline-block text-sm font-semibold text-brand-700">
                   Explore {d.area.name}: prices, trends & guide →

@@ -70,6 +70,8 @@ export interface MapPin {
   beds: number | null;
   areaValue: number;
   areaUnit: AreaUnit;
+  corner: boolean;
+  parkFacing: boolean;
 }
 export interface MapCluster {
   kind: "cluster";

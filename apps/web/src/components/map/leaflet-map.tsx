@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { Map as LMap, LayerGroup } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+export type MapPolygon = { points: [number, number][]; approximate?: boolean; label?: string; href?: string };
 export type MapMarker = { lat: number; lng: number; html?: string; popup?: string; kind?: "property" | "poi" | "cluster"; onClick?: () => void; title?: string };
 
 const TILE = process.env.NEXT_PUBLIC_MAP_TILE_URL ?? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -19,6 +20,8 @@ export function LeafletMap({
   onMoveEnd,
   circle,
   fitMarkers = false,
+  polygons = [],
+  fitPolygons = false,
 }: {
   center: [number, number];
   zoom?: number;
@@ -28,6 +31,9 @@ export function LeafletMap({
   onMoveEnd?: (map: LMap) => void;
   circle?: { lat: number; lng: number; radiusKm: number } | null;
   fitMarkers?: boolean;
+  /** area / society outlines; approximate ones are dashed */
+  polygons?: MapPolygon[];
+  fitPolygons?: boolean;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<LMap | null>(null);
@@ -63,6 +69,12 @@ export function LeafletMap({
     const m = map.current;
     if (!leaflet || !m || !layer.current) return;
     layer.current.clearLayers();
+    for (const pg of polygons) {
+      const poly = leaflet.polygon(pg.points, { color: pg.approximate ? "#d97706" : "#047857", weight: pg.approximate ? 2.5 : 3, dashArray: pg.approximate ? "8 6" : undefined, fillColor: pg.approximate ? "#f59e0b" : "#10b981", fillOpacity: pg.approximate ? 0.07 : 0.1 });
+      if (pg.label) poly.bindTooltip(pg.label, { sticky: true });
+      if (pg.href) poly.on("click", () => window.location.assign(pg.href!));
+      poly.addTo(layer.current);
+    }
     for (const mk of markers) {
       const icon = leaflet.divIcon({
         className: "",
@@ -75,10 +87,11 @@ export function LeafletMap({
       marker.addTo(layer.current);
     }
     if (circle) leaflet.circle([circle.lat, circle.lng], { radius: circle.radiusKm * 1000, color: "#c9922a", weight: 2, fillOpacity: 0.08 }).addTo(layer.current);
-    if (fitMarkers && markers.length > 1) m.fitBounds(leaflet.latLngBounds(markers.map((x) => [x.lat, x.lng] as [number, number])), { padding: [30, 30], maxZoom: 15 });
+    if (fitPolygons && polygons.length) m.fitBounds(leaflet.latLngBounds(polygons.flatMap((x) => x.points)), { padding: [20, 20], maxZoom: 16 });
+    else if (fitMarkers && markers.length > 1) m.fitBounds(leaflet.latLngBounds(markers.map((x) => [x.lat, x.lng] as [number, number])), { padding: [30, 30], maxZoom: 15 });
   };
 
-  useEffect(renderMarkers, [markers, circle, fitMarkers]);
+  useEffect(renderMarkers, [markers, circle, fitMarkers, polygons, fitPolygons]);
 
   return <div ref={el} className={`${className} z-0 overflow-hidden rounded-2xl`} />;
 }

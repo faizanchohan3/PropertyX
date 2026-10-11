@@ -1,6 +1,7 @@
 export * from "./errors";
 export * from "./storage";
 export * from "./settings";
+export * from "./boundaries";
 export * from "./billing";
 export * from "./fraud";
 export * from "./listings";

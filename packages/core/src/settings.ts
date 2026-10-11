@@ -17,6 +17,11 @@ export async function getSetting<T>(db: Database, key: string): Promise<T | unde
   return value;
 }
 
+/** Drops a cached setting so the next read sees a fresh value (e.g. after a direct write). */
+export function clearSettingCache(key: string) {
+  cache.delete(key);
+}
+
 export async function setSetting(db: Database, actor: Actor | null, key: string, value: unknown) {
   requirePerm(actor, "settings.manage");
   await db.insert(siteSettings).values({ key, value, updatedById: actor.id }).onConflictDoUpdate({ target: siteSettings.key, set: { value, updatedById: actor.id, updatedAt: new Date() } });

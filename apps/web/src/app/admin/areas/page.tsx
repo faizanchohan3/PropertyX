@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { adminLocations } from "@propertyx/core";
+import { adminLocations, getSetting } from "@propertyx/core";
 import { requirePermission, db } from "@/lib/server";
 import { allCities } from "@/lib/queries";
 import { AdminHeader, darkInput, okBtn, darkBtn } from "@/components/admin/ui";
@@ -10,7 +10,7 @@ export const metadata = { title: "Areas & guides" };
 export default async function AdminAreas({ searchParams }: { searchParams: Promise<{ city?: string; q?: string }> }) {
   const user = await requirePermission("content.manage", "/admin/areas");
   const sp = await searchParams;
-  const [rows, cities] = await Promise.all([adminLocations(db, user, { city: sp.city, q: sp.q }), allCities()]);
+  const [rows, cities, boundaries] = await Promise.all([adminLocations(db, user, { city: sp.city, q: sp.q }), allCities(), getSetting<Record<string, [number, number][]>>(db, "location_boundaries")]);
   return (
     <div className="space-y-5">
       <AdminHeader title="Areas & guides" subtitle="Edit SEO content, investment outlook and area guides for /area pages, or add new societies and blocks." />
@@ -36,6 +36,9 @@ export default async function AdminAreas({ searchParams }: { searchParams: Promi
               name: r.name as string,
               fullName: r.full_name as string,
               slug: r.slug as string,
+              lat: r.lat != null ? Number(r.lat) : null,
+              lng: r.lng != null ? Number(r.lng) : null,
+              boundary: boundaries?.[r.slug as string] ?? null,
               activeListings: Number(r.active_listings),
               overview: (r.overview as string) ?? "",
               investmentOutlook: (r.investment_outlook as string) ?? "",

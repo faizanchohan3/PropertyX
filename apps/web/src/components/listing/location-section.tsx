@@ -19,7 +19,7 @@ const CATS = [
 
 type Place = { name: string; distanceKm: number; lat: number; lng: number };
 
-export function LocationSection({ lat, lng, address }: { lat: number; lng: number; address: string }) {
+export function LocationSection({ lat, lng, address, boundary }: { lat: number; lng: number; address: string; boundary?: { name: string; polygon: [number, number][]; source: "drawn" | "approximate" } | null }) {
   const [places, setPlaces] = useState<Record<string, Place[]> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<string>("schools");
@@ -37,7 +37,12 @@ export function LocationSection({ lat, lng, address }: { lat: number; lng: numbe
   return (
     <div>
       <p className="mb-3 text-sm text-slate-600">{address}</p>
-      <LeafletMap center={[lat, lng]} zoom={14} markers={markers} className="h-80 w-full" />
+      <LeafletMap center={[lat, lng]} zoom={14} markers={markers} className="h-80 w-full" polygons={boundary ? [{ points: boundary.polygon, approximate: boundary.source === "approximate", label: boundary.name }] : []} />
+      {boundary && (
+        <p className="mt-2 text-xs text-slate-500">
+          {boundary.source === "drawn" ? `Outline: ${boundary.name} boundary.` : `Dashed outline: approximate extent of ${boundary.name}, based on where its listings are. Not an official boundary.`}
+        </p>
+      )}
       <p className="mt-1 text-[11px] text-slate-400">Location shown is approximate. Map data © OpenStreetMap contributors.</p>
       <div className="mt-5">
         <p className="mb-3 font-semibold text-slate-900">Nearby places</p>

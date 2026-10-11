@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { Map as LMap, LayerGroup, Polygon, Circle, Polyline } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Pentagon, CircleDot, X, List, RefreshCw, MapPin, Loader2, SlidersHorizontal } from "lucide-react";
+import { Pentagon, CircleDot, X, List, RefreshCw, MapPin, Loader2, SlidersHorizontal, Shapes } from "lucide-react";
 import { formatPriceShort, formatPKR, formatArea, parseSearchQuery, serializeSearchQuery, PROPERTY_TYPES, type SearchQuery } from "@propertyx/shared";
 import type { MapResult, ListingCard } from "@propertyx/search";
+
+type Boundary = { slug: string; name: string; kind: string; polygon: [number, number][]; source: "drawn" | "approximate"; activeListings: number };
+const esc = (v: string) => v.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 const TILE = process.env.NEXT_PUBLIC_MAP_TILE_URL ?? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTR = process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ?? "&copy; OpenStreetMap contributors";
@@ -37,9 +40,11 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
   const pins = useRef<LayerGroup | null>(null);
   const shapes = useRef<LayerGroup | null>(null);
   const poiLayer = useRef<LayerGroup | null>(null);
+  const boundaryLayer = useRef<LayerGroup | null>(null);
+  const [showBoundaries, setShowBoundaries] = useState(true);
   const drawPts = useRef<[number, number][]>([]);
   const drawLine = useRef<Polyline | null>(null);
-  const [data, setData] = useState<(MapResult & { list: ListingCard[]; listTotal: number }) | null>(null);
+  const [data, setData] = useState<(MapResult & { list: ListingCard[]; listTotal: number; boundaries?: Boundary[] }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [auto, setAuto] = useState(true);
   const [dirty, setDirty] = useState(false);
@@ -88,6 +93,7 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
       const m = leaflet.map(el.current, { center, zoom: initial.lat != null ? 13 : city ? 12 : 6, zoomControl: false });
       leaflet.control.zoom({ position: "bottomright" }).addTo(m);
       leaflet.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
+      boundaryLayer.current = leaflet.layerGroup().addTo(m);
       pins.current = leaflet.layerGroup().addTo(m);
       shapes.current = leaflet.layerGroup().addTo(m);
       poiLayer.current = leaflet.layerGroup().addTo(m);
@@ -166,20 +172,53 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
         const isActive = active === f.id;
         const icon = leaflet.divIcon({
           className: "",
-          html: `<div style="transform:translate(-50%,-100%);background:${isActive ? "#c9922a" : f.purpose === "rent" ? "#1e3a8a" : "#047857"};color:white;font:700 11px sans-serif;padding:4px 8px;border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap;position:relative">${formatPriceShort(f.price)}</div>`,
+          html: `<div style="transform:translate(-50%,-100%);background:${isActive ? "#c9922a" : f.purpose === "rent" ? "#1e3a8a" : "#047857"};color:white;font:700 11px sans-serif;padding:4px 8px;border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap;position:relative;display:flex;align-items:center;gap:3px">${formatPriceShort(f.price)}${f.corner ? `<span title="Corner" style="background:#fbbf24;color:#422006;border-radius:4px;padding:0 3px;font-size:9px">C</span>` : ""}${f.parkFacing ? `<span title="Park facing" style="background:#86efac;color:#14532d;border-radius:4px;padding:0 3px;font-size:9px">P</span>` : ""}</div>`,
           iconSize: [0, 0],
         });
-        const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
         leaflet
           .marker([f.lat, f.lng], { icon, title: f.title, zIndexOffset: isActive ? 1000 : 0 })
           .bindPopup(
-            `<a href="/property/${f.slug}" style="display:block;width:220px;text-decoration:none;color:inherit">${f.coverUrl ? `<img src="${f.coverUrl.replace(/w=\d+/, "w=440")}" style="width:100%;height:120px;object-fit:cover;border-radius:8px" alt=""/>` : ""}<div style="font:800 15px sans-serif;margin-top:6px">${formatPKR(f.price)}${f.purpose === "rent" ? "/mo" : ""}</div><div style="font:500 12px sans-serif;color:#334155;margin-top:2px">${esc(f.title)}</div><div style="font:12px sans-serif;color:#64748b;margin-top:2px">${f.beds != null ? `${f.beds} beds · ` : ""}${formatArea(f.areaValue, f.areaUnit)}</div></a>`,
+            `<a href="/property/${f.slug}" style="display:block;width:220px;text-decoration:none;color:inherit">${f.coverUrl ? `<img src="${f.coverUrl.replace(/w=\d+/, "w=440")}" style="width:100%;height:120px;object-fit:cover;border-radius:8px" alt=""/>` : ""}<div style="font:800 15px sans-serif;margin-top:6px">${formatPKR(f.price)}${f.purpose === "rent" ? "/mo" : ""}</div><div style="font:500 12px sans-serif;color:#334155;margin-top:2px">${esc(f.title)}</div><div style="font:12px sans-serif;color:#64748b;margin-top:2px">${f.beds != null ? `${f.beds} beds · ` : ""}${formatArea(f.areaValue, f.areaUnit)}</div>${f.corner || f.parkFacing ? `<div style="font:600 11px sans-serif;color:#047857;margin-top:4px">${[f.corner && "Corner", f.parkFacing && "Park facing"].filter(Boolean).join(" · ")}</div>` : ""}</a>`,
           )
           .on("click", () => setActive(f.id))
           .addTo(pins.current);
       }
     }
   }, [data, active]);
+
+  // area / society outlines (drawn by staff, or approximate from listing positions)
+  useEffect(() => {
+    const leaflet = L.current;
+    const layer = boundaryLayer.current;
+    if (!leaflet || !layer) return;
+    layer.clearLayers();
+    if (!showBoundaries || !data?.boundaries?.length) return;
+    for (const b of data.boundaries) {
+      const drawn = b.source === "drawn";
+      const poly = leaflet.polygon(b.polygon, { color: drawn ? "#047857" : "#d97706", weight: drawn ? 3 : 2.5, dashArray: drawn ? undefined : "8 6", fillColor: drawn ? "#10b981" : "#f59e0b", fillOpacity: drawn ? 0.1 : 0.07, interactive: true });
+      poly.bindTooltip(`${esc(b.name)}${drawn ? "" : " (approx.)"}`, { sticky: true, direction: "top" });
+      const box = document.createElement("div");
+      box.style.cssText = "font:13px sans-serif;min-width:200px";
+      box.innerHTML = `<div style="font:800 15px sans-serif">${esc(b.name)}</div><div style="color:#64748b;margin-top:2px">${b.kind === "society" ? "Housing society" : "Area"} · ${b.activeListings} listings</div><div style="color:${drawn ? "#047857" : "#a16207"};font-size:11px;margin-top:4px">${drawn ? "Boundary traced by Bismillah" : "Approximate outline based on listing locations — not an official boundary"}</div>`;
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;gap:8px;margin-top:8px";
+      const inside = document.createElement("button");
+      inside.textContent = "Show properties inside";
+      inside.style.cssText = "background:#047857;color:#fff;border-radius:8px;padding:5px 9px;font:600 12px sans-serif;cursor:pointer";
+      inside.onclick = () => {
+        map.current?.closePopup();
+        setFilters((f) => ({ ...f, lat: undefined, lng: undefined, radiusKm: undefined, polygon: b.polygon.map(([a, c]) => `${a.toFixed(5)} ${c.toFixed(5)}`).join(";") }));
+        map.current?.fitBounds(poly.getBounds(), { padding: [30, 30] });
+      };
+      const guide = document.createElement("a");
+      guide.href = `/area/${b.slug}`;
+      guide.textContent = "Area guide";
+      guide.style.cssText = "color:#047857;font:600 12px sans-serif;padding:5px 2px";
+      actions.append(inside, guide);
+      box.append(actions);
+      poly.bindPopup(box).addTo(layer);
+    }
+  }, [data, showBoundaries]);
 
   // nearby POIs for the map centre
   useEffect(() => {
@@ -269,6 +308,24 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
                 </option>
               ))}
             </select>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {([["corner", "Corner"], ["park_facing", "Park facing"]] as const).map(([key, label]) => {
+              const on = !!filters.features?.includes(key);
+              return (
+                <button
+                  key={key}
+                  onClick={() => setFilters((f) => {
+                    const next = on ? (f.features ?? []).filter((x) => x !== key) : [...(f.features ?? []), key];
+                    return { ...f, features: next.length ? next : undefined };
+                  })}
+                  className={`chip py-1 text-xs ${on ? "chip-active" : ""}`}
+                  aria-pressed={on}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
           <Link href={`/search?${serializeSearchQuery(filters).toString()}`} className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-brand-700">
             <SlidersHorizontal className="h-3.5 w-3.5" /> More filters in list view
@@ -365,7 +422,20 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
             <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} className="accent-brand-700" /> Search as I move the map
           </label>
         </div>
-        <div className="absolute bottom-6 left-3 z-[400] hidden max-w-[240px] rounded-xl bg-white p-3 shadow-md sm:block">
+        <div className="absolute bottom-6 left-3 z-[400] hidden max-w-[240px] space-y-3 rounded-xl bg-white p-3 shadow-md sm:block">
+          <div>
+            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <input type="checkbox" checked={showBoundaries} onChange={(e) => setShowBoundaries(e.target.checked)} className="accent-brand-700" />
+              <Shapes className="h-3.5 w-3.5" /> Society &amp; area outlines
+            </label>
+            <ul className="mt-1.5 space-y-0.5 text-[11px] text-slate-500">
+              <li className="flex items-center gap-1.5"><span className="inline-block h-0 w-5 border-t-2 border-brand-700" /> Traced boundary</li>
+              <li className="flex items-center gap-1.5"><span className="inline-block h-0 w-5 border-t-2 border-dashed border-gold-500" /> Approximate (from listings)</li>
+              <li className="flex items-center gap-1.5"><span className="rounded bg-amber-400 px-1 text-[9px] font-bold text-amber-950">C</span> Corner <span className="ml-1 rounded bg-green-300 px-1 text-[9px] font-bold text-green-900">P</span> Park facing</li>
+            </ul>
+            {data && !data.boundaries?.length && (map.current?.getZoom() ?? 0) < 12 && <p className="mt-1 text-[11px] text-slate-400">Zoom in to see outlines.</p>}
+          </div>
+          <div>
           <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-slate-700">
             <MapPin className="h-3.5 w-3.5" /> Nearby (OpenStreetMap)
           </p>
@@ -375,6 +445,7 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
                 {p.label}
               </button>
             ))}
+          </div>
           </div>
         </div>
       </div>

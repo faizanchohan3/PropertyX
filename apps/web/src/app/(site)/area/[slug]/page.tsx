@@ -3,12 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ArrowRight, Check, ChevronRight, MapPinned, X } from "lucide-react";
-import { getLocationPage } from "@propertyx/core";
+import { getBoundaries, getLocationPage } from "@propertyx/core";
 import { areaPath, agentPath, projectPath, searchPath, formatPKR, PROPERTY_TYPE_LABELS, PROJECT_STATUS_LABELS } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { renderMarkdown } from "@/lib/markdown";
 import { VerificationBadge } from "@/components/badges";
 import { IndexChart } from "@/components/market/index-chart";
+import { AreaMap } from "@/components/market/area-map";
 import { MarketDataNote, Stat, ChangePill } from "@/components/market/data-note";
 
 export const revalidate = 3600;
@@ -48,6 +49,12 @@ export default async function AreaPage({ params }: Props) {
   ).sort((a, b) => b.sale + b.rent - (a.sale + a.rent));
   const highlights = loc.highlights ?? [];
   const hasPrices = priceTable.some((r) => r.house || r.plot || r.rent);
+  // outline of this area, or every area outline for a city page
+  const outlines =
+    loc.lat != null && loc.lng != null
+      ? await getBoundaries(db, isCity ? [loc.lng - 0.25, loc.lat - 0.25, loc.lng + 0.25, loc.lat + 0.25] : [loc.lng - 0.05, loc.lat - 0.05, loc.lng + 0.05, loc.lat + 0.05], isCity ? {} : { slugs: [loc.slug] }).catch(() => [])
+      : [];
+  const anyApprox = outlines.some((o) => o.source === "approximate");
 
   return (
     <div className="container-px py-10">
@@ -98,6 +105,19 @@ export default async function AreaPage({ params }: Props) {
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6">
+          {loc.lat != null && loc.lng != null && (
+            <section className="card p-6">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-lg font-bold">{isCity ? `Areas of ${loc.name} on the map` : "On the map"}</h2>
+                <Link href={`/map?lat=${loc.lat}&lng=${loc.lng}`} className="text-sm font-semibold text-brand-700">Open full map</Link>
+              </div>
+              <div className="mt-4">
+                <AreaMap center={[loc.lat, loc.lng]} zoom={isCity ? 11 : 15} fit={!isCity} polygons={outlines.map((o) => ({ points: o.polygon, approximate: o.source === "approximate", label: `${o.name} · ${o.activeListings} listings`, href: isCity ? `/area/${o.slug}` : undefined }))} />
+              </div>
+              {anyApprox && <p className="mt-2 text-xs text-slate-500">Dashed outlines are approximate, based on where listings are — not official boundaries.</p>}
+            </section>
+          )}
+
           {index.points.some((p) => p.salePricePerSqft) && (
             <section className="card p-6">
               <div className="flex flex-wrap items-end justify-between gap-2">

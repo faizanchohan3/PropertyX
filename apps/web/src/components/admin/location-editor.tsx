@@ -6,8 +6,9 @@ import { Loader2, ChevronDown } from "lucide-react";
 import { api } from "@/lib/client";
 import { toast } from "../toast";
 import { darkInput, okBtn } from "./ui";
+import { BoundaryEditor } from "./boundary-editor";
 
-type Loc = { id: string; kind: string; name: string; fullName: string; slug: string; activeListings: number; overview: string; investmentOutlook: string; highlights: string[]; seoTitle: string; seoDescription: string; guide: { title: string; summary: string; body: string; pros: string[]; cons: string[] } | null };
+type Loc = { id: string; kind: string; name: string; fullName: string; slug: string; lat: number | null; lng: number | null; boundary: [number, number][] | null; activeListings: number; overview: string; investmentOutlook: string; highlights: string[]; seoTitle: string; seoDescription: string; guide: { title: string; summary: string; body: string; pros: string[]; cons: string[] } | null };
 
 export function LocationEditor({ loc }: { loc: Loc }) {
   const router = useRouter();
@@ -42,6 +43,7 @@ export function LocationEditor({ loc }: { loc: Loc }) {
         </span>
         <span className="text-xs text-slate-400">{loc.activeListings} listings</span>
         {loc.guide && <span className="badge bg-emerald-500/15 text-emerald-300">guide</span>}
+        {loc.boundary && <span className="badge bg-sky-500/15 text-sky-300">boundary</span>}
         <ChevronDown className={`h-4 w-4 text-slate-400 transition ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
@@ -66,6 +68,11 @@ export function LocationEditor({ loc }: { loc: Loc }) {
           <button onClick={save} disabled={busy} className={okBtn}>
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Save {loc.name}
           </button>
+          {(loc.kind === "area" || loc.kind === "society") && loc.lat != null && loc.lng != null && (
+            <div className="border-t border-white/10 pt-4">
+              <BoundaryEditor slug={loc.slug} name={loc.name} center={[loc.lat, loc.lng]} saved={loc.boundary} />
+            </div>
+          )}
         </div>
       )}
     </div>

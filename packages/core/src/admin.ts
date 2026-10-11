@@ -205,7 +205,7 @@ export async function adminThreads(db: Database, actor: Actor | null) {
 export async function adminLocations(db: Database, actor: Actor | null, opts: { city?: string; q?: string } = {}) {
   requirePerm(actor, "content.manage");
   return db.execute<Record<string, unknown>>(sql`
-    select l.id, l.kind, l.name, l.full_name, l.slug, l.active_listings, l.overview, l.investment_outlook, l.highlights, l.seo_title, l.seo_description, l.city_id,
+    select l.id, l.kind, l.name, l.full_name, l.slug, l.lat, l.lng, l.active_listings, l.overview, l.investment_outlook, l.highlights, l.seo_title, l.seo_description, l.city_id,
       g.title as guide_title, g.summary as guide_summary, g.body as guide_body, g.pros as guide_pros, g.cons as guide_cons
     from locations l left join area_guides g on g.location_id = l.id
     where l.kind in ('city','area','society')

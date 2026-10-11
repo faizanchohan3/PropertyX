@@ -265,7 +265,9 @@ export class PostgresListingSearch implements ListingSearchEngine {
     if (total <= PIN_LIMIT || zoom >= 16) {
       const rows = await this.db.execute<Row>(sql`
         select l.id, l.slug, l.title, l.price, l.purpose, p.type, p.lat, p.lng, p.beds, p.area_value, p.area_unit,
-          (select m.url from property_media m where m.property_id = p.id and m.kind = 'image' order by m.sort_order limit 1) as cover_url
+          (select m.url from property_media m where m.property_id = p.id and m.kind = 'image' order by m.sort_order limit 1) as cover_url,
+          exists(select 1 from property_features pf join features f on f.id = pf.feature_id where pf.property_id = p.id and f.key = 'corner') as corner,
+          exists(select 1 from property_features pf join features f on f.id = pf.feature_id where pf.property_id = p.id and f.key = 'park_facing') as park_facing
         ${CARD_FROM} where ${where} order by ${this.orderBy(q)} limit 1000`);
       return {
         total,
@@ -285,6 +287,8 @@ export class PostgresListingSearch implements ListingSearchEngine {
             beds: num(r.beds),
             areaValue: Number(r.area_value),
             areaUnit: r.area_unit as MapPin["areaUnit"],
+            corner: !!r.corner,
+            parkFacing: !!r.park_facing,
           }),
         ),
       };
