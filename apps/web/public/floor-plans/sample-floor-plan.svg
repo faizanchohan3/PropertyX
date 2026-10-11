@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" font-family="Arial, Helvetica, sans-serif">
+  <rect width="800" height="560" fill="#ffffff"/>
+  <g fill="none" stroke="#1e293b" stroke-width="6">
+    <rect x="60" y="60" width="680" height="420"/>
+    <path d="M330 60v180M330 300v180M60 270h270M330 240h410M560 240v240"/>
+  </g>
+  <g fill="#ffffff" stroke="none">
+    <rect x="180" y="264" width="70" height="12"/>
+    <rect x="324" y="240" width="12" height="60"/>
+    <rect x="420" y="234" width="70" height="12"/>
+    <rect x="554" y="320" width="12" height="60"/>
+  </g>
+  <g fill="#0f172a" font-size="22" text-anchor="middle">
+    <text x="195" y="170">Bedroom 1</text><text x="195" y="198" font-size="16" fill="#64748b">14' × 12'</text>
+    <text x="195" y="380">Bedroom 2</text><text x="195" y="408" font-size="16" fill="#64748b">12' × 12'</text>
+    <text x="535" y="150">Lounge / Dining</text><text x="535" y="178" font-size="16" fill="#64748b">22' × 14'</text>
+    <text x="445" y="370">Kitchen</text><text x="445" y="398" font-size="16" fill="#64748b">12' × 10'</text>
+    <text x="650" y="370">Bath</text><text x="650" y="398" font-size="16" fill="#64748b">8' × 7'</text>
+  </g>
+  <text x="400" y="530" text-anchor="middle" font-size="18" fill="#94a3b8">Sample floor plan — for illustration only, not to scale</text>
+</svg>

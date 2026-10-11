@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" font-family="Arial, Helvetica, sans-serif">
+  <rect width="900" height="640" fill="#f8fafc"/>
+  <rect x="40" y="40" width="820" height="520" rx="16" fill="#ecfdf5" stroke="#047857" stroke-width="4"/>
+  <g fill="#cbd5e1"><rect x="40" y="280" width="820" height="40"/><rect x="430" y="40" width="40" height="520"/></g>
+  <g stroke="#ffffff" stroke-width="3" stroke-dasharray="14 12"><path d="M40 300h820M450 40v520"/></g>
+  <g stroke="#94a3b8" stroke-width="2">
+    <g fill="#fde68a"><rect x="70" y="70" width="80" height="80"/><rect x="160" y="70" width="80" height="80"/><rect x="250" y="70" width="80" height="80"/><rect x="340" y="70" width="70" height="80"/>
+    <rect x="70" y="170" width="80" height="80"/><rect x="160" y="170" width="80" height="80"/><rect x="250" y="170" width="80" height="80"/><rect x="340" y="170" width="70" height="80"/></g>
+    <g fill="#bfdbfe"><rect x="490" y="70" width="160" height="180"/><rect x="670" y="70" width="160" height="180"/></g>
+    <g fill="#fecaca"><rect x="70" y="340" width="340" height="90"/></g>
+    <g fill="#bbf7d0"><rect x="70" y="450" width="340" height="80" rx="40"/><rect x="490" y="340" width="340" height="190" rx="20"/></g>
+  </g>
+  <g font-size="20" fill="#0f172a" text-anchor="middle">
+    <text x="240" y="265" font-size="16">Residential plots</text>
+    <text x="660" y="165">Apartments</text>
+    <text x="240" y="392">Commercial</text>
+    <text x="240" y="497">Park</text>
+    <text x="660" y="440">Mosque · School · Community park</text>
+  </g>
+  <text x="450" y="605" text-anchor="middle" font-size="18" fill="#94a3b8">Sample master plan — for illustration only. See the developer's approved plan.</text>
+</svg>
