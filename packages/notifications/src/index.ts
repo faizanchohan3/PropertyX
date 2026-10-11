@@ -44,7 +44,7 @@ export async function getPreferences(db: Database, userId: string) {
 
 export async function notify(db: Database, input: NotifyInput) {
   const prefs = (await getPreferences(db, input.userId))(input.type);
-  const [user] = await db.select({ email: users.email, phone: users.phone, phoneVerifiedAt: users.phoneVerifiedAt, status: users.status }).from(users).where(eq(users.id, input.userId)).limit(1);
+  const [user] = await db.select({ email: users.email, phone: users.phone, phoneVerifiedAt: users.phoneVerifiedAt, status: users.status, isSeed: users.isSeed }).from(users).where(eq(users.id, input.userId)).limit(1);
   if (!user || user.status !== "active") return null;
   let notificationId: string | null = null;
   if (prefs.in_app) {
@@ -54,6 +54,8 @@ export async function notify(db: Database, input: NotifyInput) {
   const appUrl = publicAppUrl();
   const text = `${input.title}\n${input.body}${input.link ? `\n${appUrl}${input.link}` : ""}`;
   const outbox: (typeof notificationDeliveries.$inferInsert)[] = [];
+  // demo accounts get in-app notifications only: their emails and phone numbers are made up and may belong to real people
+  if (user.isSeed) return notificationId;
   if (prefs.email && user.email) outbox.push({ notificationId, userId: input.userId, channel: "email", to: user.email, subject: input.title, body: text });
   // SMS / WhatsApp only to verified numbers
   if (prefs.sms && user.phone && user.phoneVerifiedAt) outbox.push({ notificationId, userId: input.userId, channel: "sms", to: user.phone, body: text.slice(0, 300) });
@@ -160,6 +162,10 @@ export function providerFor(channel: string): ChannelProvider {
 }
 
 export async function processOutbox(db: Database, limit = 50) {
+  // never deliver to demo accounts (made-up contact details), including anything queued before this rule existed
+  await db.execute(sql`
+    update notification_deliveries d set status = 'failed', error = 'demo account — not delivered'
+    from users u where u.id = d.user_id and u.is_seed and d.status in ('queued','retry')`);
   const batch = await db.execute<{ id: string; channel: string; to: string; subject: string | null; body: string; attempts: number }>(sql`
     update notification_deliveries set status = 'sending', attempts = attempts + 1
     where id in (select id from notification_deliveries where status in ('queued','retry') and attempts < 5 order by created_at limit ${limit} for update skip locked)

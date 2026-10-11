@@ -15,7 +15,8 @@ import { markPastVisits } from "./engagement";
 import { refreshLocationCounts } from "./admin";
 
 export async function expireListings(db: Database) {
-  const expired = await db.update(s.propertyListings).set({ status: "expired" }).where(and(eq(s.propertyListings.status, "active"), lt(s.propertyListings.expiresAt, new Date()))).returning({ id: s.propertyListings.id, postedById: s.propertyListings.postedById, title: s.propertyListings.title });
+  // demo listings (is_seed) are sample data and never expire on their own
+  const expired = await db.update(s.propertyListings).set({ status: "expired" }).where(and(eq(s.propertyListings.status, "active"), eq(s.propertyListings.isSeed, false), lt(s.propertyListings.expiresAt, new Date()))).returning({ id: s.propertyListings.id, postedById: s.propertyListings.postedById, title: s.propertyListings.title });
   for (const l of expired) if (l.postedById) await notify(db, { userId: l.postedById, type: "listing_status", title: "Listing expired", body: `“${l.title}” has expired. Renew it to show it to buyers again.`, link: "/dashboard/listings?status=expired" });
   return expired.length;
 }

@@ -18,6 +18,8 @@ export async function GET(req: Request) {
     DATABASE_URL: url ? "set" : process.env.NODE_ENV === "production" ? "MISSING — add it in Vercel → Settings → Environment Variables" : "not set (local dev database in use)",
     databaseHost: url ? (url.match(/@([^:/?]+)/)?.[1] ?? "unparseable") : null,
     AUTH_SECRET: (process.env.AUTH_SECRET?.length ?? 0) >= 32 ? "set" : process.env.NODE_ENV === "production" ? "MISSING or shorter than 32 characters" : "not set (development fallback in use)",
+    CRON_SECRET: process.env.CRON_SECRET ? "set" : "not set — scheduled alerts (/api/cron) will not run on Vercel",
+    notificationProviders: { email: process.env.EMAIL_PROVIDER ?? "console", sms: process.env.SMS_PROVIDER ?? "console", whatsapp: process.env.WHATSAPP_PROVIDER ?? "console" },
     APP_URL: publicAppUrl() + (process.env.APP_URL ? "" : " (auto)"),
     region: process.env.VERCEL_REGION ?? null,
   };

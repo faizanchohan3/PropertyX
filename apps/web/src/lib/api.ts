@@ -1,7 +1,8 @@
 import "server-only";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { ZodError } from "zod";
 import { AppError } from "@propertyx/core";
+import { processOutbox } from "@propertyx/notifications";
 import { rateLimit, SESSION_COOKIE, SESSION_TTL_DAYS, type AuthUser } from "@propertyx/auth";
 import { db, getUser } from "./server";
 
@@ -53,6 +54,9 @@ export function route<P = Record<string, string>>(handler: (ctx: Ctx<P>) => Prom
       }
       const params = (await context.params) ?? ({} as P);
       const result = await handler({ req, params, user, ip });
+      // Actions (new lead, message, price drop…) may queue email / SMS / WhatsApp notifications.
+      // Deliver them right after the response instead of waiting for the scheduled job.
+      if (req.method !== "GET") after(() => processOutbox(db, 20).then(() => undefined, (e) => console.error("[outbox]", e)));
       if (result instanceof Response) return result;
       return json(result ?? { ok: true });
     } catch (e) {
