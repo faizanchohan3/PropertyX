@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, Map as MapIcon } from "lucide-react";
 import { serializeSearchQuery, PROPERTY_TYPES, TYPE_GROUPS, type SearchQuery, type PropertyType } from "@propertyx/shared";
 import { CITY_LINKS } from "./nav-data";
+import { useT } from "./i18n";
 import { LocationAutocomplete } from "./location-autocomplete";
 
 const TABS = [
@@ -43,6 +44,7 @@ function typesFor(tab: Tab) {
 
 export function HeroSearch() {
   const router = useRouter();
+  const tr = useT();
   const [tab, setTab] = useState<Tab>("buy");
   const [city, setCity] = useState("lahore");
   const [loc, setLoc] = useState<{ slug: string; label: string } | null>(null);
@@ -94,7 +96,7 @@ export function HeroSearch() {
             }}
             className={`rounded-t-xl px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition ${tab === t.key ? "bg-white text-brand-800" : "bg-white/15 text-white hover:bg-white/25"}`}
           >
-            {t.label}
+            {tr(t.label)}
           </button>
         ))}
       </div>
@@ -103,22 +105,22 @@ export function HeroSearch() {
           e.preventDefault();
           go(false);
         }}
-        className="rounded-b-2xl rounded-tr-2xl bg-white p-4 shadow-2xl sm:p-5"
+        className="rounded-b-2xl rounded-se-2xl bg-white p-4 shadow-2xl sm:p-5"
       >
         <div className="grid gap-3 md:grid-cols-[160px_1fr_180px]">
           <div>
-            <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-city">City</label>
+            <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-city">{tr("City")}</label>
             <select id="hs-city" className="input" value={city} onChange={(e) => { setCity(e.target.value); setLoc(null); }}>
-              <option value="">All cities</option>
+              <option value="">{tr("All cities")}</option>
               {CITY_LINKS.map((c) => (
                 <option key={c.slug} value={c.slug}>
-                  {c.name}
+                  {tr(c.name)}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <span className="label text-xs uppercase tracking-wide text-slate-500">Area / Society</span>
+            <span className="label text-xs uppercase tracking-wide text-slate-500">{tr("Area / Society")}</span>
             <LocationAutocomplete
               city={city || undefined}
               value={loc}
@@ -126,17 +128,17 @@ export function HeroSearch() {
                 setLoc(s ? { slug: s.slug, label: s.name } : null);
                 if (s?.citySlug) setCity(s.citySlug);
               }}
-              placeholder="e.g. DHA Phase 6, Bahria Town, F-11"
+              placeholder={tr("e.g. DHA Phase 6, Bahria Town, F-11")}
             />
           </div>
           {tab !== "projects" ? (
             <div>
-              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-type">Property type</label>
+              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-type">{tr("Property type")}</label>
               <select id="hs-type" className="input" value={type} onChange={(e) => setType(e.target.value)}>
-                <option value="">{tab === "plots" ? "All plots" : tab === "commercial" ? "All commercial" : "All homes"}</option>
+                <option value="">{tr(tab === "plots" ? "All plots" : tab === "commercial" ? "All commercial" : "All homes")}</option>
                 {typesFor(tab).map((t) => (
                   <option key={t.key} value={t.key}>
-                    {t.label}
+                    {tr(t.label)}
                   </option>
                 ))}
               </select>
@@ -148,21 +150,21 @@ export function HeroSearch() {
         {tab !== "projects" && (
           <div className={`mt-3 grid gap-3 grid-cols-2 ${rooms ? "md:grid-cols-4" : "md:grid-cols-2"}`}>
             <div>
-              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-pmin">Min price</label>
+              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-pmin">{tr("Min price")}</label>
               <select id="hs-pmin" className="input" value={priceMin} onChange={(e) => setPriceMin(e.target.value)}>
                 {prices.map((p) => (
                   <option key={p.v} value={p.v}>
-                    {p.l}
+                    {tr(p.l)}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-pmax">Max price</label>
+              <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-pmax">{tr("Max price")}</label>
               <select id="hs-pmax" className="input" value={priceMax} onChange={(e) => setPriceMax(e.target.value)}>
                 {prices.map((p) => (
                   <option key={p.v} value={p.v}>
-                    {p.l}
+                    {tr(p.l)}
                   </option>
                 ))}
               </select>
@@ -170,10 +172,10 @@ export function HeroSearch() {
             {rooms && (
               <>
                 <div>
-                  <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-beds">Beds</label>
+                  <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-beds">{tr("Beds")}</label>
                   <select id="hs-beds" className="input" value={beds} onChange={(e) => setBeds(e.target.value)}>
-                    <option value="">Any</option>
-                    <option value="0">Studio</option>
+                    <option value="">{tr("Any")}</option>
+                    <option value="0">{tr("Studio")}</option>
                     {[1, 2, 3, 4, 5].map((b) => (
                       <option key={b} value={b}>
                         {b}
@@ -183,9 +185,9 @@ export function HeroSearch() {
                   </select>
                 </div>
                 <div>
-                  <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-baths">Baths</label>
+                  <label className="label text-xs uppercase tracking-wide text-slate-500" htmlFor="hs-baths">{tr("Baths")}</label>
                   <select id="hs-baths" className="input" value={baths} onChange={(e) => setBaths(e.target.value)}>
-                    <option value="">Any</option>
+                    <option value="">{tr("Any")}</option>
                     {[1, 2, 3].map((b) => (
                       <option key={b} value={b}>
                         {b}+
@@ -200,10 +202,10 @@ export function HeroSearch() {
         )}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <button type="submit" className="btn-primary flex-1 py-3 text-base">
-            <Search className="h-5 w-5" /> {tab === "projects" ? "Search Projects" : "Search Properties"}
+            <Search className="h-5 w-5" /> {tr(tab === "projects" ? "Search Projects" : "Search Properties")}
           </button>
           <button type="button" onClick={() => go(true)} className="btn-outline py-3 text-base sm:w-56">
-            <MapIcon className="h-5 w-5" /> Search on Map
+            <MapIcon className="h-5 w-5" /> {tr("Search on Map")}
           </button>
         </div>
       </form>

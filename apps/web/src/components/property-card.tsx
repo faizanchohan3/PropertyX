@@ -3,6 +3,7 @@ import Image from "next/image";
 import { BedDouble, Bath, Maximize, MapPin, Images, Video } from "lucide-react";
 import type { ListingCard } from "@propertyx/search";
 import { formatPKR, formatArea, PROPERTY_TYPE_LABELS } from "@propertyx/shared";
+import { Tr } from "./tr";
 import { VerificationBadge, PriceReducedBadge, PremiumBadge, FeaturedBadge, DemoBadge } from "./badges";
 import { SaveButton } from "./save-button";
 import { CompareToggle } from "./compare";
@@ -21,7 +22,7 @@ export function PropertyCard({ l, saved = false, layout = "grid", priority = fal
         {l.coverUrl ? (
           <Image src={l.coverUrl} alt={l.title} fill sizes={list ? "(min-width: 640px) 340px, 100vw" : "(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"} className="object-cover transition duration-500 group-hover:scale-[1.04]" priority={priority} />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-slate-400">No photo</div>
+          <div className="flex h-full items-center justify-center text-sm text-slate-400"><Tr k="No photo" /></div>
         )}
         <div className="absolute inset-x-0 top-0 flex flex-wrap gap-1.5 p-3">
           {l.isFeatured && <FeaturedBadge />}
@@ -38,7 +39,7 @@ export function PropertyCard({ l, saved = false, layout = "grid", priority = fal
           {l.isSeed && <DemoBadge />}
         </div>
       </Link>
-      <div className="absolute right-3 top-3 z-10">
+      <div className="absolute end-3 top-3 z-10">
         <SaveButton listingId={l.id} initial={saved} />
       </div>
       <div className="flex flex-1 flex-col p-4">
@@ -72,7 +73,7 @@ export function PropertyCard({ l, saved = false, layout = "grid", priority = fal
           <span className="flex items-center gap-1.5" title="Area">
             <Maximize className="h-4 w-4 text-slate-400" /> {formatArea(l.areaValue, l.areaUnit)}
           </span>
-          <span className="ml-auto text-xs text-slate-400">{PROPERTY_TYPE_LABELS[l.type]}</span>
+          <span className="ms-auto text-xs text-slate-400">{PROPERTY_TYPE_LABELS[l.type]}</span>
         </div>
         {list && l.agentName && (
           <p className="mt-3 text-xs text-slate-500">

@@ -136,3 +136,27 @@
 }
 
 .leaflet-container { font-family: inherit; }
+
+/* ---------- Urdu ---------- */
+@utility font-urdu {
+  font-family: var(--font-urdu), "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", serif;
+}
+/* Nastaliq is tall and slanted: give it more line height so lines don't collide */
+html[lang="ur-PK"] body {
+  /* Latin font first (it has no Urdu glyphs), so English words and numbers stay crisp and Urdu falls through to Nastaliq */
+  font-family: var(--font-jakarta), var(--font-urdu), "Noto Nastaliq Urdu", sans-serif;
+  line-height: 1.9;
+}
+html[lang="ur-PK"] :where(h1, h2, h3, h4) {
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+/* numbers, prices and Latin text stay in the Latin font and left-to-right */
+html[lang="ur-PK"] :where(input, select, textarea, .ltr) {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+/* each text block takes its direction from its own first letter, so English listing titles,
+   AI replies and not-yet-translated labels read left-to-right inside the right-to-left layout */
+html[lang="ur-PK"] :where(p, h1, h2, h3, h4, li, span, a, label, button, td, th, dt, dd, option, div, input, textarea) {
+  unicode-bidi: plaintext;
+}

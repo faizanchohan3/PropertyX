@@ -1,5 +1,6 @@
 import { BadgeCheck, ShieldCheck, TrendingDown, Crown, Sparkles, Phone, IdCard, FileCheck2 } from "lucide-react";
 import { verificationInfo } from "@propertyx/shared";
+import { Tr } from "./tr";
 
 export function VerificationBadge({ level, kind = "property", size = "sm" }: { level: number; kind?: "property" | "agent" | "profile"; size?: "sm" | "md" }) {
   if (level <= 0) return null;
@@ -9,42 +10,42 @@ export function VerificationBadge({ level, kind = "property", size = "sm" }: { l
     if (level >= 2)
       return (
         <span className={`badge bg-brand-50 text-brand-800 ring-1 ring-brand-200 ${cls}`} title={info.description}>
-          <BadgeCheck className="h-3.5 w-3.5" /> {kind === "agent" ? "Verified Agent" : "Verified"}
+          <BadgeCheck className="h-3.5 w-3.5" /> <Tr k={kind === "agent" ? "Verified Agent" : "Verified"} />
         </span>
       );
     return (
       <span className={`badge bg-slate-100 text-slate-700 ${cls}`} title={info.description}>
-        <Phone className="h-3 w-3" /> Phone Verified
+        <Phone className="h-3 w-3" /> <Tr k="Phone Verified" />
       </span>
     );
   }
   if (level >= 5)
     return (
       <span className={`badge bg-gold-100 text-gold-800 ring-1 ring-gold-300 ${cls}`} title={info.description}>
-        <Crown className="h-3.5 w-3.5" /> Premium Verified
+        <Crown className="h-3.5 w-3.5" /> <Tr k="Premium Verified" />
       </span>
     );
   if (level >= 4)
     return (
       <span className={`badge bg-brand-700 text-white ${cls}`} title={info.description}>
-        <ShieldCheck className="h-3.5 w-3.5" /> Verified Property
+        <ShieldCheck className="h-3.5 w-3.5" /> <Tr k="Verified Property" />
       </span>
     );
   if (level === 3)
     return (
       <span className={`badge bg-sky-50 text-sky-800 ring-1 ring-sky-200 ${cls}`} title={info.description}>
-        <FileCheck2 className="h-3.5 w-3.5" /> Docs Submitted
+        <FileCheck2 className="h-3.5 w-3.5" /> <Tr k="Docs Submitted" />
       </span>
     );
   if (level === 2)
     return (
       <span className={`badge bg-slate-100 text-slate-700 ${cls}`} title={info.description}>
-        <IdCard className="h-3.5 w-3.5" /> ID Verified
+        <IdCard className="h-3.5 w-3.5" /> <Tr k="ID Verified" />
       </span>
     );
   return (
     <span className={`badge bg-slate-100 text-slate-600 ${cls}`} title={info.description}>
-      <Phone className="h-3 w-3" /> Phone Verified
+      <Phone className="h-3 w-3" /> <Tr k="Phone Verified" />
     </span>
   );
 }
@@ -52,7 +53,7 @@ export function VerificationBadge({ level, kind = "property", size = "sm" }: { l
 export function PriceReducedBadge() {
   return (
     <span className="badge bg-red-50 text-red-700 ring-1 ring-red-200">
-      <TrendingDown className="h-3.5 w-3.5" /> Price Reduced
+      <TrendingDown className="h-3.5 w-3.5" /> <Tr k="Price Reduced" />
     </span>
   );
 }
@@ -60,19 +61,19 @@ export function PriceReducedBadge() {
 export function PremiumBadge() {
   return (
     <span className="badge bg-gradient-to-r from-gold-400 to-gold-600 text-white shadow-sm">
-      <Sparkles className="h-3.5 w-3.5" /> Premium
+      <Sparkles className="h-3.5 w-3.5" /> <Tr k="Premium" />
     </span>
   );
 }
 
 export function FeaturedBadge() {
-  return <span className="badge bg-gold-500 text-white">Featured</span>;
+  return <span className="badge bg-gold-500 text-white"><Tr k="Featured" /></span>;
 }
 
 export function DemoBadge() {
   return (
     <span className="badge bg-slate-900/70 text-white backdrop-blur" title="Sample listing created for demonstration">
-      Demo listing
+      <Tr k="Demo listing" />
     </span>
   );
 }

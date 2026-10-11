@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUp, Expand, Loader2, MapPin, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
 import { formatArea, formatPKR } from "@propertyx/shared";
 import { api } from "@/lib/client";
+import { useT } from "../i18n";
 
 type Ranked = { listing: { id: string; slug: string; title: string; price: number; purpose: string; coverUrl: string | null; locationFullName: string | null; areaValue: number; areaUnit: "marla" }; score: number };
 type Resp = { reply: string; criteria: Record<string, unknown>; total: number; results: Ranked[]; followUps: string[]; searchUrl: string; sessionId?: string };
@@ -14,6 +15,7 @@ const STARTERS = ["10 marla house in Lahore under 5 crore", "2 bed flat for rent
 
 /** Compact floating version of the AI assistant (same API as /ai). */
 export function FloatingAssistant() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -69,37 +71,37 @@ export function FloatingAssistant() {
   return (
     <>
       {open && (
-        <div role="dialog" aria-label="AI property assistant" className="fixed inset-x-2 bottom-[4.75rem] top-20 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl md:inset-x-auto md:bottom-24 md:right-6 md:top-auto md:h-[min(600px,calc(100dvh-8rem))] md:w-[400px]">
+        <div role="dialog" aria-label="AI property assistant" className="fixed inset-x-2 bottom-[4.75rem] top-20 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl md:inset-x-auto md:bottom-24 md:end-6 md:top-auto md:h-[min(600px,calc(100dvh-8rem))] md:w-[400px]">
           <div className="flex items-center gap-3 bg-gradient-to-br from-brand-700 to-brand-900 px-4 py-3 text-white">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
               <Sparkles className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-bold leading-tight text-white">AI Property Assistant</p>
-              <p className="text-xs text-brand-100/80">Searches live listings only</p>
+              <p className="font-bold leading-tight text-white">{t("AI Property Assistant")}</p>
+              <p className="text-xs text-brand-100/80">{t("Searches live listings only")}</p>
             </div>
             {msgs.length > 0 && (
-              <button onClick={restart} className="rounded-lg p-1.5 hover:bg-white/15" aria-label="Start over" title="Start over">
+              <button onClick={restart} className="rounded-lg p-1.5 hover:bg-white/15" aria-label={t("Start over")} title={t("Start over")}>
                 <RotateCcw className="h-4 w-4" />
               </button>
             )}
-            <Link href={lastUser ? `/ai?q=${encodeURIComponent(lastUser.text)}` : "/ai"} className="rounded-lg p-1.5 hover:bg-white/15" aria-label="Open full assistant" title="Open full assistant">
+            <Link href={lastUser ? `/ai?q=${encodeURIComponent(lastUser.text)}` : "/ai"} className="rounded-lg p-1.5 hover:bg-white/15" aria-label={t("Open full assistant")} title={t("Open full assistant")}>
               <Expand className="h-4 w-4" />
             </Link>
-            <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 hover:bg-white/15" aria-label="Close assistant">
+            <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 hover:bg-white/15" aria-label={t("Close assistant")}>
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4">
-            <div className="max-w-[90%] rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
-              Assalam o Alaikum! Tell me what you&apos;re looking for — budget in lakh or crore, size in marla, city or area — and I&apos;ll find matching listings.
+            <div className="max-w-[90%] rounded-2xl rounded-ss-md bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
+              {t("Assalam o Alaikum! Tell me what you're looking for — budget in lakh or crore, size in marla, city or area — and I'll find matching listings.")}
             </div>
             {msgs.length === 0 && (
               <div className="flex flex-col items-start gap-2">
                 {STARTERS.map((s) => (
-                  <button key={s} onClick={() => send(s)} className="rounded-full border border-brand-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-brand-800 hover:bg-brand-50">
-                    {s}
+                  <button key={s} onClick={() => send(s)} className="rounded-full border border-brand-200 bg-white px-3 py-1.5 text-start text-xs font-medium text-brand-800 hover:bg-brand-50">
+                    {t(s)}
                   </button>
                 ))}
               </div>
@@ -107,11 +109,11 @@ export function FloatingAssistant() {
             {msgs.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
-                  <p className="max-w-[85%] rounded-2xl rounded-br-md bg-brand-700 px-3.5 py-2 text-sm text-white">{m.text}</p>
+                  <p className="max-w-[85%] rounded-2xl rounded-ee-md bg-brand-700 px-3.5 py-2 text-sm text-white">{m.text}</p>
                 </div>
               ) : (
                 <div key={i} className="space-y-2">
-                  <p className="max-w-[95%] rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 text-sm leading-relaxed text-slate-800 shadow-sm">{m.data.reply}</p>
+                  <p className="max-w-[95%] rounded-2xl rounded-ss-md bg-white px-3.5 py-2.5 text-sm leading-relaxed text-slate-800 shadow-sm">{m.data.reply}</p>
                   {m.data.results.slice(0, 3).map((r) => (
                     <Link key={r.listing.id} href={`/property/${r.listing.slug}`} className="flex gap-2.5 rounded-xl border border-slate-200 bg-white p-2 hover:border-brand-300">
                       {r.listing.coverUrl && <img src={r.listing.coverUrl.replace(/w=\d+/, "w=200")} alt="" className="h-16 w-20 shrink-0 rounded-lg object-cover" loading="lazy" />}
@@ -121,7 +123,7 @@ export function FloatingAssistant() {
                             {formatPKR(r.listing.price)}
                             {r.listing.purpose === "rent" ? "/mo" : ""}
                           </span>
-                          <span className="shrink-0 text-[11px] font-semibold text-brand-700">{r.score}% match</span>
+                          <span className="shrink-0 text-[11px] font-semibold text-brand-700">{t("{n}% match", { n: r.score })}</span>
                         </span>
                         <span className="block truncate text-xs text-slate-700">{r.listing.title}</span>
                         <span className="flex items-center gap-1 truncate text-[11px] text-slate-500">
@@ -132,7 +134,7 @@ export function FloatingAssistant() {
                   ))}
                   {m.data.total > 3 && (
                     <Link href={m.data.searchUrl} className="inline-block text-xs font-semibold text-brand-700 hover:text-brand-800">
-                      See all {m.data.total} results →
+                      {t("See all {n} results →", { n: m.data.total })}
                     </Link>
                   )}
                 </div>
@@ -140,7 +142,7 @@ export function FloatingAssistant() {
             )}
             {busy && (
               <p className="flex items-center gap-2 text-sm text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" /> Searching listings…
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("Searching listings…")}
               </p>
             )}
             {!busy && lastAssistant && lastAssistant.data.followUps.length > 0 && (
@@ -162,8 +164,8 @@ export function FloatingAssistant() {
               send(input);
             }}
           >
-            <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder="e.g. Show cheaper options" className="input py-2.5" maxLength={500} aria-label="Message the assistant" />
-            <button className="btn-primary shrink-0 px-3" disabled={busy || !input.trim()} aria-label="Send">
+            <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("e.g. Show cheaper options")} className="input py-2.5" maxLength={500} aria-label={t("Message the assistant")} />
+            <button className="btn-primary shrink-0 px-3" disabled={busy || !input.trim()} aria-label={t("Send")}>
               <ArrowUp className="h-5 w-5" />
             </button>
           </form>
@@ -172,12 +174,12 @@ export function FloatingAssistant() {
 
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`fixed bottom-[4.75rem] right-4 z-50 items-center gap-2 ${open ? "hidden md:flex" : "flex"} rounded-full bg-brand-700 py-3 pl-3.5 pr-4 font-semibold text-white shadow-xl ring-4 ring-white transition hover:bg-brand-800 md:bottom-6 md:right-6`}
-        aria-label={open ? "Close AI assistant" : "Open AI assistant"}
+        className={`fixed bottom-[4.75rem] end-4 z-50 items-center gap-2 ${open ? "hidden md:flex" : "flex"} rounded-full bg-brand-700 py-3 ps-3.5 pe-4 font-semibold text-white shadow-xl ring-4 ring-white transition hover:bg-brand-800 md:bottom-6 md:end-6`}
+        aria-label={t(open ? "Close AI assistant" : "Open AI assistant")}
         aria-expanded={open}
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-        <span className="text-sm">{open ? "Close" : "Ask AI"}</span>
+        <span className="text-sm">{t(open ? "Close" : "Ask AI")}</span>
       </button>
     </>
   );

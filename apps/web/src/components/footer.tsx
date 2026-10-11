@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CITY_LINKS } from "./nav-data";
 import { isDemoMode } from "@/lib/server";
+import { getT } from "@/lib/i18n-server";
 
 export async function Footer() {
-  const demo = await isDemoMode();
+  const [demo, t] = await Promise.all([isDemoMode(), getT()]);
   const cols = [
     { title: "Buy", links: CITY_LINKS.map((c) => ({ label: `Property in ${c.name}`, href: `/buy/property/${c.slug}` })) },
     { title: "Rent", links: CITY_LINKS.slice(0, 6).map((c) => ({ label: `Rent in ${c.name}`, href: `/rent/property/${c.slug}` })) },
@@ -37,22 +38,22 @@ export async function Footer() {
     <footer className="mt-20 bg-night pb-24 text-slate-300 md:pb-0">
       {demo && (
         <div className="border-b border-white/10 bg-gold-500/10 py-2 text-center text-xs text-gold-200">
-          Demo environment — listings, agents, agencies, developers and projects shown here are sample data generated for demonstration and do not represent real offers.
+          {t("Demo environment — listings, agents, agencies, developers and projects shown here are sample data generated for demonstration and do not represent real offers.")}
         </div>
       )}
       <div className="container-px grid gap-10 py-14 md:grid-cols-[1.3fr_repeat(4,1fr)]">
         <div>
           <Logo dark />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">Pakistan's intelligent property marketplace — verified listings, transparent pricing data and AI that explains every match.</p>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">{t("Pakistan's intelligent property marketplace — verified listings, transparent pricing data and AI that explains every match.")}</p>
         </div>
         {cols.map((c) => (
           <div key={c.title}>
-            <p className="mb-3 text-sm font-semibold text-white">{c.title}</p>
+            <p className="mb-3 text-sm font-semibold text-white">{t(c.title)}</p>
             <ul className="space-y-2 text-sm">
               {c.links.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-slate-400 hover:text-white">
-                    {l.label}
+                    {t(l.label)}
                   </Link>
                 </li>
               ))}
@@ -62,8 +63,8 @@ export async function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-px flex flex-col gap-2 py-6 text-xs text-slate-500 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} Bismillah Pakistan. All rights reserved.</p>
-          <p>Prices and estimates are indicative. Always verify ownership documents before paying.</p>
+          <p>© {new Date().getFullYear()} Bismillah Pakistan. {t("All rights reserved.")}</p>
+          <p>{t("Prices and estimates are indicative. Always verify ownership documents before paying.")}</p>
         </div>
       </div>
     </footer>
