@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { sql } from "drizzle-orm";
-import { Home, Building, LandPlot, Store, Trees, HardHat, KeyRound, Sparkles, Calculator, TrendingUp, Landmark, Hammer, Scale, ArrowRight, ShieldCheck, BadgeCheck, LineChart, Building2, MapPinned, Ruler, Flame } from "lucide-react";
+import { Home, Building, LandPlot, Store, Trees, HardHat, KeyRound, Sparkles, Calculator, TrendingUp, Landmark, Hammer, Scale, ArrowRight, ShieldCheck, BadgeCheck, LineChart, Building2, MapPinned, Receipt, Ruler, Flame } from "lucide-react";
 import { createSearchEngine } from "@propertyx/search";
 import { listProjects, listPosts, recommendedFor, serveAds, getSetting, listAgents } from "@propertyx/core";
 import { formatPKR, PROJECT_STATUS_LABELS, COUNTRY, isUAE } from "@propertyx/shared";
@@ -40,15 +40,21 @@ const TOOLS = [
   { label: "AI Property Assistant", desc: "Describe what you need in plain words.", href: "/ai", icon: Sparkles },
   { label: "What's My Property Worth?", desc: "Indicative value from comparable listings.", href: "/tools/property-value", icon: LineChart },
   { label: "Investment Advisor", desc: "Yield, ROI, cash flow and a clear score.", href: "/tools/investment", icon: TrendingUp },
-  { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
+  isUAE
+    ? { label: "Mortgage Calculator", desc: "Monthly payment with UAE loan limits.", href: "/tools/home-loan", icon: Landmark }
+    : { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
   { label: "Installment Planner", desc: "Full schedule for any payment plan.", href: "/tools/installment", icon: Calculator },
-  { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
+  isUAE
+    ? { label: "Buying Costs", desc: "DLD 4% fee and every other cost.", href: "/tools/buying-costs", icon: Receipt }
+    : { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
 ].filter((x) => !isUAE || x.href !== "/tools/construction-cost");
 
 const EXPLORE = [
   { label: "New Projects", desc: "The best investment opportunities", href: "/projects", icon: Building2 },
-  { label: "Construction Cost Calculator", desc: "Get construction cost estimate", href: "/tools/construction-cost", icon: Hammer },
-  { label: "Home Loan Calculator", desc: "Find affordable loan packages", href: "/tools/home-loan", icon: Landmark },
+  isUAE
+    ? { label: "Buying Costs Calculator", desc: "DLD fee, trustee, agent and bank costs", href: "/tools/buying-costs", icon: Receipt }
+    : { label: "Construction Cost Calculator", desc: "Get construction cost estimate", href: "/tools/construction-cost", icon: Hammer },
+  { label: isUAE ? "Mortgage Calculator" : "Home Loan Calculator", desc: isUAE ? "UAE loan limits, payments and fees" : "Find affordable loan packages", href: "/tools/home-loan", icon: Landmark },
   { label: "Area Guides", desc: isUAE ? "Explore communities across the UAE" : "Explore housing societies in Pakistan", href: "/areas", icon: MapPinned },
   { label: isUAE ? "Map Search" : "Plot Finder", desc: isUAE ? "Find homes in any community on the map" : "Find plots in any housing society", href: "/map", icon: LandPlot },
   { label: "Property Index", desc: "Track changes in real estate prices", href: "/price-index", icon: LineChart },

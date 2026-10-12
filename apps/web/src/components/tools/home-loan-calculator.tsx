@@ -1,17 +1,38 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { calculateFinancing, formatPKR, formatPKRFull, FINANCING_MAX_PROFIT_PCT, type FinancingProduct, COUNTRY } from "@propertyx/shared";
+import Link from "next/link";
+import {
+  calculateFinancing,
+  formatPKR,
+  formatPKRFull,
+  FINANCING_MAX_PROFIT_PCT,
+  type FinancingProduct,
+  COUNTRY,
+  isUAE,
+  uaeMaxLtv,
+  uaeBuyingCosts,
+  UAE_EMIRATE_LABELS,
+  type UaeEmirate,
+  type UaeResidency,
+} from "@propertyx/shared";
 
-export function HomeLoanCalculator({ products }: { products: FinancingProduct[] }) {
+export function HomeLoanCalculator({ products, initialPrice }: { products: FinancingProduct[]; initialPrice?: number }) {
   const [productKey, setProductKey] = useState(products[0].key);
   const product = products.find((p) => p.key === productKey) ?? products[0];
-  const [price, setPrice] = useState("20000000");
-  const [downPct, setDownPct] = useState(30);
+  const [price, setPrice] = useState(String(initialPrice || (isUAE ? 2_000_000 : 20_000_000)));
+  const [downPct, setDownPct] = useState(isUAE ? 20 : 30);
   const [rate, setRate] = useState(String(product.defaultRate));
-  const [tenure, setTenure] = useState(Math.min(15, product.maxTenureYears));
+  const [tenure, setTenure] = useState(Math.min(isUAE ? 25 : 15, product.maxTenureYears));
+  // UAE buyer profile — decides the Central Bank loan-to-value limit
+  const [residency, setResidency] = useState<UaeResidency>("expat");
+  const [firstHome, setFirstHome] = useState(true);
+  const [offPlan, setOffPlan] = useState(false);
+  const [emirate, setEmirate] = useState<UaeEmirate>("dubai");
 
-  const minDown = 100 - product.maxFinancingPct;
+  const propertyPriceNum = Math.max(0, Number(price) || 0);
+  const maxLtv = isUAE ? uaeMaxLtv({ residency, firstHome, price: propertyPriceNum, offPlan }) : product.maxFinancingPct;
+  const minDown = 100 - maxLtv;
   const pickProduct = (p: FinancingProduct) => {
     setProductKey(p.key);
     setRate(String(p.defaultRate));
@@ -19,14 +40,16 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
     setDownPct((d) => Math.max(d, 100 - p.maxFinancingPct));
   };
 
-  const propertyPrice = Math.max(0, Number(price) || 0);
-  const downPayment = Math.round((propertyPrice * downPct) / 100);
+  const propertyPrice = propertyPriceNum;
+  const effDownPct = Math.max(downPct, minDown);
+  const downPayment = Math.round((propertyPrice * effDownPct) / 100);
   const annualRate = Math.max(0, Number(rate) || 0);
   const result = useMemo(
     () => (propertyPrice > 0 ? calculateFinancing({ propertyPrice, downPayment, annualRate, tenureYears: tenure, mode: product.mode }) : null),
     [propertyPrice, downPayment, annualRate, tenure, product.mode],
   );
   const principalShare = result && result.totalRepayment ? result.financedAmount / result.totalRepayment : 0;
+  const costs = isUAE && result ? uaeBuyingCosts({ price: propertyPrice, emirate, purchase: offPlan ? "off_plan" : "resale", loanAmount: result.financedAmount }) : null;
 
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
@@ -45,20 +68,66 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
           </div>
           <p className="mt-2 text-xs text-slate-500">{product.description}</p>
         </div>
+        {isUAE && (
+          <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+            <div>
+              <p className="label">You are</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(["expat", "national"] as const).map((r) => (
+                  <button key={r} type="button" onClick={() => setResidency(r)} className={`chip justify-center text-xs ${residency === r ? "chip-active" : ""}`}>
+                    {r === "expat" ? "Expat / resident" : "UAE national"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="label">This will be your</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[true, false].map((f) => (
+                  <button key={String(f)} type="button" onClick={() => setFirstHome(f)} className={`chip justify-center text-xs ${firstHome === f ? "chip-active" : ""}`}>
+                    {f ? "First home" : "Second+ home"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="label">Property</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[false, true].map((o) => (
+                  <button key={String(o)} type="button" onClick={() => setOffPlan(o)} className={`chip justify-center text-xs ${offPlan === o ? "chip-active" : ""}`}>
+                    {o ? "Off-plan" : "Ready"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="label" htmlFor="hl-emirate">Emirate</label>
+              <select id="hl-emirate" className="input py-2" value={emirate} onChange={(e) => setEmirate(e.target.value as UaeEmirate)}>
+                {Object.entries(UAE_EMIRATE_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
         <div>
           <label className="label" htmlFor="hl-price">Property price ({COUNTRY.currency})</label>
-          <input id="hl-price" className="input" type="number" min={0} step={100000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
+          <input id="hl-price" className="input" type="number" min={0} step={isUAE ? 10000 : 100000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
           {propertyPrice > 0 && <p className="mt-1 text-xs text-slate-500">{formatPKR(propertyPrice)}</p>}
         </div>
         <div>
           <div className="flex items-baseline justify-between">
             <label className="label" htmlFor="hl-down">Down payment</label>
             <span className="text-sm font-semibold text-slate-800">
-              {downPct}% · {formatPKR(downPayment)}
+              {effDownPct}% · {formatPKR(downPayment)}
             </span>
           </div>
-          <input id="hl-down" className="w-full accent-brand-700" type="range" min={minDown} max={90} step={1} value={downPct} onChange={(e) => setDownPct(Number(e.target.value))} />
-          <p className="text-xs text-slate-500">Minimum {minDown}% — banks finance up to {product.maxFinancingPct}% of the price.</p>
+          <input id="hl-down" className="w-full accent-brand-700" type="range" min={minDown} max={90} step={1} value={effDownPct} onChange={(e) => setDownPct(Number(e.target.value))} />
+          <p className="text-xs text-slate-500">
+            Minimum {minDown}% — banks finance up to {maxLtv}% of the price{isUAE ? " for this buyer profile (UAE Central Bank limit)" : ""}.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -104,6 +173,28 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-brand-700" /> {result.labels.principal} {Math.round(principalShare * 100)}%</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-gold-500" /> {result.labels.profit} {Math.round((1 - principalShare) * 100)}%</span>
             </div>
+            {costs && (
+              <div className="mt-6 rounded-xl border border-slate-200 p-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-sm font-semibold text-slate-700">Cash needed upfront</p>
+                  <p className="text-lg font-extrabold text-slate-900">{formatPKR(downPayment + costs.total)}</p>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Down payment {formatPKR(downPayment)} + buying costs {formatPKR(costs.total)} ({costs.percentOfPrice}% of the price)
+                </p>
+                <ul className="mt-3 space-y-1 text-sm">
+                  {costs.items.map((c) => (
+                    <li key={c.key} className="flex justify-between gap-3">
+                      <span className="text-slate-600">{c.label}</span>
+                      <span className="font-medium text-slate-800">{formatPKR(c.amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={`/tools/buying-costs?price=${propertyPrice}`} className="mt-3 inline-block text-sm font-semibold text-brand-700">
+                  Adjust buying costs →
+                </Link>
+              </div>
+            )}
             <details className="mt-6 rounded-xl border border-slate-200">
               <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-700">Year-by-year schedule</summary>
               <div className="max-h-80 overflow-auto">
@@ -129,7 +220,11 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
                 </table>
               </div>
             </details>
-            <p className="mt-5 text-xs text-slate-400">Total {result.labels.profit.toLowerCase()} is capped at {FINANCING_MAX_PROFIT_PCT}% of the property price. Estimate only. Actual rates, fees, insurance and eligibility depend on the bank and on KIBOR at the time you apply.</p>
+            <p className="mt-5 text-xs text-slate-400">
+              {isUAE
+                ? "Estimate only. Banks also require life and property insurance, a maximum loan term of 25 years (ending by age 65 for most expats, 70 for nationals) and monthly debts below 50% of your income. Fees follow published land-department schedules and change from time to time."
+                : `Total ${result.labels.profit.toLowerCase()} is capped at ${FINANCING_MAX_PROFIT_PCT}% of the property price. Estimate only. Actual rates, fees, insurance and eligibility depend on the bank and on KIBOR at the time you apply.`}
+            </p>
           </>
         ) : (
           <p className="py-16 text-center text-slate-500">Enter a property price to see your installment.</p>

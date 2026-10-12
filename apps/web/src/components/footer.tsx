@@ -1,4 +1,4 @@
-import { COUNTRY } from "@propertyx/shared";
+import { COUNTRY, isUAE } from "@propertyx/shared";
 import Link from "next/link";
 import { Logo } from "./logo";
 import { CITY_LINKS } from "./nav-data";
@@ -16,8 +16,8 @@ export async function Footer() {
         { label: "AI Property Assistant", href: "/ai" },
         { label: "Property Valuation", href: "/tools/property-value" },
         { label: "Investment Advisor", href: "/tools/investment" },
-        { label: "Home Finance", href: "/tools/home-loan" },
-        { label: "Construction Cost", href: "/tools/construction-cost" },
+        { label: isUAE ? "Mortgage Calculator" : "Home Finance", href: "/tools/home-loan" },
+        isUAE ? { label: "Buying Costs", href: "/tools/buying-costs" } : { label: "Construction Cost", href: "/tools/construction-cost" },
         { label: "Price Index", href: "/price-index" },
       ],
     },

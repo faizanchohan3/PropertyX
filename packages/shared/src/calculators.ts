@@ -4,6 +4,9 @@
  * Every result is an estimate — the UI must label it as such.
  */
 
+import { isUAE } from "./country";
+import { UAE_FINANCING_PRODUCTS } from "./uae";
+
 const round = (n: number) => Math.round(n);
 
 /* ------------------------------------------------------------------ */
@@ -64,6 +67,15 @@ export const DEFAULT_FINANCING_PRODUCTS: FinancingProduct[] = [
     description: "Bank buys and sells the property to you at a disclosed fixed profit, paid in equal installments.",
   },
 ];
+
+/** Products for this deployment: the admin-saved list when it belongs to this market, else the defaults. */
+export function financingProductsFor(saved: FinancingProduct[] | null | undefined): FinancingProduct[] {
+  const defaults = isUAE ? UAE_FINANCING_PRODUCTS : DEFAULT_FINANCING_PRODUCTS;
+  if (!Array.isArray(saved) || !saved.length) return defaults;
+  // a UAE database created from the Pakistani defaults still holds the Pakistani products
+  const savedIsUae = saved.some((p) => p.key.startsWith("ae_"));
+  return savedIsUae === isUAE ? saved : defaults;
+}
 
 export interface FinancingInput {
   propertyPrice: number;
@@ -131,8 +143,9 @@ export function calculateFinancing(input: FinancingInput): FinancingResult {
 
   // Total interest / profit never exceeds FINANCING_MAX_PROFIT_PCT of the property price.
   // When the cap applies, it is spread evenly with equal principal, so installments stay equal.
+  // (Pakistan only — UAE mortgages are plain amortising loans.)
   const cap = (input.propertyPrice * FINANCING_MAX_PROFIT_PCT) / 100;
-  if (monthly * n - P > cap) {
+  if (!isUAE && monthly * n - P > cap) {
     monthly = (P + cap) / n;
     schedule.length = 0;
     let balance = P;

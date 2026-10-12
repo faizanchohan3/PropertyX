@@ -314,9 +314,9 @@ export default async function PropertyPage({ params }: Props) {
           {l.purpose === "sale" && (
             <div className="card p-5">
               <h2 className="mb-3 flex items-center gap-2 font-bold">
-                <Calculator className="h-5 w-5 text-brand-600" /> Home financing
+                <Calculator className="h-5 w-5 text-brand-600" /> {isUAE ? "Mortgage & costs" : "Home financing"}
               </h2>
-              <FinanceWidget price={l.price} />
+              <FinanceWidget price={l.price} offPlan={offPlan} />
             </div>
           )}
           {l.purpose === "sale" && (

@@ -1,4 +1,5 @@
-import { COUNTRY } from "@propertyx/shared";
+import { COUNTRY, isUAE } from "@propertyx/shared";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { constructionRates, cities } from "@propertyx/database";
@@ -29,6 +30,8 @@ async function loadRates(): Promise<CityRates[]> {
 }
 
 export default async function ConstructionCostPage() {
+  // the rates are Pakistani grey-structure / finishing costs; UAE buyers need the purchase costs instead
+  if (isUAE) redirect("/tools/buying-costs");
   const rates = await loadRates().catch(() => [{ slug: "", name: "Other city (national average)", rates: DEFAULT_CONSTRUCTION_RATES }]);
   return (
     <div className="container-px py-12">

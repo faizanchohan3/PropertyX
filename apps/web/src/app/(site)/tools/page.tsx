@@ -1,11 +1,11 @@
-import { COUNTRY } from "@propertyx/shared";
+import { COUNTRY, isUAE } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Calculator, Flame, Hammer, Landmark, LineChart, MapPinned, Ruler, Sparkles, TrendingUp, type LucideIcon } from "lucide-react";
+import { ArrowRight, Calculator, Flame, Hammer, Landmark, LineChart, MapPinned, Receipt, Ruler, Sparkles, TrendingUp, type LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Free property calculators and tools",
-  description: `Free calculators for ${COUNTRY.adjective} property: valuation, investment, home finance, installment plans, construction cost and area units.`,
+  description: `Free calculators for ${COUNTRY.adjective} property: valuation, investment, home finance, installment plans, ${isUAE ? "buying costs" : "construction cost"} and area units.`,
   alternates: { canonical: "/tools" },
 };
 
@@ -13,13 +13,17 @@ const TOOLS: { label: string; desc: string; href: string; icon: LucideIcon }[] =
   { label: "AI Property Assistant", desc: "Describe what you need in plain words.", href: "/ai", icon: Sparkles },
   { label: "What's My Property Worth?", desc: "Indicative value from comparable listings.", href: "/tools/property-value", icon: LineChart },
   { label: "Investment Advisor", desc: "Yield, ROI, cash flow and a clear score.", href: "/tools/investment", icon: TrendingUp },
-  { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
+  isUAE
+    ? { label: "Mortgage Calculator", desc: "Monthly payment with UAE loan limits.", href: "/tools/home-loan", icon: Landmark }
+    : { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
   { label: "Installment Planner", desc: "Full schedule for any payment plan.", href: "/tools/installment", icon: Calculator },
-  { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
-  { label: "Area Unit Converter", desc: "Marla, kanal, sq ft, sq yd and more.", href: "/tools/area-unit-converter", icon: Ruler },
+  isUAE
+    ? { label: "Buying Costs", desc: "DLD 4% fee and every other cost.", href: "/tools/buying-costs", icon: Receipt }
+    : { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
+  { label: "Area Unit Converter", desc: isUAE ? "Sq ft, sq m, acres and more." : "Marla, kanal, sq ft, sq yd and more.", href: "/tools/area-unit-converter", icon: Ruler },
   { label: "Property Index", desc: "How prices and rents are moving.", href: "/price-index", icon: LineChart },
   { label: "Property Trends", desc: "The most popular areas right now.", href: "/trends", icon: Flame },
-  { label: "Area Guides", desc: "Housing societies and neighbourhoods.", href: "/areas", icon: MapPinned },
+  { label: "Area Guides", desc: isUAE ? "Communities and neighbourhoods." : "Housing societies and neighbourhoods.", href: "/areas", icon: MapPinned },
 ];
 
 export default function ToolsPage() {

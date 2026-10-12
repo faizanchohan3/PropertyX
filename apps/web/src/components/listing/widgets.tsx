@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { calculateFinancing, formatPKR, formatPriceWords } from "@propertyx/shared";
+import { calculateFinancing, formatPKR, formatPriceWords, isUAE, uaeMaxLtv, uaeBuyingCosts } from "@propertyx/shared";
 import { anonId } from "@/lib/client";
 
 export function ViewTracker({ listingId, projectId }: { listingId?: string; projectId?: string }) {
@@ -13,27 +13,32 @@ export function ViewTracker({ listingId, projectId }: { listingId?: string; proj
   return null;
 }
 
-export function FinanceWidget({ price }: { price: number }) {
-  const [downPct, setDownPct] = useState(30);
-  const [years, setYears] = useState(20);
-  const [rate, setRate] = useState(14);
+export function FinanceWidget({ price, offPlan = false }: { price: number; offPlan?: boolean }) {
+  // UAE: expat first-home limit (80%, 65% above AED 5M, 50% off-plan); Pakistan: banks' usual 85%
+  const minDown = isUAE ? 100 - uaeMaxLtv({ residency: "expat", firstHome: true, price, offPlan }) : 15;
+  const [downPct, setDownPct] = useState(isUAE ? minDown : 30);
+  const [years, setYears] = useState(isUAE ? 25 : 20);
+  const [rate, setRate] = useState(isUAE ? 4.25 : 14);
   const [mode, setMode] = useState<"conventional" | "diminishing_musharakah">("conventional");
   const r = useMemo(() => calculateFinancing({ propertyPrice: price, downPayment: (price * downPct) / 100, annualRate: rate, tenureYears: years, mode }), [price, downPct, rate, years, mode]);
+  const costs = isUAE ? uaeBuyingCosts({ price, emirate: "dubai", purchase: offPlan ? "off_plan" : "resale", loanAmount: price - (price * downPct) / 100 }) : null;
   return (
     <div>
-      <div className="mb-3 grid grid-cols-2 gap-2">
-        {(["conventional", "diminishing_musharakah"] as const).map((m) => (
-          <button key={m} onClick={() => setMode(m)} className={`chip justify-center text-xs ${mode === m ? "chip-active" : ""}`}>
-            {m === "conventional" ? "Conventional" : "Islamic (DM)"}
-          </button>
-        ))}
-      </div>
+      {!isUAE && (
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          {(["conventional", "diminishing_musharakah"] as const).map((m) => (
+            <button key={m} onClick={() => setMode(m)} className={`chip justify-center text-xs ${mode === m ? "chip-active" : ""}`}>
+              {m === "conventional" ? "Conventional" : "Islamic (DM)"}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="space-y-3 text-sm">
         <label className="block">
           <span className="flex justify-between text-slate-600">
             Down payment <b className="text-slate-900">{downPct}% · {formatPriceWords((price * downPct) / 100)}</b>
           </span>
-          <input type="range" min={15} max={90} step={5} value={downPct} onChange={(e) => setDownPct(Number(e.target.value))} className="w-full accent-brand-700" />
+          <input type="range" min={minDown} max={90} step={5} value={downPct} onChange={(e) => setDownPct(Number(e.target.value))} className="w-full accent-brand-700" />
         </label>
         <label className="block">
           <span className="flex justify-between text-slate-600">
@@ -45,17 +50,23 @@ export function FinanceWidget({ price }: { price: number }) {
           <span className="flex justify-between text-slate-600">
             {mode === "conventional" ? "Interest" : "Profit"} rate <b className="text-slate-900">{rate}%</b>
           </span>
-          <input type="range" min={6} max={24} step={0.5} value={rate} onChange={(e) => setRate(Number(e.target.value))} className="w-full accent-brand-700" />
+          <input type="range" min={isUAE ? 2 : 6} max={isUAE ? 9 : 24} step={isUAE ? 0.25 : 0.5} value={rate} onChange={(e) => setRate(Number(e.target.value))} className="w-full accent-brand-700" />
         </label>
       </div>
       <div className="mt-4 rounded-xl bg-brand-50 p-4 text-center">
         <p className="text-xs text-brand-800">Estimated monthly payment</p>
         <p className="text-2xl font-extrabold text-brand-900">{formatPKR(r.monthlyPayment)}</p>
-        <p className="mt-1 text-xs text-brand-800/70">Total financing cost {formatPKR(r.totalFinancingCost)}</p>
+        <p className="mt-1 text-xs text-brand-800/70">Total {isUAE ? "interest" : "financing cost"} {formatPKR(r.totalFinancingCost)}</p>
       </div>
+      {costs && (
+        <Link href={`/tools/buying-costs?price=${price}`} className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm hover:border-brand-300">
+          <span className="text-slate-600">Buying costs (DLD 4% + fees)</span>
+          <b className="text-slate-900">≈ {formatPKR(costs.total)}</b>
+        </Link>
+      )}
       <p className="mt-2 text-[11px] text-slate-400">Estimate only — not an offer of finance. Rates vary by bank.</p>
       <Link href={`/tools/home-loan?price=${price}`} className="mt-2 block text-center text-sm font-semibold text-brand-700">
-        Full financing calculator →
+        {isUAE ? "Full mortgage calculator →" : "Full financing calculator →"}
       </Link>
     </div>
   );

@@ -4,7 +4,7 @@
  * Idempotent — safe to run on every deploy (`npm run db:seed -- --reference-only`).
  */
 import { sql } from "drizzle-orm";
-import { isUAE, ROLES, PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, FEATURES, DEFAULT_FINANCING_PRODUCTS, type ConstructionRates } from "@propertyx/shared";
+import { isUAE, ROLES, PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, FEATURES, DEFAULT_FINANCING_PRODUCTS, UAE_FINANCING_PRODUCTS, type ConstructionRates } from "@propertyx/shared";
 import type { Database } from "./client";
 import { syncGeography } from "./geography";
 import { roles, permissions, rolePermissions, features, subscriptionPlans, siteSettings, constructionRates } from "./schema";
@@ -122,7 +122,7 @@ export const DEFAULT_SETTINGS: Record<string, unknown> = {
     announcement: "",
   },
   marla_sqft: 225,
-  financing_products: DEFAULT_FINANCING_PRODUCTS,
+  financing_products: isUAE ? UAE_FINANCING_PRODUCTS : DEFAULT_FINANCING_PRODUCTS,
   investment_weights: { yield: 0.35, appreciation: 0.3, demand: 0.2, affordability: 0.15 },
   featured_pricing: { 7: 1_500, 15: 2_500, 30: 4_500 },
   listing_expiry_days: 90,
