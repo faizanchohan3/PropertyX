@@ -21,7 +21,7 @@ const CATEGORIES = isUAE
       { label: "Apartments", href: "/buy/apartment", icon: Building },
       { label: "Villas", href: "/buy/villa", icon: Home },
       { label: "Penthouses", href: "/buy/penthouse", icon: Building2 },
-      { label: "Off-plan", href: "/projects", icon: HardHat },
+      { label: "Off-plan", href: "/buy?completion=off_plan", icon: HardHat },
       { label: "Commercial", href: "/commercial-property", icon: Store },
       { label: "Plots", href: "/plots-for-sale", icon: LandPlot },
       { label: "Rentals", href: "/rent", icon: KeyRound },

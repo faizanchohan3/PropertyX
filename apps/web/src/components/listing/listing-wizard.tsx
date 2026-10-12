@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, Loader2, Sparkles, Upload, Trash2, ArrowUp, ArrowDown, AlertTriangle, ImagePlus, Home, KeyRound } from "lucide-react";
-import { PROPERTY_TYPES, FEATURES, FEATURE_GROUP_LABELS, FURNISHING_LABELS, CONDITION_LABELS, AREA_UNIT_LABELS, formatPKR, formatArea, propertyTypeInfo, type AreaUnit, COUNTRY, isMobileNumber } from "@propertyx/shared";
+import { LISTABLE_TYPES, FEATURES, FEATURE_GROUP_LABELS, FURNISHING_LABELS, CONDITION_LABELS, AREA_UNIT_LABELS, formatPKR, formatArea, propertyTypeInfo, type AreaUnit, COUNTRY, isMobileNumber, isUAE, CHEQUE_OPTIONS, COMPLETION_LABELS, formatHandover } from "@propertyx/shared";
 import { api, ApiError } from "@/lib/client";
 import { toast } from "../toast";
 import type { MapMarker } from "../map/leaflet-map";
@@ -12,6 +12,17 @@ import type { MapMarker } from "../map/leaflet-map";
 const LeafletMap = dynamic(() => import("../map/leaflet-map").then((m) => m.LeafletMap), { ssr: false, loading: () => <div className="h-72 animate-pulse rounded-2xl bg-slate-100" /> });
 
 type Media = { id: string; url: string; kind: "image" | "floor_plan"; caption?: string };
+type UaeDetails = {
+  permitNumber?: string;
+  brn?: string;
+  orn?: string;
+  completionStatus?: "ready" | "off_plan";
+  handoverDate?: string;
+  paymentPlan?: string;
+  developer?: string;
+  serviceChargePerSqft?: number | null;
+  cheques?: number | null;
+};
 export interface WizardData {
   purpose: "sale" | "rent";
   type: string;
@@ -44,6 +55,7 @@ export interface WizardData {
   highlights: string[];
   videoUrl: string;
   tourUrl: string;
+  details: UaeDetails;
   contactName: string;
   contactPhone: string;
   contactWhatsapp: string;
@@ -70,7 +82,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     lat: null,
     lng: null,
     price: null,
-    rentPeriod: "monthly",
+    rentPeriod: COUNTRY.rentPeriod,
     installmentAvailable: false,
     advanceAmount: null,
     monthlyInstallment: null,
@@ -91,6 +103,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     highlights: [],
     videoUrl: "",
     tourUrl: "",
+    details: isUAE ? { completionStatus: "ready" } : {},
     contactName: contact.name,
     contactPhone: contact.phone,
     contactWhatsapp: contact.phone,
@@ -106,6 +119,9 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
   const [aiBusy, setAiBusy] = useState(false);
   const loaded = useRef(false);
   const set = (patch: Partial<WizardData>) => setD((x) => ({ ...x, ...patch }));
+  const setDetails = (patch: Partial<UaeDetails>) => setD((x) => ({ ...x, details: { ...x.details, ...patch } }));
+  const offPlan = isUAE && d.purpose === "sale" && d.details?.completionStatus === "off_plan";
+  const perLabel = d.purpose === "rent" ? (d.rentPeriod === "yearly" ? "/yr" : "/mo") : "";
   const info = propertyTypeInfo(d.type);
   const rooms = !!info?.hasRooms && d.type !== "room";
   const isAptLike = ["flat", "apartment", "penthouse", "office", "shop"].includes(d.type);
@@ -159,6 +175,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     if (s === 3) {
       if (!d.price || d.price <= 0) e.price = "Enter the price";
       if (d.installmentAvailable && (!d.advanceAmount || !d.monthlyInstallment)) e.installments = "Enter advance and monthly installment";
+      if (offPlan && !d.details.handoverDate) e.handoverDate = "Enter the expected handover month";
     }
     if (s === 4) {
       if (!d.areaValue || d.areaValue <= 0) e.areaValue = "Enter the area";
@@ -247,6 +264,15 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     contactEmail: d.contactEmail || undefined,
     videoUrl: d.videoUrl || undefined,
     tourUrl: d.tourUrl || undefined,
+    details: isUAE
+      ? {
+          ...d.details,
+          completionStatus: d.purpose === "sale" ? d.details.completionStatus : undefined,
+          handoverDate: offPlan ? d.details.handoverDate : undefined,
+          paymentPlan: offPlan ? d.details.paymentPlan : undefined,
+          cheques: d.purpose === "rent" ? d.details.cheques : undefined,
+        }
+      : {},
     media: d.media.map((m) => ({ id: m.id, kind: m.kind, caption: m.caption })),
   });
 
@@ -321,7 +347,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
         {step === 1 && (
           <div className="mt-5 space-y-5">
             {(["residential", "plot", "commercial", "agricultural"] as const).map((cat) => {
-              const types = PROPERTY_TYPES.filter((t) => t.category === cat && !(d.purpose === "rent" && t.category === "plot"));
+              const types = LISTABLE_TYPES.filter((t) => t.category === cat && !(d.purpose === "rent" && t.category === "plot"));
               if (!types.length) return null;
               return (
                 <div key={cat}>
@@ -430,22 +456,69 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
           <div className="mt-5 space-y-4">
             <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
               <div>
-                <label className="label" htmlFor="w-price">{d.purpose === "rent" ? "Monthly rent (PKR)" : "Asking price (PKR)"}</label>
-                <input id="w-price" inputMode="numeric" className="input text-lg font-semibold" placeholder={d.purpose === "rent" ? "e.g. 85000" : "e.g. 25000000"} value={d.price ?? ""} onChange={(e) => set({ price: num(e.target.value.replace(/\D/g, "")) })} />
+                <label className="label" htmlFor="w-price">
+                  {d.purpose === "rent" ? (d.rentPeriod === "yearly" ? "Annual rent" : "Monthly rent") : "Asking price"} ({COUNTRY.currency})
+                </label>
+                <input id="w-price" inputMode="numeric" className="input text-lg font-semibold" placeholder={isUAE ? (d.purpose === "rent" ? "e.g. 95000" : "e.g. 1850000") : d.purpose === "rent" ? "e.g. 85000" : "e.g. 25000000"} value={d.price ?? ""} onChange={(e) => set({ price: num(e.target.value.replace(/\D/g, "")) })} />
                 {d.price ? <p className="mt-1 text-sm font-medium text-brand-700">{formatPKR(d.price)}</p> : null}
                 {err("price")}
               </div>
               {d.purpose === "rent" && (
                 <div>
                   <label className="label" htmlFor="w-period">Rent period</label>
-                  <select id="w-period" className="input" value={d.rentPeriod ?? "monthly"} onChange={(e) => set({ rentPeriod: e.target.value as "monthly" })}>
+                  <select id="w-period" className="input" value={d.rentPeriod ?? COUNTRY.rentPeriod} onChange={(e) => set({ rentPeriod: e.target.value as "monthly" })}>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>
                 </div>
               )}
             </div>
-            {d.purpose === "sale" && (
+            {isUAE && d.purpose === "rent" && (
+              <div className="max-w-xs">
+                <label className="label" htmlFor="w-cheques">Cheques accepted</label>
+                <select id="w-cheques" className="input" value={d.details.cheques ?? ""} onChange={(e) => setDetails({ cheques: num(e.target.value) })}>
+                  <option value="">Not specified</option>
+                  {CHEQUE_OPTIONS.map((n) => (
+                    <option key={n} value={n}>
+                      {n === 1 ? "1 cheque (full payment)" : `Up to ${n} cheques`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {isUAE && d.purpose === "sale" && (
+              <div className="space-y-4">
+                <div>
+                  <p className="label">Completion status</p>
+                  <div className="flex gap-2">
+                    {(["ready", "off_plan"] as const).map((k) => (
+                      <button key={k} type="button" onClick={() => setDetails({ completionStatus: k })} className={`chip ${d.details.completionStatus === k ? "chip-active" : ""}`} aria-pressed={d.details.completionStatus === k}>
+                        {COMPLETION_LABELS[k]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {offPlan && (
+                  <div className="grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-3">
+                    <div>
+                      <label className="label" htmlFor="w-handover">Expected handover</label>
+                      <input id="w-handover" type="month" className="input" value={d.details.handoverDate ?? ""} onChange={(e) => setDetails({ handoverDate: e.target.value })} />
+                      {d.details.handoverDate && <p className="mt-1 text-xs text-slate-500">{formatHandover(d.details.handoverDate)}</p>}
+                      {err("handoverDate")}
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="w-plan">Payment plan</label>
+                      <input id="w-plan" className="input" placeholder="e.g. 60/40, 1% monthly" maxLength={60} value={d.details.paymentPlan ?? ""} onChange={(e) => setDetails({ paymentPlan: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor="w-dev">Developer</label>
+                      <input id="w-dev" className="input" placeholder="e.g. Emaar, Sobha, Aldar" maxLength={80} value={d.details.developer ?? ""} onChange={(e) => setDetails({ developer: e.target.value })} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {!isUAE && d.purpose === "sale" && (
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input type="checkbox" className="h-4 w-4 accent-brand-700" checked={d.installmentAvailable} onChange={(e) => set({ installmentAvailable: e.target.checked })} /> Available on installments
               </label>
@@ -453,7 +526,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
             {d.installmentAvailable && (
               <div className="grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-3">
                 <div>
-                  <label className="label" htmlFor="w-adv">Advance (PKR)</label>
+                  <label className="label" htmlFor="w-adv">Advance ({COUNTRY.currency})</label>
                   <input id="w-adv" inputMode="numeric" className="input" value={d.advanceAmount ?? ""} onChange={(e) => set({ advanceAmount: num(e.target.value.replace(/\D/g, "")) })} />
                 </div>
                 <div>
@@ -489,6 +562,12 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
                 </select>
               </div>
             </div>
+            {isUAE && info?.category !== "agricultural" && (
+              <div className="max-w-xs">
+                <label className="label" htmlFor="w-sc">Service charge ({COUNTRY.currency} per sq ft / year)</label>
+                <input id="w-sc" inputMode="decimal" className="input" placeholder="e.g. 18" value={d.details.serviceChargePerSqft ?? ""} onChange={(e) => setDetails({ serviceChargePerSqft: num(e.target.value) })} />
+              </div>
+            )}
             {rooms && (
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
@@ -612,7 +691,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
             </div>
             <div>
               <label className="label" htmlFor="w-cp">Mobile number</label>
-              <input id="w-cp" className="input" placeholder="0300 1234567" value={d.contactPhone} onChange={(e) => set({ contactPhone: e.target.value })} />
+              <input id="w-cp" className="input" placeholder={COUNTRY.phone.example} value={d.contactPhone} onChange={(e) => set({ contactPhone: e.target.value })} />
               {err("contactPhone")}
             </div>
             <div>
@@ -623,6 +702,24 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
               <label className="label" htmlFor="w-ce">Email (optional)</label>
               <input id="w-ce" type="email" className="input" value={d.contactEmail} onChange={(e) => set({ contactEmail: e.target.value })} />
             </div>
+            {isUAE && (
+              <div className="grid gap-4 rounded-2xl border border-slate-200 p-4 sm:col-span-2 sm:grid-cols-3">
+                <p className="text-sm font-semibold sm:col-span-3">Advertising permit</p>
+                <div>
+                  <label className="label" htmlFor="w-permit">Permit number</label>
+                  <input id="w-permit" className="input" placeholder="DLD / RERA or ADREC permit" maxLength={40} value={d.details.permitNumber ?? ""} onChange={(e) => setDetails({ permitNumber: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label" htmlFor="w-brn">Agent BRN</label>
+                  <input id="w-brn" className="input" placeholder="Broker registration no." maxLength={20} value={d.details.brn ?? ""} onChange={(e) => setDetails({ brn: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label" htmlFor="w-orn">Office ORN</label>
+                  <input id="w-orn" className="input" placeholder="Office registration no." maxLength={20} value={d.details.orn ?? ""} onChange={(e) => setDetails({ orn: e.target.value })} />
+                </div>
+                <p className="text-xs text-slate-500 sm:col-span-3">In Dubai and Abu Dhabi, property adverts need a valid permit from the land department. Listings showing a permit number get a “Permit” badge.</p>
+              </div>
+            )}
             <p className="text-xs text-slate-500 sm:col-span-2">Your number is shown only when a buyer taps “Call”. Verify it in Account → Security to earn the phone-verified badge.</p>
           </div>
         )}
@@ -672,7 +769,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
               <div className="card max-w-sm overflow-hidden">
                 {d.media[0] && <img src={d.media.find((m) => m.kind === "image")?.url} alt="" className="aspect-[4/3] w-full object-cover" />}
                 <div className="p-4">
-                  <p className="text-xl font-extrabold">{d.price ? `${formatPKR(d.price)}${d.purpose === "rent" ? "/mo" : ""}` : "—"}</p>
+                  <p className="text-xl font-extrabold">{d.price ? `${formatPKR(d.price)}${perLabel}` : "—"}</p>
                   <p className="mt-1 font-semibold text-slate-800">{d.title || "Your title"}</p>
                   <p className="text-sm text-slate-500">{[blockName, locationName, city?.name].filter(Boolean).join(", ")}</p>
                   <p className="mt-2 text-sm text-slate-600">
@@ -693,7 +790,9 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
                 ["Purpose", d.purpose === "sale" ? "For sale" : "For rent"],
                 ["Type", info?.label ?? "—"],
                 ["Location", [blockName, locationName, city?.name].filter(Boolean).join(", ")],
-                ["Price", d.price ? formatPKR(d.price) : "—"],
+                ["Price", d.price ? `${formatPKR(d.price)}${perLabel}` : "—"],
+                ...(offPlan ? [["Handover", formatHandover(d.details.handoverDate) ?? "—"]] : []),
+                ...(isUAE ? [["Permit", d.details.permitNumber || "Not added"]] : []),
                 ["Area", d.areaValue ? formatArea(d.areaValue, d.areaUnit) : "—"],
                 ["Photos", String(d.media.filter((m) => m.kind === "image").length)],
                 ["Amenities", String(d.features.length)],

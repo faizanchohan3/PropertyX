@@ -1,0 +1,1 @@
+ALTER TABLE "property_listings" ADD COLUMN IF NOT EXISTS "details" jsonb DEFAULT '{}'::jsonb NOT NULL;

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
-import { calculateInstallmentPlan, formatPKR, formatPKRFull } from "@propertyx/shared";
+import { calculateInstallmentPlan, formatPKR, formatPKRFull, COUNTRY } from "@propertyx/shared";
 
 const DURATIONS = [12, 24, 36, 48, 60];
 
@@ -26,7 +26,7 @@ export function InstallmentCalculator() {
     <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <form className="card space-y-5 p-6" onSubmit={(e) => e.preventDefault()}>
         <div>
-          <label className="label" htmlFor="ip-price">Total price (PKR)</label>
+          <label className="label" htmlFor="ip-price">Total price ({COUNTRY.currency})</label>
           <input id="ip-price" className="input" type="number" min={0} step={100000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
           {totalPrice > 0 && <p className="mt-1 text-xs text-slate-500">{formatPKR(totalPrice)}</p>}
         </div>

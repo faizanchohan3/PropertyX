@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -15,7 +16,7 @@ export default async function PricingPage() {
     <div className="container-px py-14">
       <div className="mx-auto max-w-2xl text-center">
         <h1 className="text-4xl font-extrabold">Simple, transparent plans</h1>
-        <p className="mt-3 text-slate-500">Owners list for free. Professionals get more reach, featured placement, CRM and analytics. Prices in PKR, billed monthly.</p>
+        <p className="mt-3 text-slate-500">Owners list for free. Professionals get more reach, featured placement, CRM and analytics. Prices in {COUNTRY.currency}, billed monthly.</p>
       </div>
       <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
         {plans.map((p) => {

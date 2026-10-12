@@ -86,7 +86,7 @@ const AE_NAV: NavItem[] = [
     label: "Buy",
     href: "/buy",
     columns: [
-      { title: "Homes", links: [{ label: "Apartments", href: "/buy/apartment" }, { label: "Villas", href: "/buy/villa" }, { label: "Penthouses", href: "/buy/penthouse" }, { label: "Houses", href: "/buy/house" }, { label: "Off-plan projects", href: "/projects" }] },
+      { title: "Homes", links: [{ label: "Apartments", href: "/buy/apartment" }, { label: "Villas", href: "/buy/villa" }, { label: "Penthouses", href: "/buy/penthouse" }, { label: "Houses", href: "/buy/house" }, { label: "Off-plan properties", href: "/buy?completion=off_plan" }, { label: "Off-plan projects", href: "/projects" }] },
       { title: "By emirate", links: AE_CITY_LINKS.map((c) => ({ label: `Property in ${c.name}`, href: `/buy/property/${c.slug}` })) },
     ],
   },

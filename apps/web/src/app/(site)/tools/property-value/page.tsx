@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AREA_UNIT_LABELS, CONDITIONS, CONDITION_LABELS, PROPERTY_TYPES, formatPKR, type AreaUnit, type Condition, type PropertyType, COUNTRY } from "@propertyx/shared";
+import { AREA_UNIT_LABELS, CONDITIONS, CONDITION_LABELS, LISTABLE_TYPES, formatPKR, type AreaUnit, type Condition, type PropertyType, COUNTRY } from "@propertyx/shared";
 import { listAreaDirectory, valueProperty } from "@propertyx/core";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
 
-const VALUE_TYPES = PROPERTY_TYPES.filter((t) => !["room", "plot_file", "other"].includes(t.key));
+const VALUE_TYPES = LISTABLE_TYPES.filter((t) => !["room", "plot_file", "other"].includes(t.key));
 
 export default async function PropertyValuePage({ searchParams }: Props) {
   const sp = await searchParams;
@@ -137,7 +137,7 @@ export default async function PropertyValuePage({ searchParams }: Props) {
               </p>
               <div className="mt-5 grid grid-cols-3 gap-3">
                 {[
-                  ["Per sq ft", `PKR ${est.pricePerSqft.avg.toLocaleString()}`],
+                  ["Per sq ft", `${COUNTRY.currency} ${est.pricePerSqft.avg.toLocaleString()}`],
                   ["Compared with", `${est.sampleSize} listings`],
                   ["Confidence", est.confidence[0].toUpperCase() + est.confidence.slice(1)],
                 ].map(([k, v]) => (

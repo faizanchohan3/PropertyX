@@ -1,5 +1,7 @@
 "use client";
 
+import { COUNTRY } from "@propertyx/shared";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -26,8 +28,8 @@ export function PlanEditor({ plan }: { plan: Plan }) {
       <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
         {(
           [
-            ["priceMonthly", "Monthly (PKR)"],
-            ["priceYearly", "Yearly (PKR)"],
+            ["priceMonthly", `Monthly (${COUNTRY.currency})`],
+            ["priceYearly", `Yearly (${COUNTRY.currency})`],
             ["listingQuota", "Listing quota"],
             ["featuredQuota", "Featured / month"],
             ["agentSeats", "Agent seats"],

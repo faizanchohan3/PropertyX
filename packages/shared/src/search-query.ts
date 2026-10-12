@@ -39,6 +39,8 @@ export const searchQuerySchema = z.object({
   hasVideo: bool,
   hasTour: bool,
   installments: bool,
+  /** UAE: ready or off-plan (property_listings.details.completionStatus) */
+  completion: z.enum(["ready", "off_plan"]).optional(),
   sort: z.enum(sortKeys).optional(),
   page: z.coerce.number().int().min(1).max(500).optional(),
   pageSize: z.coerce.number().int().min(1).max(100).optional(),

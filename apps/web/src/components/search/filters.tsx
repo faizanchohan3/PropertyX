@@ -3,13 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SlidersHorizontal, X, Search, Map as MapIcon } from "lucide-react";
-import { PROPERTY_TYPES, FEATURES, FURNISHING_LABELS, CONDITION_LABELS, serializeSearchQuery, AREA_UNIT_LABELS, type SearchQuery, type PropertyType, type AreaUnit, COUNTRY } from "@propertyx/shared";
+import { LISTABLE_TYPES, FEATURES, FURNISHING_LABELS, CONDITION_LABELS, serializeSearchQuery, AREA_UNIT_LABELS, type SearchQuery, type PropertyType, type AreaUnit, COUNTRY, isUAE, COMPLETION_LABELS, formatPriceShort } from "@propertyx/shared";
 import { LocationAutocomplete } from "../location-autocomplete";
 import { CITY_LINKS } from "../nav-data";
 
-const SALE_PRICES = [500_000, 1_000_000, 2_500_000, 5_000_000, 7_500_000, 10_000_000, 15_000_000, 20_000_000, 30_000_000, 50_000_000, 75_000_000, 100_000_000, 200_000_000, 500_000_000];
-const RENT_PRICES = [10_000, 20_000, 30_000, 50_000, 75_000, 100_000, 150_000, 200_000, 300_000, 500_000, 1_000_000];
-const fmt = (n: number) => (n >= 10_000_000 ? `${n / 10_000_000} Crore` : n >= 100_000 ? `${n / 100_000} Lakh` : `${n / 1000}K`);
+const AE_SALE_PRICES = [300_000, 500_000, 750_000, 1_000_000, 1_500_000, 2_000_000, 3_000_000, 5_000_000, 7_500_000, 10_000_000, 15_000_000, 25_000_000, 50_000_000];
+const AE_RENT_PRICES = [20_000, 40_000, 60_000, 80_000, 100_000, 150_000, 200_000, 300_000, 500_000, 1_000_000];
+const PK_SALE_PRICES = [500_000, 1_000_000, 2_500_000, 5_000_000, 7_500_000, 10_000_000, 15_000_000, 20_000_000, 30_000_000, 50_000_000, 75_000_000, 100_000_000, 200_000_000, 500_000_000];
+const PK_RENT_PRICES = [10_000, 20_000, 30_000, 50_000, 75_000, 100_000, 150_000, 200_000, 300_000, 500_000, 1_000_000];
+const SALE_PRICES = isUAE ? AE_SALE_PRICES : PK_SALE_PRICES;
+const RENT_PRICES = isUAE ? AE_RENT_PRICES : PK_RENT_PRICES;
+const fmt = (n: number) => (isUAE ? formatPriceShort(n) : n >= 10_000_000 ? `${n / 10_000_000} Crore` : n >= 100_000 ? `${n / 100_000} Lakh` : `${n / 1000}K`);
 
 export function SearchFilters({ initial, locationLabel, total }: { initial: SearchQuery; locationLabel?: string; total: number }) {
   const router = useRouter();
@@ -20,7 +24,7 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
   const set = (patch: Partial<SearchQuery>) => setQ((x) => ({ ...x, ...patch }));
   const prices = q.purpose === "rent" ? RENT_PRICES : SALE_PRICES;
   const toggleArr = <T,>(arr: T[] | undefined, v: T) => (arr?.includes(v) ? arr.filter((x) => x !== v) : [...(arr ?? []), v]);
-  const extraCount = useMemo(() => (q.features?.length ?? 0) + (q.furnishing ? 1 : 0) + (q.condition ? 1 : 0) + (q.verified ? 1 : 0) + (q.hasVideo ? 1 : 0) + (q.installments ? 1 : 0) + (q.bathsMin ? 1 : 0), [q]);
+  const extraCount = useMemo(() => (q.features?.length ?? 0) + (q.furnishing ? 1 : 0) + (q.condition ? 1 : 0) + (q.verified ? 1 : 0) + (q.hasVideo ? 1 : 0) + (q.installments ? 1 : 0) + (q.completion ? 1 : 0) + (q.bathsMin ? 1 : 0), [q]);
 
   const apply = (map = false) => {
     const { page: _p, ...rest } = q;
@@ -59,10 +63,22 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
           <LocationAutocomplete city={q.city} value={q.location ? { slug: q.location, label: locationLabel ?? q.location } : null} onSelect={(s) => set({ location: s?.slug, city: s?.citySlug ?? q.city })} />
         </div>
       </div>
+      {isUAE && q.purpose !== "rent" && (
+        <div>
+          <span className="label">Completion</span>
+          <div className="grid grid-cols-3 gap-1.5">
+            {([undefined, "ready", "off_plan"] as const).map((c) => (
+              <button key={c ?? "any"} type="button" onClick={() => set({ completion: c })} className={`chip justify-center px-2 text-xs ${q.completion === c ? "chip-active" : ""}`}>
+                {c ? COMPLETION_LABELS[c] : "Any"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div>
         <span className="label">Property type</span>
         <div className="flex flex-wrap gap-1.5">
-          {PROPERTY_TYPES.filter((t) => !(q.purpose === "rent" && t.category === "plot")).map((t) => (
+          {LISTABLE_TYPES.filter((t) => !(q.purpose === "rent" && t.category === "plot")).map((t) => (
             <button key={t.key} type="button" onClick={() => set({ types: toggleArr(q.types, t.key as PropertyType) })} className={`chip px-2.5 py-1 text-xs ${q.types?.includes(t.key as PropertyType) ? "chip-active" : ""}`}>
               {t.label}
             </button>
@@ -71,7 +87,7 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label" htmlFor="f-pmin">Min price (PKR)</label>
+          <label className="label" htmlFor="f-pmin">Min price ({COUNTRY.currency})</label>
           <select id="f-pmin" className="input" value={q.priceMin ?? ""} onChange={(e) => set({ priceMin: e.target.value ? Number(e.target.value) : undefined })}>
             <option value="">No min</option>
             {prices.map((p) => (
@@ -82,7 +98,7 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="f-pmax">Max price (PKR)</label>
+          <label className="label" htmlFor="f-pmax">Max price ({COUNTRY.currency})</label>
           <select id="f-pmax" className="input" value={q.priceMax ?? ""} onChange={(e) => set({ priceMax: e.target.value ? Number(e.target.value) : undefined })}>
             <option value="">No max</option>
             {prices.map((p) => (
@@ -160,7 +176,7 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
             {[
               ["verified", "Verified properties only"],
-              ["installments", "Installments available"],
+              ...(isUAE ? [] : [["installments", "Installments available"]]),
               ["hasVideo", "Has video"],
             ].map(([k, l]) => (
               <label key={k} className="flex items-center gap-2">

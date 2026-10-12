@@ -31,6 +31,8 @@ export interface ListingCard {
   isPremium: boolean;
   installmentAvailable: boolean;
   hasVideo: boolean;
+  completionStatus: "ready" | "off_plan" | null;
+  hasPermit: boolean;
   publishedAt: string | null;
   updatedAt: string;
   viewsCount: number;

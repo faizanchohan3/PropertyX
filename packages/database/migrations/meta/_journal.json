@@ -15,6 +15,20 @@
       "when": 1791445435463,
       "tag": "0001_description_trgm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791800612390,
+      "tag": "0002_listing_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791800859586,
+      "tag": "0003_uae_property_types",
+      "breakpoints": true
     }
   ]
 }

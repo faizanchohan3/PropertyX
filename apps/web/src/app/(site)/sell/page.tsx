@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Camera, ShieldCheck, Sparkles, LineChart, MessageSquare, CalendarDays, Plus } from "lucide-react";
@@ -35,7 +36,7 @@ export default function SellPage() {
               ["5 levels", "of verification"],
               ["11 steps", "guided listing wizard"],
               ["AI", "copywriting & lead scoring"],
-              ["0 PKR", "for owners (up to 5 listings)"],
+              [`0 ${COUNTRY.currency}`, "for owners (up to 5 listings)"],
             ].map(([a, b]) => (
               <div key={a} className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
                 <p className="text-3xl font-extrabold text-gold-300">{a}</p>

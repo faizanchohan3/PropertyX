@@ -38,6 +38,8 @@ const SALE_SHARE: Record<PropertyType, number> = {
   lower_portion: 0.12,
   room: 0,
   farmhouse: 0.8,
+  townhouse: 0.6,
+  hotel_apartment: 0.3,
   villa: 0.75,
   penthouse: 0.7,
   residential_plot: 1,

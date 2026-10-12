@@ -1,5 +1,7 @@
 "use client";
 
+import { COUNTRY } from "@propertyx/shared";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Play } from "lucide-react";
@@ -100,7 +102,7 @@ export function SettingsEditor({ settings, rates, cities }: { settings: Record<s
         <SaveBtn onSave={async () => { await saveSetting("marla_sqft", platform.marla_sqft); await saveSetting("listing_expiry_days", platform.listing_expiry_days); await saveSetting("demo_mode", platform.demo_mode); }} />
       </Section>
 
-      <Section title="Construction material & labour rates" desc="Used by the construction cost calculator. Set a default and optional per-city overrides (PKR).">
+      <Section title="Construction material & labour rates" desc={`Used by the construction cost calculator. Set a default and optional per-city overrides (${COUNTRY.currency}).`}>
         <select className={darkInput} value={rateIdx} onChange={(e) => { const i = Number(e.target.value); setRateIdx(i); setRate(rates[i].rates); }} aria-label="Rate set">
           {rates.map((r, i) => <option key={r.cityId ?? "default"} value={i}>{r.cityName}</option>)}
         </select>
@@ -126,7 +128,7 @@ export function SettingsEditor({ settings, rates, cities }: { settings: Record<s
         <SaveBtn onSave={() => api("/api/v1/admin/rates.set", { body: { cityId: rates[rateIdx].cityId, rates: rate } }).then(() => undefined)} />
       </Section>
 
-      <Section title="Featured listing pricing (PKR)">
+      <Section title={`Featured listing pricing (${COUNTRY.currency})`}>
         <div className="grid grid-cols-3 gap-3">
           {Object.keys(featured).map((d) => <L key={d} t={`${d} days`}><input type="number" className={darkInput} value={featured[d]} onChange={(e) => setFeatured({ ...featured, [d]: Number(e.target.value) })} /></L>)}
         </div>

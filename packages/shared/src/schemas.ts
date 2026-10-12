@@ -3,6 +3,7 @@ import { COUNTRY } from "./country";
 import { FEATURES, FURNISHING, CONDITIONS, PROPERTY_TYPE_KEYS, PURPOSES, REPORT_REASONS, APPOINTMENT_STATUSES, LEAD_STATUSES, NOTIFICATION_CHANNELS } from "./constants";
 import { AREA_UNITS } from "./units";
 import { SELF_SERVICE_ROLES } from "./permissions";
+import { listingDetailsSchema } from "./listing-details";
 
 /** Mobile number for the deployment's country, normalised to E.164 (+923001234567 / +971501234567). */
 export const pkPhone = COUNTRY.code === "ae"
@@ -99,6 +100,7 @@ export const listingInputSchema = z.object({
   highlights: z.array(z.string().trim().max(120)).max(8).default([]),
   videoUrl: z.string().url().max(500).optional().or(z.literal("")).nullable(),
   tourUrl: z.string().url().max(500).optional().or(z.literal("")).nullable(),
+  details: listingDetailsSchema,
   contactName: z.string().trim().min(2).max(80),
   contactPhone: pkPhone,
   contactWhatsapp: optionalPkPhone,

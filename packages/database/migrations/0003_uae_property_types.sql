@@ -1,0 +1,2 @@
+ALTER TYPE "public"."property_type" ADD VALUE IF NOT EXISTS 'townhouse' BEFORE 'residential_plot';--> statement-breakpoint
+ALTER TYPE "public"."property_type" ADD VALUE IF NOT EXISTS 'hotel_apartment' BEFORE 'residential_plot';

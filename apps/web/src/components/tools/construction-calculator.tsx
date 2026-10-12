@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CITY_LINKS } from "../nav-data";
-import { estimateConstructionCost, formatPKR, formatPKRFull, formatNumber, sqftPerUnit, type ConstructionInput, type ConstructionRates, type FinishingQuality } from "@propertyx/shared";
+import { estimateConstructionCost, formatPKR, formatPKRFull, formatNumber, sqftPerUnit, type ConstructionInput, type ConstructionRates, type FinishingQuality, COUNTRY } from "@propertyx/shared";
 
 export type CityRates = { slug: string; name: string; rates: ConstructionRates };
 
@@ -132,7 +132,7 @@ export function ConstructionCalculator({ cities }: { cities: CityRates[] }) {
             <div className="mt-5 grid grid-cols-3 gap-3 text-center">
               {[
                 ["Covered area", `${formatNumber(result.coveredAreaSqft)} sq ft`],
-                ["Per sq ft", `PKR ${formatNumber(result.perSqft)}`],
+                ["Per sq ft", `${COUNTRY.currency} ${formatNumber(result.perSqft)}`],
                 ["Baths / kitchens", `${result.bathrooms} / ${result.kitchens}`],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-xl bg-slate-50 p-3">

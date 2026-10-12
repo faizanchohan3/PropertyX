@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import type { Map as LMap, LayerGroup, Polygon, Circle, Polyline } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Pentagon, CircleDot, X, List, RefreshCw, MapPin, Loader2, SlidersHorizontal, Shapes } from "lucide-react";
-import { formatPriceShort, formatPKR, formatArea, parseSearchQuery, serializeSearchQuery, PROPERTY_TYPES, type SearchQuery, COUNTRY } from "@propertyx/shared";
+import { formatPriceShort, formatPKR, formatArea, parseSearchQuery, serializeSearchQuery, LISTABLE_TYPES, type SearchQuery, COUNTRY } from "@propertyx/shared";
 import type { MapResult, ListingCard } from "@propertyx/search";
 
 type Boundary = { slug: string; name: string; kind: string; polygon: [number, number][]; source: "drawn" | "approximate"; activeListings: number };
@@ -294,7 +294,7 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
             </select>
             <select aria-label="Type" className="input py-2 text-xs" value={filters.types?.[0] ?? ""} onChange={(e) => setFilters((f) => ({ ...f, types: e.target.value ? [e.target.value as never] : undefined }))}>
               <option value="">All types</option>
-              {PROPERTY_TYPES.map((t) => (
+              {LISTABLE_TYPES.map((t) => (
                 <option key={t.key} value={t.key}>
                   {t.label}
                 </option>

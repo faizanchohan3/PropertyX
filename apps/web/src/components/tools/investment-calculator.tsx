@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CheckCircle2, MinusCircle, XCircle } from "lucide-react";
-import { analyseInvestment, formatPKR, type DevelopmentStatus } from "@propertyx/shared";
+import { analyseInvestment, formatPKR, type DevelopmentStatus, COUNTRY } from "@propertyx/shared";
 
 const STATUSES: { key: DevelopmentStatus; label: string }[] = [
   { key: "developed", label: "Developed" },
@@ -43,12 +43,12 @@ export function InvestmentCalculator() {
       <form className="card space-y-5 p-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label" htmlFor="iv-price">Purchase price (PKR)</label>
+            <label className="label" htmlFor="iv-price">Purchase price ({COUNTRY.currency})</label>
             <input id="iv-price" className="input" type="number" min={0} step={100000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
             {purchasePrice > 0 && <p className="mt-1 text-xs text-slate-500">{formatPKR(purchasePrice)}</p>}
           </div>
           <div>
-            <label className="label" htmlFor="iv-rent">Monthly rent (PKR)</label>
+            <label className="label" htmlFor="iv-rent">Monthly rent ({COUNTRY.currency})</label>
             <input id="iv-rent" className="input" type="number" min={0} step={5000} inputMode="numeric" value={rent} onChange={(e) => setRent(e.target.value)} />
             <p className="mt-1 text-xs text-slate-500">0 for a plot or an empty property</p>
           </div>

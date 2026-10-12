@@ -1,5 +1,5 @@
 import { listCampaigns } from "@propertyx/core";
-import { AD_FORMATS, formatPKR } from "@propertyx/shared";
+import { AD_FORMATS, formatPKR, COUNTRY } from "@propertyx/shared";
 import { requirePermission, db } from "@/lib/server";
 import { AdminHeader, AdminTabs, DarkPill, th, td, okBtn, badBtn, darkBtn } from "@/components/admin/ui";
 import { AdminAction } from "@/components/admin/admin-action";
@@ -36,7 +36,7 @@ export default async function AdminAds({ searchParams }: { searchParams: Promise
                     {ad.status === "pending" && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: "reject" }} label="Reject" className={badBtn} promptFor={{ key: "reason", label: "Reason for the advertiser" }} promptRequired />}
                     {ad.status === "active" && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: "pause" }} label="Pause" className={darkBtn} />}
                     {ad.status === "paused" && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: "resume" }} label="Resume" className={okBtn} />}
-                    {["active", "paused"].includes(ad.status) && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: ad.status === "active" ? "resume" : "pause" }} label="Edit budget" className={darkBtn} promptFor={{ key: "budget", label: "New total budget (PKR)" }} />}
+                    {["active", "paused"].includes(ad.status) && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: ad.status === "active" ? "resume" : "pause" }} label="Edit budget" className={darkBtn} promptFor={{ key: "budget", label: `New total budget (${COUNTRY.currency})` }} />}
                     {["active", "paused"].includes(ad.status) && <AdminAction action="ad.moderate" payload={{ id: ad.id, action: "end" }} label="End" className={badBtn} confirmText="End this campaign now?" />}
                   </div>
                 </td>

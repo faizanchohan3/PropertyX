@@ -1,4 +1,5 @@
 /** Core domain constants shared by the database, API and UI layers. */
+import { isUAE } from "./country";
 
 export const PURPOSES = ["sale", "rent"] as const;
 export type Purpose = (typeof PURPOSES)[number];
@@ -17,6 +18,8 @@ export const PROPERTY_TYPES = [
   { key: "farmhouse", label: "Farmhouse", category: "residential", hasRooms: true },
   { key: "villa", label: "Villa", category: "residential", hasRooms: true },
   { key: "penthouse", label: "Penthouse", category: "residential", hasRooms: true },
+  { key: "townhouse", label: "Townhouse", category: "residential", hasRooms: true },
+  { key: "hotel_apartment", label: "Hotel Apartment", category: "residential", hasRooms: true },
   { key: "residential_plot", label: "Residential Plot", category: "plot", hasRooms: false },
   { key: "commercial_plot", label: "Commercial Plot", category: "plot", hasRooms: false },
   { key: "plot_file", label: "Plot File", category: "plot", hasRooms: false },
@@ -32,12 +35,17 @@ export const PROPERTY_TYPES = [
 export type PropertyType = (typeof PROPERTY_TYPES)[number]["key"];
 export const PROPERTY_TYPE_KEYS = PROPERTY_TYPES.map((t) => t.key) as unknown as readonly [PropertyType, ...PropertyType[]];
 export const PROPERTY_TYPE_LABELS = Object.fromEntries(PROPERTY_TYPES.map((t) => [t.key, t.label])) as Record<PropertyType, string>;
+/** types that only make sense in one market (all stay valid in the database) */
+const UAE_ONLY_TYPES: PropertyType[] = ["townhouse", "hotel_apartment"];
+const PK_ONLY_TYPES: PropertyType[] = ["flat", "upper_portion", "lower_portion", "plot_file", "farmhouse", "agricultural_land", "factory"];
+/** property types offered in forms and filters on this deployment */
+export const LISTABLE_TYPES = PROPERTY_TYPES.filter((t) => !(isUAE ? PK_ONLY_TYPES : UAE_ONLY_TYPES).includes(t.key));
 export function propertyTypeInfo(key: string) {
   return PROPERTY_TYPES.find((t) => t.key === key);
 }
 /** Grouped type filters used by "Plot" / "Commercial" / "Home" shortcuts. */
 export const TYPE_GROUPS: Record<string, PropertyType[]> = {
-  homes: ["house", "flat", "apartment", "upper_portion", "lower_portion", "room", "farmhouse", "villa", "penthouse"],
+  homes: ["house", "flat", "apartment", "upper_portion", "lower_portion", "room", "farmhouse", "villa", "penthouse", "townhouse", "hotel_apartment"],
   plots: ["residential_plot", "commercial_plot", "plot_file", "agricultural_land"],
   commercial: ["office", "shop", "warehouse", "factory", "building", "commercial_plot", "other"],
 };
@@ -59,7 +67,13 @@ export const TYPE_SLUGS: Record<string, PropertyType[] | "all"> = {
   farmhouse: ["farmhouse"],
   farmhouses: ["farmhouse"],
   villa: ["villa"],
+  villas: ["villa"],
   penthouse: ["penthouse"],
+  penthouses: ["penthouse"],
+  townhouse: ["townhouse"],
+  townhouses: ["townhouse"],
+  "hotel-apartment": ["hotel_apartment"],
+  "hotel-apartments": ["hotel_apartment"],
   plot: TYPE_GROUPS.plots,
   plots: TYPE_GROUPS.plots,
   "residential-plot": ["residential_plot"],

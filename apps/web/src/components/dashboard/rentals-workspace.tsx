@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Plus, Home, Users, Wallet, Wrench, Receipt, HardHat, Loader2, CheckCircle2, FileText } from "lucide-react";
-import { formatPKR, formatPKRFull } from "@propertyx/shared";
+import { formatPKR, formatPKRFull, COUNTRY } from "@propertyx/shared";
 import { api } from "@/lib/client";
 import { Modal, FormError } from "../modal";
 import { StatusPill } from "../badges";
@@ -121,7 +121,7 @@ export function RentalsWorkspace({ data }: { data: Data }) {
             <StatCard dark label="Net income (this month)" value={formatPKR(data.kpis.netIncomeThisMonth)} hint={`${formatPKR(data.kpis.collectedThisMonth)} in − ${formatPKR(data.kpis.expensesThisMonth)} out`} icon={CheckCircle2} />
           </div>
           <Panel title="Income vs expenses (6 months)" dark>
-            <Bars dark x="month" data={data.trend} series={[{ key: "income", label: "Rent collected" }, { key: "expenses", label: "Expenses" }]} formatY={(v) => formatPKR(v).replace("PKR ", "")} />
+            <Bars dark x="month" data={data.trend} series={[{ key: "income", label: "Rent collected" }, { key: "expenses", label: "Expenses" }]} formatY={(v) => formatPKR(v).replace(`${COUNTRY.currency} `, "")} />
           </Panel>
           <Panel title="Rent due & overdue">
             <DuesTable dues={dues.slice(0, 8)} leaseOf={leaseOf} unitLabel={unitLabel} onPay={(p) => setModal({ pay: p })} />
@@ -188,7 +188,7 @@ export function RentalsWorkspace({ data }: { data: Data }) {
             <div key={m.id} className="card p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2"><p className="font-semibold">{m.title}</p><StatusPill status={m.status} /><span className={`badge ${m.priority === "urgent" || m.priority === "high" ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-600"}`}>{m.priority}</span></div>
-                <select aria-label="Status" className="input w-auto py-1.5 text-xs" value={m.status} onChange={(e) => { const cost = e.target.value === "resolved" ? prompt("Repair cost in PKR (optional — added to expenses)") : null; post("maintenance-update", { id: m.id, status: e.target.value, cost: cost ? Number(cost) : undefined }, "Updated"); }}>
+                <select aria-label="Status" className="input w-auto py-1.5 text-xs" value={m.status} onChange={(e) => { const cost = e.target.value === "resolved" ? prompt(`Repair cost in ${COUNTRY.currency} (optional — added to expenses)`) : null; post("maintenance-update", { id: m.id, status: e.target.value, cost: cost ? Number(cost) : undefined }, "Updated"); }}>
                   {["open", "in_progress", "resolved", "closed"].map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
                 </select>
               </div>
@@ -224,25 +224,25 @@ export function RentalsWorkspace({ data }: { data: Data }) {
         {form([{ name: "name", label: "Name (e.g. Johar Town House)", required: true }, { name: "address", label: "Address", required: true }, { name: "cityName", label: "City" }, { name: "managerEmail", label: "Property manager's Bismillah email (optional)", type: "email" }, { name: "notes", label: "Notes", type: "textarea" }], "property", "Property added")}
       </Modal>
       <Modal open={modal === "unit"} onClose={() => setModal(null)} title="Add unit">
-        {form([{ name: "managedPropertyId", label: "Property", options: data.properties.map((p) => ({ v: p.id, l: p.name })) }, { name: "label", label: "Unit label (e.g. Ground floor, Flat 101)", required: true }, { name: "beds", label: "Bedrooms", type: "number" }, { name: "baths", label: "Bathrooms", type: "number" }, { name: "areaSqft", label: "Area (sq ft)", type: "number" }, { name: "marketRent", label: "Market rent (PKR)", type: "number" }], "unit", "Unit added")}
+        {form([{ name: "managedPropertyId", label: "Property", options: data.properties.map((p) => ({ v: p.id, l: p.name })) }, { name: "label", label: "Unit label (e.g. Ground floor, Flat 101)", required: true }, { name: "beds", label: "Bedrooms", type: "number" }, { name: "baths", label: "Bathrooms", type: "number" }, { name: "areaSqft", label: "Area (sq ft)", type: "number" }, { name: "marketRent", label: `Market rent (${COUNTRY.currency})`, type: "number" }], "unit", "Unit added")}
       </Modal>
       <Modal open={modal === "lease"} onClose={() => setModal(null)} title="New lease">
-        {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "tenantName", label: "Tenant name", required: true }, { name: "tenantPhone", label: "Tenant mobile", required: true }, { name: "tenantEmail", label: "Tenant email (links their Bismillah account)", type: "email" }, { name: "startDate", label: "Start date", type: "date", def: today, required: true }, { name: "endDate", label: "End date", type: "date", def: inYear, required: true }, { name: "monthlyRent", label: "Monthly rent (PKR)", type: "number", required: true }, { name: "securityDeposit", label: "Security deposit (PKR)", type: "number" }, { name: "dueDay", label: "Rent due day (1–28)", type: "number", def: "5" }, { name: "annualIncreasePct", label: "Annual increase %", type: "number", def: "10" }, { name: "terms", label: "Key terms", type: "textarea" }], "lease", "Lease created — rent dues generated")}
+        {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "tenantName", label: "Tenant name", required: true }, { name: "tenantPhone", label: "Tenant mobile", required: true }, { name: "tenantEmail", label: "Tenant email (links their Bismillah account)", type: "email" }, { name: "startDate", label: "Start date", type: "date", def: today, required: true }, { name: "endDate", label: "End date", type: "date", def: inYear, required: true }, { name: "monthlyRent", label: `Monthly rent (${COUNTRY.currency})`, type: "number", required: true }, { name: "securityDeposit", label: `Security deposit (${COUNTRY.currency})`, type: "number" }, { name: "dueDay", label: "Rent due day (1–28)", type: "number", def: "5" }, { name: "annualIncreasePct", label: "Annual increase %", type: "number", def: "10" }, { name: "terms", label: "Key terms", type: "textarea" }], "lease", "Lease created — rent dues generated")}
       </Modal>
       <Modal open={modal === "maintenance"} onClose={() => setModal(null)} title="Log maintenance request">
         {form([{ name: "unitId", label: "Unit", options: unitOptions }, { name: "title", label: "Title", required: true }, { name: "description", label: "Details", type: "textarea", required: true }, { name: "category", label: "Category", options: ["general", "plumbing", "electrical", "appliance", "structural", "cleaning", "pest"].map((v) => ({ v, l: v })) }, { name: "priority", label: "Priority", def: "normal", options: ["low", "normal", "high", "urgent"].map((v) => ({ v, l: v })) }], "maintenance", "Request logged")}
       </Modal>
       <Modal open={modal === "expense"} onClose={() => setModal(null)} title="Add expense">
-        {form([{ name: "managedPropertyId", label: "Property", options: data.properties.map((p) => ({ v: p.id, l: p.name })) }, { name: "category", label: "Category", options: ["repairs", "utilities", "tax", "salaries", "insurance", "other"].map((v) => ({ v, l: v })) }, { name: "description", label: "Description" }, { name: "amount", label: "Amount (PKR)", type: "number", required: true }, { name: "incurredOn", label: "Date", type: "date", def: today, required: true }], "expense", "Expense added")}
+        {form([{ name: "managedPropertyId", label: "Property", options: data.properties.map((p) => ({ v: p.id, l: p.name })) }, { name: "category", label: "Category", options: ["repairs", "utilities", "tax", "salaries", "insurance", "other"].map((v) => ({ v, l: v })) }, { name: "description", label: "Description" }, { name: "amount", label: `Amount (${COUNTRY.currency})`, type: "number", required: true }, { name: "incurredOn", label: "Date", type: "date", def: today, required: true }], "expense", "Expense added")}
       </Modal>
       <Modal open={modal === "staff"} onClose={() => setModal(null)} title="Add staff member">
-        {form([{ name: "name", label: "Name", required: true }, { name: "role", label: "Role", options: ["caretaker", "guard", "electrician", "plumber", "cleaner", "accountant", "other"].map((v) => ({ v, l: v })) }, { name: "phone", label: "Mobile" }, { name: "monthlySalary", label: "Monthly salary (PKR)", type: "number" }], "staff", "Staff added")}
+        {form([{ name: "name", label: "Name", required: true }, { name: "role", label: "Role", options: ["caretaker", "guard", "electrician", "plumber", "cleaner", "accountant", "other"].map((v) => ({ v, l: v })) }, { name: "phone", label: "Mobile" }, { name: "monthlySalary", label: `Monthly salary (${COUNTRY.currency})`, type: "number" }], "staff", "Staff added")}
       </Modal>
       <Modal open={!!modal && typeof modal === "object"} onClose={() => setModal(null)} title="Record rent payment">
         {modal && typeof modal === "object" && (
           <>
             <p className="mb-3 text-sm text-slate-600">{leaseOf(modal.pay.leaseId)?.tenantName} · {modal.pay.period} · balance {formatPKR(modal.pay.amountDue - modal.pay.amountPaid)}</p>
-            {form([{ name: "amount", label: "Amount received (PKR)", type: "number", def: String(modal.pay.amountDue - modal.pay.amountPaid), required: true }, { name: "method", label: "Method", options: ["Bank transfer", "Raast", "Cash", "Cheque", "JazzCash", "Easypaisa"].map((v) => ({ v, l: v })) }, { name: "reference", label: "Reference / cheque no." }], "payment", "Payment recorded", { paymentId: modal.pay.id })}
+            {form([{ name: "amount", label: `Amount received (${COUNTRY.currency})`, type: "number", def: String(modal.pay.amountDue - modal.pay.amountPaid), required: true }, { name: "method", label: "Method", options: ["Bank transfer", "Raast", "Cash", "Cheque", "JazzCash", "Easypaisa"].map((v) => ({ v, l: v })) }, { name: "reference", label: "Reference / cheque no." }], "payment", "Payment recorded", { paymentId: modal.pay.id })}
           </>
         )}
       </Modal>

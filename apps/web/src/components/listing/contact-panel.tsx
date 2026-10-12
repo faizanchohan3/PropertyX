@@ -252,7 +252,7 @@ function LeadModal({ mode, open, onClose, onSubmit, busy, err, user, price, purp
       >
         {mode === "offer" && (
           <div>
-            <label className="label" htmlFor="o-amt">Your offer (PKR){purpose === "rent" ? " per month" : ""}</label>
+            <label className="label" htmlFor="o-amt">Your offer ({COUNTRY.currency}){purpose === "rent" ? " per month" : ""}</label>
             <input id="o-amt" inputMode="numeric" className="input text-lg font-semibold" value={offer} onChange={(e) => setOffer(e.target.value.replace(/\D/g, ""))} required />
             <p className="mt-1 text-xs text-slate-500">
               {Number(offer) > 0 && `${formatPKR(Number(offer))} — ${Math.round((Number(offer) / price) * 100)}% of the asking price (${formatPKR(price)})`}

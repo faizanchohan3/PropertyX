@@ -11,6 +11,7 @@ const iso = (v: unknown) => (v == null ? null : v instanceof Date ? v.toISOStrin
 export const CARD_COLUMNS = sql`
   l.id, l.slug, l.reference_code, l.title, l.purpose, l.status, l.price, l.previous_price, l.price_reduced_at, l.rent_period,
   l.price_per_sqft, l.verification_level, l.is_premium, l.installment_available, l.video_url is not null as has_video,
+  l.details->>'completionStatus' as completion_status, (l.details->>'permitNumber') is not null as has_permit,
   (l.featured_until is not null and l.featured_until > now()) as is_featured,
   l.published_at, l.updated_at, l.views_count, l.saves_count, l.is_seed,
   p.type, p.area_value, p.area_unit, p.area_sqft, p.beds, p.baths, p.lat, p.lng,
@@ -61,6 +62,8 @@ export function mapCard(r: Row): ListingCard {
     isPremium: !!r.is_premium,
     installmentAvailable: !!r.installment_available,
     hasVideo: !!r.has_video,
+    completionStatus: (r.completion_status as ListingCard["completionStatus"]) ?? null,
+    hasPermit: !!r.has_permit,
     publishedAt: iso(r.published_at),
     updatedAt: iso(r.updated_at)!,
     viewsCount: Number(r.views_count ?? 0),
@@ -155,6 +158,8 @@ export class PostgresListingSearch implements ListingSearchEngine {
     if (q.hasVideo) w.push(sql`l.video_url is not null`);
     if (q.hasTour) w.push(sql`l.tour_url is not null`);
     if (q.installments) w.push(sql`l.installment_available = true`);
+    if (q.completion === "off_plan") w.push(sql`l.details->>'completionStatus' = 'off_plan'`);
+    if (q.completion === "ready") w.push(sql`coalesce(l.details->>'completionStatus', 'ready') = 'ready'`);
     if (q.agent) w.push(sql`l.agent_id = ${q.agent}`);
     if (q.agency) w.push(sql`l.agency_id = ${q.agency}`);
     if (q.owner) w.push(sql`l.posted_by_id = ${q.owner}`);

@@ -75,7 +75,7 @@ export default async function PriceIndexPage({ searchParams }: Props) {
       </form>
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label="Price per marla" value={s.pricePerMarla ? formatPKR(s.pricePerMarla) : "—"} hint={s.pricePerSqft ? `PKR ${s.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
+        <Stat label="Price per marla" value={s.pricePerMarla ? formatPKR(s.pricePerMarla) : "—"} hint={s.pricePerSqft ? `${COUNTRY.currency} ${s.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
         <Stat label="Average asking price" value={s.avgPrice ? formatPKR(s.avgPrice) : "—"} />
         <div className="card p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Price change</p>

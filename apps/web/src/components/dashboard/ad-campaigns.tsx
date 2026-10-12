@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2, MousePointerClick, Eye, Wallet } from "lucide-react";
-import { AD_FORMATS, formatPKR } from "@propertyx/shared";
+import { AD_FORMATS, formatPKR, COUNTRY } from "@propertyx/shared";
 import { api, fieldError } from "@/lib/client";
 import { Modal, FieldError, FormError } from "../modal";
 import { StatusPill } from "../badges";
@@ -147,7 +147,7 @@ export function AdCampaigns({ ads, targets, gateways }: { ads: Ad[]; targets: Ta
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="label" htmlFor="ad-budget">Budget (PKR)</label>
+              <label className="label" htmlFor="ad-budget">Budget ({COUNTRY.currency})</label>
               <input id="ad-budget" type="number" min={5000} step={1000} className="input" value={f.budget} onChange={set("budget")} />
               <FieldError msg={fieldError(err, "budget")} />
             </div>

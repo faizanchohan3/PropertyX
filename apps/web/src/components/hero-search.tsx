@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Map as MapIcon } from "lucide-react";
-import { serializeSearchQuery, PROPERTY_TYPES, TYPE_GROUPS, type SearchQuery, type PropertyType, isUAE } from "@propertyx/shared";
+import { serializeSearchQuery, LISTABLE_TYPES, TYPE_GROUPS, type SearchQuery, type PropertyType, isUAE } from "@propertyx/shared";
 import { CITY_LINKS } from "./nav-data";
 import { useT } from "./i18n";
 import { LocationAutocomplete } from "./location-autocomplete";
@@ -59,9 +59,9 @@ const PRICE_SALE = isUAE ? AE_PRICE_SALE : PK_PRICE_SALE;
 const PRICE_RENT = isUAE ? AE_PRICE_RENT : PK_PRICE_RENT;
 
 function typesFor(tab: Tab) {
-  if (tab === "plots") return PROPERTY_TYPES.filter((t) => t.category === "plot" || t.category === "agricultural");
-  if (tab === "commercial") return PROPERTY_TYPES.filter((t) => t.category === "commercial" || t.key === "commercial_plot");
-  return PROPERTY_TYPES.filter((t) => t.category === "residential");
+  if (tab === "plots") return LISTABLE_TYPES.filter((t) => t.category === "plot" || t.category === "agricultural");
+  if (tab === "commercial") return LISTABLE_TYPES.filter((t) => t.category === "commercial" || t.key === "commercial_plot");
+  return LISTABLE_TYPES.filter((t) => t.category === "residential");
 }
 
 export function HeroSearch() {

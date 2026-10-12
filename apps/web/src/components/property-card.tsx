@@ -28,6 +28,7 @@ export function PropertyCard({ l, saved = false, layout = "grid", priority = fal
           {l.isFeatured && <FeaturedBadge />}
           {l.isPremium && <PremiumBadge />}
           {reduced && <PriceReducedBadge />}
+          {l.completionStatus === "off_plan" && <span className="badge bg-violet-600 text-white">Off-plan</span>}
         </div>
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/55 to-transparent p-3 pt-10">
           <span className="flex items-center gap-2 text-xs font-medium text-white">

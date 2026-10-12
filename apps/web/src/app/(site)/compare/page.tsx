@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Scale, X } from "lucide-react";
 import { createSearchEngine } from "@propertyx/search";
-import { PROPERTY_TYPE_LABELS, formatArea, formatPKR, listingPath } from "@propertyx/shared";
+import { PROPERTY_TYPE_LABELS, formatArea, formatPKR, listingPath, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { priceLabel } from "@/components/property-card";
 
@@ -25,7 +25,7 @@ export default async function ComparePage({ searchParams }: Props) {
 
   const rows: { label: string; cell: (o: (typeof ordered)[number]) => React.ReactNode; best?: (o: (typeof ordered)[number]) => boolean }[] = [
     { label: "Price", cell: (o) => priceLabel(o), best: (o) => o.price === cheapest },
-    { label: "Price per sq ft", cell: (o) => (o.pricePerSqft ? `PKR ${Math.round(o.pricePerSqft).toLocaleString()}` : "—"), best: (o) => o.pricePerSqft === bestPpsf },
+    { label: "Price per sq ft", cell: (o) => (o.pricePerSqft ? `${COUNTRY.currency} ${Math.round(o.pricePerSqft).toLocaleString()}` : "—"), best: (o) => o.pricePerSqft === bestPpsf },
     { label: "Size", cell: (o) => `${formatArea(o.areaValue, o.areaUnit)} (${Math.round(o.areaSqft).toLocaleString()} sq ft)`, best: (o) => o.areaSqft === biggest },
     { label: "Type", cell: (o) => PROPERTY_TYPE_LABELS[o.type] ?? o.type },
     { label: "Bedrooms", cell: (o) => o.beds ?? "—" },

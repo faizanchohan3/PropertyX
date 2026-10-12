@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BedDouble, Bath, Maximize, Car, Building2, CalendarClock, Layers, Sofa, Hammer, Hash, Clock, CheckCircle2, ShieldAlert, Calculator, TrendingUp } from "lucide-react";
+import { BedDouble, Bath, Maximize, Car, Building2, CalendarClock, Layers, Sofa, Hammer, Hash, Clock, CheckCircle2, ShieldAlert, Calculator, TrendingUp, HardHat, Receipt, Wallet, BadgeCheck, Landmark } from "lucide-react";
 import { getBoundaries, getListingDetail, similarListings } from "@propertyx/core";
-import { formatPKR, formatArea, formatPriceWords, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, CONDITION_LABELS, FEATURE_GROUP_LABELS, verificationInfo, describeSqft, truncate, isUAE } from "@propertyx/shared";
+import { formatPKR, formatArea, formatPriceWords, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, CONDITION_LABELS, FEATURE_GROUP_LABELS, verificationInfo, describeSqft, truncate, isUAE, COUNTRY, COMPLETION_LABELS, formatHandover, annualServiceCharge } from "@propertyx/shared";
 import { db, getUser, appUrl } from "@/lib/server";
 import { savedIdsFor } from "@/lib/queries";
 import { Gallery } from "@/components/listing/gallery";
@@ -49,6 +49,9 @@ export default async function PropertyPage({ params }: Props) {
   const areaLabel = formatArea(p.areaValue, p.areaUnit);
   const v = verificationInfo(l.verificationLevel);
   const location = [d.block?.name, d.area?.name, d.city.name].filter(Boolean).join(", ");
+  const det = l.details ?? {};
+  const offPlan = l.purpose === "sale" && det.completionStatus === "off_plan";
+  const serviceYear = annualServiceCharge(det.serviceChargePerSqft, p.areaSqft);
   const groups = d.features.reduce<Record<string, string[]>>((acc, f) => ((acc[f.group] ??= []).push(f.label), acc), {});
   const facts = [
     { icon: Building2, label: "Type", value: PROPERTY_TYPE_LABELS[p.type] },
@@ -61,8 +64,14 @@ export default async function PropertyPage({ params }: Props) {
     p.furnishing && { icon: Sofa, label: "Furnishing", value: FURNISHING_LABELS[p.furnishing] },
     p.condition && { icon: Hammer, label: "Condition", value: CONDITION_LABELS[p.condition] },
     p.yearBuilt && { icon: CalendarClock, label: "Built", value: String(p.yearBuilt) },
+    l.purpose === "sale" && det.completionStatus && { icon: HardHat, label: "Completion", value: COMPLETION_LABELS[det.completionStatus] },
+    offPlan && det.handoverDate && { icon: CalendarClock, label: "Handover", value: formatHandover(det.handoverDate)! },
+    offPlan && det.paymentPlan && { icon: Wallet, label: "Payment plan", value: det.paymentPlan },
+    det.developer && { icon: Building2, label: "Developer", value: det.developer },
+    det.serviceChargePerSqft && { icon: Receipt, label: "Service charge", value: `${COUNTRY.currency} ${det.serviceChargePerSqft}/sq ft${serviceYear ? ` (≈ ${formatPKR(serviceYear)}/yr)` : ""}` },
+    l.purpose === "rent" && det.cheques && { icon: Receipt, label: "Cheques", value: det.cheques === 1 ? "1 (full payment)" : `Up to ${det.cheques}` },
     { icon: Hash, label: "Reference", value: l.referenceCode },
-    l.publishedAt && { icon: Clock, label: "Listed", value: l.publishedAt.toLocaleDateString("en-PK", { dateStyle: "medium" }) },
+    l.publishedAt && { icon: Clock, label: "Listed", value: l.publishedAt.toLocaleDateString(COUNTRY.locale, { dateStyle: "medium" }) },
   ].filter(Boolean) as { icon: typeof Building2; label: string; value: string }[];
   const base = appUrl();
   const purposeLabel = l.purpose === "sale" ? "Buy" : "Rent";
@@ -91,6 +100,12 @@ export default async function PropertyPage({ params }: Props) {
         {d.isFeatured && <FeaturedBadge />}
         {l.isPremium && <PremiumBadge />}
         {reduced && <PriceReducedBadge />}
+        {offPlan && <span className="badge bg-violet-50 text-violet-700 ring-1 ring-violet-200">Off-plan</span>}
+        {det.permitNumber && (
+          <span className="badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+            <BadgeCheck className="h-3.5 w-3.5" /> Permit
+          </span>
+        )}
         {recentlyUpdated && <span className="badge bg-sky-50 text-sky-700 ring-1 ring-sky-200">Recently Updated</span>}
         {l.isSeed && <DemoBadge />}
       </div>
@@ -106,14 +121,18 @@ export default async function PropertyPage({ params }: Props) {
               <div>
                 <p className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
                   {formatPKR(l.price)}
-                  {l.purpose === "rent" && <span className="text-lg font-semibold text-slate-500"> / month</span>}
+                  {l.purpose === "rent" && <span className="text-lg font-semibold text-slate-500"> / {l.rentPeriod === "yearly" ? "year" : "month"}</span>}
                 </p>
                 {reduced && (
                   <p className="mt-1 text-sm">
                     <span className="text-slate-400 line-through">{formatPKR(l.previousPrice!)}</span> <span className="font-semibold text-red-600">Reduced by {formatPriceWords(l.previousPrice! - l.price)}</span>
                   </p>
                 )}
-                {l.pricePerSqft && l.purpose === "sale" && <p className="mt-1 text-sm text-slate-500">PKR {Math.round(l.pricePerSqft).toLocaleString()} per sq ft · {formatPKR(l.pricePerSqft * 225)} per marla</p>}
+                {l.pricePerSqft && l.purpose === "sale" && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {COUNTRY.currency} {Math.round(l.pricePerSqft).toLocaleString()} per sq ft{!isUAE && ` · ${formatPKR(l.pricePerSqft * 225)} per marla`}
+                  </p>
+                )}
               </div>
               {l.installmentAvailable && l.advanceAmount && (
                 <div className="rounded-xl bg-gold-50 px-4 py-2 text-sm ring-1 ring-gold-200">
@@ -172,6 +191,29 @@ export default async function PropertyPage({ params }: Props) {
             <h2 className="mb-3 text-lg font-bold">Description</h2>
             <ReadMore text={l.description} />
           </section>
+
+          {isUAE && (det.permitNumber || det.brn || det.orn) && (
+            <section className="card p-6">
+              <h2 className="mb-1 flex items-center gap-2 text-lg font-bold">
+                <Landmark className="h-5 w-5 text-brand-600" /> Regulatory information
+              </h2>
+              <p className="mb-4 text-sm text-slate-500">As provided by the advertiser. Check the permit on the land department&apos;s app (DLD / Trakheesi in Dubai, ADREC in Abu Dhabi) before paying anything.</p>
+              <dl className="grid gap-4 sm:grid-cols-3">
+                {[
+                  ["Permit number", det.permitNumber],
+                  ["Agent BRN", det.brn],
+                  ["Office ORN", det.orn],
+                ]
+                  .filter(([, v]) => v)
+                  .map(([k, v]) => (
+                    <div key={k}>
+                      <dt className="text-xs text-slate-500">{k}</dt>
+                      <dd className="font-mono font-semibold text-slate-900">{v}</dd>
+                    </div>
+                  ))}
+              </dl>
+            </section>
+          )}
 
           {Object.keys(groups).length > 0 && (
             <section className="card p-6">
@@ -305,7 +347,7 @@ export default async function PropertyPage({ params }: Props) {
           url: `${base}/property/${l.slug}`,
           datePosted: l.publishedAt?.toISOString(),
           image: d.images.slice(0, 5).map((i) => i.url),
-          offers: { "@type": "Offer", price: l.price, priceCurrency: "PKR", availability: l.status === "active" ? "https://schema.org/InStock" : "https://schema.org/SoldOut", businessFunction: l.purpose === "rent" ? "https://purl.org/goodrelations/v1#LeaseOut" : "https://purl.org/goodrelations/v1#Sell" },
+          offers: { "@type": "Offer", price: l.price, priceCurrency: COUNTRY.currency, availability: l.status === "active" ? "https://schema.org/InStock" : "https://schema.org/SoldOut", businessFunction: l.purpose === "rent" ? "https://purl.org/goodrelations/v1#LeaseOut" : "https://purl.org/goodrelations/v1#Sell" },
           about: {
             "@type": p.type === "flat" || p.type === "apartment" || p.type === "penthouse" ? "Apartment" : p.category === "residential" ? "SingleFamilyResidence" : "Place",
             numberOfRooms: p.beds ?? undefined,

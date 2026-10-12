@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, uuid, integer, boolean, timestamp, index, uniqueIndex, doublePrecision, bigint, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt, isSeed, tsvector, numericNumber } from "./_helpers";
 import { users } from "./identity";
+import type { ListingDetails } from "@propertyx/shared";
 import { cities, areas, societies, blocks, locations } from "./locations";
 import { purposeEnum, propertyTypeEnum, propertyCategoryEnum, listingStatusEnum, furnishingEnum, conditionEnum, areaUnitEnum, mediaKindEnum } from "./enums";
 
@@ -77,6 +78,8 @@ export const propertyListings = pgTable(
     title: text("title").notNull(),
     description: text("description").notNull(),
     highlights: jsonb("highlights").$type<string[]>().default([]),
+    /** market-specific extras (UAE: permit/BRN/ORN, off-plan, handover, service charge, cheques) */
+    details: jsonb("details").$type<ListingDetails>().notNull().default({}),
     price: bigint("price", { mode: "number" }).notNull(),
     previousPrice: bigint("previous_price", { mode: "number" }),
     priceReducedAt: timestamp("price_reduced_at", { withTimezone: true }),

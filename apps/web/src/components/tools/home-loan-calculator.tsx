@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { calculateFinancing, formatPKR, formatPKRFull, FINANCING_MAX_PROFIT_PCT, type FinancingProduct } from "@propertyx/shared";
+import { calculateFinancing, formatPKR, formatPKRFull, FINANCING_MAX_PROFIT_PCT, type FinancingProduct, COUNTRY } from "@propertyx/shared";
 
 export function HomeLoanCalculator({ products }: { products: FinancingProduct[] }) {
   const [productKey, setProductKey] = useState(products[0].key);
@@ -46,7 +46,7 @@ export function HomeLoanCalculator({ products }: { products: FinancingProduct[] 
           <p className="mt-2 text-xs text-slate-500">{product.description}</p>
         </div>
         <div>
-          <label className="label" htmlFor="hl-price">Property price (PKR)</label>
+          <label className="label" htmlFor="hl-price">Property price ({COUNTRY.currency})</label>
           <input id="hl-price" className="input" type="number" min={0} step={100000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
           {propertyPrice > 0 && <p className="mt-1 text-xs text-slate-500">{formatPKR(propertyPrice)}</p>}
         </div>
