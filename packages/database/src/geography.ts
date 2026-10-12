@@ -6,7 +6,7 @@
  * before it has localities or listings.
  */
 import { sql, inArray } from "drizzle-orm";
-import { slugify as slug } from "@propertyx/shared";
+import { slugify as slug, isUAE } from "@propertyx/shared";
 import type { Database } from "./client";
 import { provinces, cities, locations, areas, societies } from "./schema";
 
@@ -290,15 +290,99 @@ export const PAKISTAN_LOCALITIES: Record<string, LocalityRow[]> = {
   ],
 };
 
+
+/* ---------------- UAE (used when NEXT_PUBLIC_COUNTRY=ae) ---------------- */
+
+/** Emirates (stored as provinces) and their main cities. Coordinates are approximate centroids. */
+export const UAE_CITIES: Record<string, CityRow[]> = {
+  Dubai: [["Dubai", 25.2048, 55.2708]],
+  "Abu Dhabi": [["Abu Dhabi", 24.4539, 54.3773], ["Al Ain", 24.2075, 55.7447]],
+  Sharjah: [["Sharjah", 25.3463, 55.4209]],
+  Ajman: [["Ajman", 25.4052, 55.5136]],
+  "Ras Al Khaimah": [["Ras Al Khaimah", 25.8007, 55.9762]],
+  Fujairah: [["Fujairah", 25.1288, 56.3265]],
+  "Umm Al Quwain": [["Umm Al Quwain", 25.5647, 55.5552]],
+};
+const UAE_MAJOR = ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Al Ain", "Fujairah", "Umm Al Quwain"];
+
+/**
+ * Well-known UAE communities, keyed by city slug. "society" = master-planned / gated community,
+ * "area" = district. Coordinates are approximate; admins can refine outlines in Admin → Areas.
+ */
+export const UAE_LOCALITIES: Record<string, LocalityRow[]> = {
+  dubai: [
+    ["Dubai Marina", "area", 25.0805, 55.1403],
+    ["Downtown Dubai", "area", 25.1972, 55.2744],
+    ["Business Bay", "area", 25.1865, 55.2637],
+    ["Jumeirah Village Circle", "society", 25.059, 55.209],
+    ["Jumeirah Lake Towers", "society", 25.0693, 55.1418],
+    ["Palm Jumeirah", "society", 25.1124, 55.139],
+    ["Dubai Hills Estate", "society", 25.115, 55.245],
+    ["Arabian Ranches", "society", 25.0559, 55.2683],
+    ["Damac Hills", "society", 25.023, 55.251],
+    ["Town Square", "society", 24.995, 55.3],
+    ["Motor City", "society", 25.048, 55.238],
+    ["Dubai Sports City", "society", 25.04, 55.22],
+    ["Dubai Silicon Oasis", "society", 25.1218, 55.3772],
+    ["International City", "society", 25.164, 55.409],
+    ["Al Barsha", "area", 25.1036, 55.2003],
+    ["Jumeirah", "area", 25.21, 55.255],
+    ["Deira", "area", 25.2697, 55.3095],
+    ["Bur Dubai", "area", 25.255, 55.292],
+    ["Mirdif", "area", 25.22, 55.42],
+    ["Al Nahda Dubai", "area", 25.29, 55.37],
+  ],
+  "abu-dhabi": [
+    ["Al Reem Island", "area", 24.499, 54.404],
+    ["Saadiyat Island", "area", 24.542, 54.435],
+    ["Yas Island", "area", 24.488, 54.605],
+    ["Al Raha Beach", "area", 24.45, 54.6],
+    ["Khalifa City", "area", 24.419, 54.577],
+    ["Mohammed Bin Zayed City", "area", 24.348, 54.544],
+    ["Al Reef", "society", 24.45, 54.68],
+    ["Corniche Abu Dhabi", "area", 24.476, 54.346],
+  ],
+  "al-ain": [
+    ["Al Jimi", "area", 24.237, 55.732],
+    ["Al Muwaiji", "area", 24.205, 55.708],
+  ],
+  sharjah: [
+    ["Al Majaz", "area", 25.327, 55.388],
+    ["Al Khan", "area", 25.322, 55.364],
+    ["Al Taawun", "area", 25.315, 55.378],
+    ["Al Nahda Sharjah", "area", 25.302, 55.373],
+    ["Muwaileh", "area", 25.299, 55.46],
+    ["Aljada", "society", 25.308, 55.463],
+  ],
+  ajman: [
+    ["Al Nuaimiya", "area", 25.398, 55.456],
+    ["Al Rashidiya", "area", 25.4, 55.44],
+    ["Al Jurf", "area", 25.416, 55.496],
+    ["Emirates City", "society", 25.4, 55.56],
+  ],
+  "ras-al-khaimah": [
+    ["Al Hamra Village", "society", 25.689, 55.781],
+    ["Al Marjan Island", "area", 25.67, 55.735],
+    ["Mina Al Arab", "society", 25.724, 55.825],
+  ],
+  fujairah: [["Al Faseel", "area", 25.129, 56.348]],
+  "umm-al-quwain": [["Al Salamah", "area", 25.51, 55.58]],
+};
+
+/** Geography for this deployment's country. */
+const COUNTRY_CITIES = isUAE ? UAE_CITIES : PAKISTAN_CITIES;
+const COUNTRY_MAJOR = isUAE ? UAE_MAJOR : MAJOR;
+const COUNTRY_LOCALITIES = isUAE ? UAE_LOCALITIES : PAKISTAN_LOCALITIES;
+
 export async function syncGeography(db: Database) {
-  const provinceNames = Object.keys(PAKISTAN_CITIES);
+  const provinceNames = Object.keys(COUNTRY_CITIES);
   await db.insert(provinces).values(provinceNames.map((name) => ({ name, slug: slug(name) }))).onConflictDoNothing({ target: provinces.slug });
   const provRows = await db.select({ id: provinces.id, name: provinces.name, slug: provinces.slug }).from(provinces);
   const provBySlug = new Map(provRows.map((p) => [p.slug, p]));
 
-  const cityValues = Object.entries(PAKISTAN_CITIES).flatMap(([prov, list]) =>
+  const cityValues = Object.entries(COUNTRY_CITIES).flatMap(([prov, list]) =>
     list.map(([name, lat, lng]) => {
-      const major = MAJOR.indexOf(name);
+      const major = COUNTRY_MAJOR.indexOf(name);
       return { provinceId: provBySlug.get(slug(prov))!.id, name, slug: slug(name), lat, lng, isMajor: major >= 0, sortOrder: major >= 0 ? 50 + major : 1000 };
     }),
   );
@@ -318,14 +402,14 @@ export async function syncGeography(db: Database) {
   await syncLocalities(db);
 }
 
-/** Inserts PAKISTAN_LOCALITIES that are missing; existing rows (matched by slug) are left untouched. */
+/** Inserts the country's localities that are missing; existing rows (matched by slug) are left untouched. */
 async function syncLocalities(db: Database) {
-  const citySlugs = Object.keys(PAKISTAN_LOCALITIES);
+  const citySlugs = Object.keys(COUNTRY_LOCALITIES);
   const cityRows = await db.select({ id: cities.id, name: cities.name, slug: cities.slug }).from(cities).where(inArray(cities.slug, citySlugs));
   const cityLocs = await db.select({ id: locations.id, refId: locations.refId }).from(locations).where(inArray(locations.refId, cityRows.map((c) => c.id)));
   for (const city of cityRows) {
     const parentId = cityLocs.find((l) => l.refId === city.id)?.id ?? null;
-    for (const [name, kind, lat, lng] of PAKISTAN_LOCALITIES[city.slug]) {
+    for (const [name, kind, lat, lng] of COUNTRY_LOCALITIES[city.slug]) {
       const base = slug(name);
       const locSlug = base.includes(city.slug) ? base : `${base}-${city.slug}`;
       const table = kind === "area" ? areas : societies;

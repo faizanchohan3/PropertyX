@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUp, Expand, Loader2, MapPin, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
-import { formatArea, formatPKR } from "@propertyx/shared";
+import { formatArea, formatPKR, isUAE } from "@propertyx/shared";
 import { api } from "@/lib/client";
 import { useT } from "../i18n";
 
@@ -11,7 +11,9 @@ type Ranked = { listing: { id: string; slug: string; title: string; price: numbe
 type Resp = { reply: string; criteria: Record<string, unknown>; total: number; results: Ranked[]; followUps: string[]; searchUrl: string; sessionId?: string };
 type Msg = { role: "user"; text: string } | { role: "assistant"; data: Resp };
 
-const STARTERS = ["10 marla house in Lahore under 5 crore", "2 bed flat for rent in Islamabad", "Plots on installments in Multan"];
+const STARTERS = isUAE
+  ? ["2 bed apartment in Dubai Marina under AED 2M", "Villa for rent in Dubai Hills", "Off-plan apartment in Business Bay"]
+  : ["10 marla house in Lahore under 5 crore", "2 bed flat for rent in Islamabad", "Plots on installments in Multan"];
 
 /** Compact floating version of the AI assistant (same API as /ai). */
 export function FloatingAssistant() {
@@ -95,7 +97,9 @@ export function FloatingAssistant() {
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4">
             <div className="max-w-[90%] rounded-2xl rounded-ss-md bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
-              {t("Assalam o Alaikum! Tell me what you're looking for — budget in lakh or crore, size in marla, city or area — and I'll find matching listings.")}
+              {isUAE
+                ? "Hello! Tell me what you're looking for — budget in AED, size in sq ft, emirate or community — and I'll find matching listings."
+                : t("Assalam o Alaikum! Tell me what you're looking for — budget in lakh or crore, size in marla, city or area — and I'll find matching listings.")}
             </div>
             {msgs.length === 0 && (
               <div className="flex flex-col items-start gap-2">
@@ -121,7 +125,7 @@ export function FloatingAssistant() {
                         <span className="flex items-baseline justify-between gap-2">
                           <span className="text-sm font-bold text-slate-900">
                             {formatPKR(r.listing.price)}
-                            {r.listing.purpose === "rent" ? "/mo" : ""}
+                            {r.listing.purpose === "rent" ? (isUAE ? "/yr" : "/mo") : ""}
                           </span>
                           <span className="shrink-0 text-[11px] font-semibold text-brand-700">{t("{n}% match", { n: r.score })}</span>
                         </span>

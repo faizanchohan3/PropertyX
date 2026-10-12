@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import Link from "next/link";
 
 /** Bismillah mark: a home with an arched gold doorway and a crescent. Keep in sync with public/icon.svg. */
@@ -16,14 +17,14 @@ export function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
 
 export function Logo({ dark = false, compact = false }: { dark?: boolean; compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2" aria-label="Bismillah Pakistan home">
+    <Link href="/" className="flex items-center gap-2" aria-label={`${COUNTRY.brand} home`}>
       <LogoMark />
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className={`text-lg font-extrabold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>
             Bismillah
           </span>
-          <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-slate-400" : "text-slate-500"}`}>Pakistan</span>
+          <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-slate-400" : "text-slate-500"}`}>{COUNTRY.brandTag}</span>
         </span>
       )}
     </Link>

@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Search } from "lucide-react";
@@ -7,7 +8,7 @@ import { CITY_LINKS } from "@/components/nav-data";
 import { AgentCard } from "@/components/directory/cards";
 
 export const metadata: Metadata = {
-  title: "Property agents in Pakistan",
+  title: `Property agents in ${COUNTRY.inName}`,
   description: "Find verified real estate agents by city, with their listings, experience, areas and client reviews.",
   alternates: { canonical: "/agents" },
 };

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SlidersHorizontal, X, Search, Map as MapIcon } from "lucide-react";
-import { PROPERTY_TYPES, FEATURES, FURNISHING_LABELS, CONDITION_LABELS, serializeSearchQuery, AREA_UNIT_LABELS, type SearchQuery, type PropertyType, type AreaUnit } from "@propertyx/shared";
+import { PROPERTY_TYPES, FEATURES, FURNISHING_LABELS, CONDITION_LABELS, serializeSearchQuery, AREA_UNIT_LABELS, type SearchQuery, type PropertyType, type AreaUnit, COUNTRY } from "@propertyx/shared";
 import { LocationAutocomplete } from "../location-autocomplete";
 import { CITY_LINKS } from "../nav-data";
 
@@ -98,8 +98,8 @@ export function SearchFilters({ initial, locationLabel, total }: { initial: Sear
         <div className="grid grid-cols-[1fr_1fr_110px] gap-2">
           <input className="input" inputMode="decimal" placeholder="Min" aria-label="Minimum area" value={q.areaMin ?? ""} onChange={(e) => set({ areaMin: e.target.value ? Number(e.target.value) : undefined })} />
           <input className="input" inputMode="decimal" placeholder="Max" aria-label="Maximum area" value={q.areaMax ?? ""} onChange={(e) => set({ areaMax: e.target.value ? Number(e.target.value) : undefined })} />
-          <select className="input" aria-label="Area unit" value={q.areaUnit ?? "marla"} onChange={(e) => set({ areaUnit: e.target.value as AreaUnit })}>
-            {(["marla", "kanal", "sqft", "sqyd", "acre"] as AreaUnit[]).map((u) => (
+          <select className="input" aria-label="Area unit" value={q.areaUnit ?? COUNTRY.defaultAreaUnit} onChange={(e) => set({ areaUnit: e.target.value as AreaUnit })}>
+            {COUNTRY.areaUnits.map((u) => (
               <option key={u} value={u}>
                 {AREA_UNIT_LABELS[u]}
               </option>

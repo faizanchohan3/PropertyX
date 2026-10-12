@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import Link from "next/link";
 import { Logo } from "./logo";
 import { CITY_LINKS } from "./nav-data";
@@ -44,7 +45,7 @@ export async function Footer() {
       <div className="container-px grid gap-10 py-14 md:grid-cols-[1.3fr_repeat(4,1fr)]">
         <div>
           <Logo dark />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">{t("Pakistan's intelligent property marketplace — verified listings, transparent pricing data and AI that explains every match.")}</p>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">{t(`${COUNTRY.name}'s intelligent property marketplace — verified listings, transparent pricing data and AI that explains every match.`)}</p>
         </div>
         {cols.map((c) => (
           <div key={c.title}>
@@ -63,7 +64,7 @@ export async function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-px flex flex-col gap-2 py-6 text-xs text-slate-500 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} Bismillah Pakistan. {t("All rights reserved.")}</p>
+          <p>© {new Date().getFullYear()} {COUNTRY.brand}. {t("All rights reserved.")}</p>
           <p>{t("Prices and estimates are indicative. Always verify ownership documents before paying.")}</p>
         </div>
       </div>

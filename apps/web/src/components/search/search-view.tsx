@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Map as MapIcon, Sparkles } from "lucide-react";
 import { createSearchEngine } from "@propertyx/search";
 import { trackSearch, serveAds } from "@propertyx/core";
-import { PROPERTY_TYPE_LABELS, serializeSearchQuery, type SearchQuery } from "@propertyx/shared";
+import { PROPERTY_TYPE_LABELS, serializeSearchQuery, type SearchQuery, COUNTRY } from "@propertyx/shared";
 import { db, getUser, appUrl } from "@/lib/server";
 import { savedIdsFor } from "@/lib/queries";
 import { PropertyCard } from "../property-card";
@@ -13,7 +13,7 @@ import { SortSelect, SaveSearchButton } from "./toolbar";
 export function searchTitle(q: SearchQuery, ctx: { city?: { name: string }; location?: { name: string; fullName: string } }) {
   const typeLabel = q.types?.length === 1 ? `${PROPERTY_TYPE_LABELS[q.types[0]]}s` : q.types?.every((t) => t.includes("plot") || t === "agricultural_land") ? "Plots" : q.types?.length ? "Properties" : "Properties";
   const purpose = q.purpose === "rent" ? "for Rent" : q.purpose === "sale" ? "for Sale" : "";
-  const where = ctx.location?.name ?? ctx.city?.name ?? "Pakistan";
+  const where = ctx.location?.name ?? ctx.city?.name ?? `${COUNTRY.inName}`;
   return `${typeLabel.replace("ys", "ies").replace(/ss$/, "s")} ${purpose} in ${where}`.replace(/\s+/g, " ");
 }
 

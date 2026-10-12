@@ -4,7 +4,7 @@
  * Idempotent — safe to run on every deploy (`npm run db:seed -- --reference-only`).
  */
 import { sql } from "drizzle-orm";
-import { ROLES, PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, FEATURES, DEFAULT_FINANCING_PRODUCTS, type ConstructionRates } from "@propertyx/shared";
+import { isUAE, ROLES, PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, FEATURES, DEFAULT_FINANCING_PRODUCTS, type ConstructionRates } from "@propertyx/shared";
 import type { Database } from "./client";
 import { syncGeography } from "./geography";
 import { roles, permissions, rolePermissions, features, subscriptionPlans, siteSettings, constructionRates } from "./schema";
@@ -114,8 +114,10 @@ export const PLANS = [
 export const DEFAULT_SETTINGS: Record<string, unknown> = {
   homepage: {
     heroTitle: "Find a Place You'll Love to Call Home.",
-    heroSubtitle: "Search verified homes, plots and commercial property across Pakistan — with AI that explains every match.",
-    featuredCities: ["lahore", "islamabad", "karachi", "rawalpindi", "multan", "faisalabad", "gujranwala", "peshawar"],
+    heroSubtitle: isUAE
+      ? "Search verified apartments, villas and commercial property across the UAE — with AI that explains every match."
+      : "Search verified homes, plots and commercial property across Pakistan — with AI that explains every match.",
+    featuredCities: isUAE ? ["dubai", "abu-dhabi", "sharjah", "ajman", "ras-al-khaimah", "al-ain", "fujairah", "umm-al-quwain"] : ["lahore", "islamabad", "karachi", "rawalpindi", "multan", "faisalabad", "gujranwala", "peshawar"],
     sections: { featured: true, projects: true, recommended: true, cities: true, tools: true, guides: true, agents: true },
     announcement: "",
   },

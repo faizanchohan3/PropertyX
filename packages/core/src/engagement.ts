@@ -4,7 +4,7 @@ import * as s from "@propertyx/database";
 import { notify } from "@propertyx/notifications";
 import { rateLimit } from "@propertyx/auth";
 import { qualifyLead } from "@propertyx/ai";
-import { leadInputSchema, appointmentInputSchema, messageInputSchema, leadUpdateSchema, appointmentUpdateSchema, formatPKR, LEAD_STATUSES } from "@propertyx/shared";
+import { leadInputSchema, appointmentInputSchema, messageInputSchema, leadUpdateSchema, appointmentUpdateSchema, formatPKR, LEAD_STATUSES, COUNTRY } from "@propertyx/shared";
 import { badRequest, forbidden, notFound, requireActor, tooMany, type Actor } from "./errors";
 import { messageSpamScore } from "./fraud";
 import { getSetting } from "./settings";
@@ -371,7 +371,7 @@ export async function requestVisit(db: Database, actor: Actor | null, raw: unkno
   const parsed = appointmentInputSchema.safeParse(raw);
   if (!parsed.success) throw badRequest("Please choose a valid date and time", parsed.error.flatten());
   const input = parsed.data;
-  const when = new Date(`${input.date}T${input.time}:00+05:00`); // Pakistan Standard Time
+  const when = new Date(`${input.date}T${input.time}:00${COUNTRY.utcOffset}`); // local time of the deployment's country
   if (when.getTime() < Date.now() + 30 * 60_000) throw badRequest("Choose a time at least 30 minutes from now");
   if (when.getTime() > Date.now() + 60 * 86400_000) throw badRequest("Visits can be booked up to 60 days ahead");
   const hour = Number(input.time.slice(0, 2));
@@ -458,7 +458,7 @@ export async function visitsIcs(db: Database, actor: Actor) {
   const visits = (await listVisits(db, actor)).filter((v) => ["requested", "confirmed"].includes(v.status));
   const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const esc = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Bismillah Pakistan//Visits//EN", "CALSCALE:GREGORIAN"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", `PRODID:-//${COUNTRY.brand}//Visits//EN`, "CALSCALE:GREGORIAN"];
   for (const v of visits) {
     const start = new Date(v.scheduledAt);
     const end = new Date(start.getTime() + v.durationMins * 60_000);

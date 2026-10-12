@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, Loader2, Sparkles, Upload, Trash2, ArrowUp, ArrowDown, AlertTriangle, ImagePlus, Home, KeyRound } from "lucide-react";
-import { PROPERTY_TYPES, FEATURES, FEATURE_GROUP_LABELS, FURNISHING_LABELS, CONDITION_LABELS, AREA_UNIT_LABELS, formatPKR, formatArea, propertyTypeInfo, type AreaUnit } from "@propertyx/shared";
+import { PROPERTY_TYPES, FEATURES, FEATURE_GROUP_LABELS, FURNISHING_LABELS, CONDITION_LABELS, AREA_UNIT_LABELS, formatPKR, formatArea, propertyTypeInfo, type AreaUnit, COUNTRY, isMobileNumber } from "@propertyx/shared";
 import { api, ApiError } from "@/lib/client";
 import { toast } from "../toast";
 import type { MapMarker } from "../map/leaflet-map";
@@ -76,7 +76,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     monthlyInstallment: null,
     installmentsRemaining: null,
     areaValue: null,
-    areaUnit: "marla",
+    areaUnit: COUNTRY.defaultAreaUnit,
     beds: null,
     baths: null,
     parkingSpaces: null,
@@ -171,7 +171,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
     }
     if (s === 8) {
       if (d.contactName.trim().length < 2) e.contactName = "Enter a contact name";
-      if (!/^(\+92|0)3\d{2}\s?-?\d{7}$/.test(d.contactPhone.replace(/\s/g, ""))) e.contactPhone = "Enter a valid mobile number, e.g. 0300 1234567";
+      if (!isMobileNumber(d.contactPhone)) e.contactPhone = `Enter a valid mobile number, e.g. ${COUNTRY.phone.example}`;
     }
     if (s === 9) {
       if (d.title.trim().length < 10) e.title = "Title should be at least 10 characters";
@@ -481,7 +481,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
               <div>
                 <label className="label" htmlFor="w-unit">Unit</label>
                 <select id="w-unit" className="input" value={d.areaUnit} onChange={(e) => set({ areaUnit: e.target.value as AreaUnit })}>
-                  {(["marla", "kanal", "sqft", "sqyd", "acre", "sqm"] as AreaUnit[]).map((u) => (
+                  {COUNTRY.areaUnits.map((u) => (
                     <option key={u} value={u}>
                       {AREA_UNIT_LABELS[u]}
                     </option>

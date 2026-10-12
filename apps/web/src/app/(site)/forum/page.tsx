@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MessageCircle, Pin, Search } from "lucide-react";
 import { listThreads } from "@propertyx/core";
-import { FORUM_CATEGORIES } from "@propertyx/shared";
+import { FORUM_CATEGORIES, COUNTRY } from "@propertyx/shared";
 import { db, getUser } from "@/lib/server";
 import { AskForm } from "@/components/forum/forms";
 
 export const metadata: Metadata = {
   title: "Property community forum",
-  description: "Ask questions about buying, renting, investing, legal documents and construction in Pakistan, and get answers from owners and agents.",
+  description: `Ask questions about buying, renting, investing, legal documents and construction in ${COUNTRY.inName}, and get answers from owners and agents.`,
   alternates: { canonical: "/forum" },
 };
 
@@ -28,7 +28,7 @@ export default async function ForumPage({ searchParams }: Props) {
     <div className="container-px py-12">
       <div className="max-w-2xl">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Community forum</h1>
-        <p className="mt-3 text-slate-500">Ask anything about property in Pakistan and get answers from owners, tenants and agents.</p>
+        <p className="mt-3 text-slate-500">Ask anything about property in {COUNTRY.inName} and get answers from owners, tenants and agents.</p>
       </div>
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AREA_UNITS, AREA_UNIT_LABELS, CONDITIONS, CONDITION_LABELS, PROPERTY_TYPES, formatPKR, type AreaUnit, type Condition, type PropertyType } from "@propertyx/shared";
+import { AREA_UNIT_LABELS, CONDITIONS, CONDITION_LABELS, PROPERTY_TYPES, formatPKR, type AreaUnit, type Condition, type PropertyType, COUNTRY } from "@propertyx/shared";
 import { listAreaDirectory, valueProperty } from "@propertyx/core";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
@@ -9,7 +9,7 @@ import { AutoSubmitSelect } from "@/components/tools/auto-submit-select";
 
 export const metadata: Metadata = {
   title: "What's my property worth? — free property valuation",
-  description: "Get an indicative value for your house, flat or plot in Pakistan from comparable listings in the same area, with a price range and confidence level.",
+  description: `Get an indicative value for your house, flat or plot in ${COUNTRY.inName} from comparable listings in the same area, with a price range and confidence level.`,
   alternates: { canonical: "/tools/property-value" },
 };
 
@@ -19,9 +19,9 @@ const VALUE_TYPES = PROPERTY_TYPES.filter((t) => !["room", "plot_file", "other"]
 
 export default async function PropertyValuePage({ searchParams }: Props) {
   const sp = await searchParams;
-  const city = CITY_LINKS.find((c) => c.slug === sp.city)?.slug ?? "lahore";
+  const city = CITY_LINKS.find((c) => c.slug === sp.city)?.slug ?? CITY_LINKS[0].slug;
   const type = (VALUE_TYPES.find((t) => t.key === sp.type)?.key ?? "house") as PropertyType;
-  const unit = (AREA_UNITS.includes(sp.unit as AreaUnit) ? sp.unit : "marla") as AreaUnit;
+  const unit = (COUNTRY.areaUnits.includes(sp.unit as AreaUnit) ? sp.unit : COUNTRY.defaultAreaUnit) as AreaUnit;
   const purpose = sp.purpose === "rent" ? "rent" : "sale";
   const condition = CONDITIONS.includes(sp.condition as Condition) ? (sp.condition as Condition) : undefined;
   const areaValue = Number(sp.area);
@@ -85,9 +85,9 @@ export default async function PropertyValuePage({ searchParams }: Props) {
           <div>
             <label className="label" htmlFor="pv-area">Size</label>
             <div className="flex gap-2">
-              <input id="pv-area" name="area" className="input" type="number" min={0} step="any" required defaultValue={sp.area ?? "10"} />
+              <input id="pv-area" name="area" className="input" type="number" min={0} step="any" required defaultValue={sp.area ?? (COUNTRY.defaultAreaUnit === "marla" ? "10" : "1500")} />
               <select name="unit" defaultValue={unit} className="input w-32 shrink-0" aria-label="Unit">
-                {AREA_UNITS.map((u) => (
+                {COUNTRY.areaUnits.map((u) => (
                   <option key={u} value={u}>{AREA_UNIT_LABELS[u]}</option>
                 ))}
               </select>

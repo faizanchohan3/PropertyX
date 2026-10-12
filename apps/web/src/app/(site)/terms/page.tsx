@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { StaticPage } from "@/components/static-page";
@@ -7,7 +8,7 @@ export const metadata: Metadata = { title: "Terms of use", alternates: { canonic
 export default function TermsPage() {
   return (
     <StaticPage title="Terms of use" updated="October 2026">
-      <p>These terms apply when you use Bismillah Pakistan (“we”, “the site”). By using the site you agree to them.</p>
+      <p>These terms apply when you use {COUNTRY.brand} (“we”, “the site”). By using the site you agree to them.</p>
       <h2>What we do</h2>
       <p>We provide a platform where owners, agents, agencies and developers list property, and where buyers and tenants search and contact them. We are not a party to any sale or rental agreement, and we do not own the properties listed unless stated.</p>
       <h2>Your account</h2>

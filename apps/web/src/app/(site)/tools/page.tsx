@@ -1,10 +1,11 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Calculator, Flame, Hammer, Landmark, LineChart, MapPinned, Ruler, Sparkles, TrendingUp, type LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Free property calculators and tools",
-  description: "Free calculators for Pakistani property: valuation, investment, home finance, installment plans, construction cost and area units.",
+  description: `Free calculators for ${COUNTRY.adjective} property: valuation, investment, home finance, installment plans, construction cost and area units.`,
   alternates: { canonical: "/tools" },
 };
 
@@ -26,7 +27,7 @@ export default function ToolsPage() {
     <div className="container-px py-12">
       <div className="max-w-2xl">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Smarter decisions</h1>
-        <p className="mt-3 text-slate-500">Free calculators and market data built for Pakistani property.</p>
+        <p className="mt-3 text-slate-500">Free calculators and market data built for {COUNTRY.adjective} property.</p>
       </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {TOOLS.map((t) => (

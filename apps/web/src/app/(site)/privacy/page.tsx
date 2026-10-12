@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { StaticPage } from "@/components/static-page";
@@ -7,7 +8,7 @@ export const metadata: Metadata = { title: "Privacy policy", alternates: { canon
 export default function PrivacyPage() {
   return (
     <StaticPage title="Privacy policy" updated="October 2026">
-      <p>This policy explains what information Bismillah Pakistan collects and how it is used.</p>
+      <p>This policy explains what information {COUNTRY.brand} collects and how it is used.</p>
       <h2>What we collect</h2>
       <ul>
         <li><strong>Account details</strong> — name, email, phone number and the role you choose.</li>

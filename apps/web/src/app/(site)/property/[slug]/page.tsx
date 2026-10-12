@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BedDouble, Bath, Maximize, Car, Building2, CalendarClock, Layers, Sofa, Hammer, Hash, Clock, CheckCircle2, ShieldAlert, Calculator, TrendingUp } from "lucide-react";
 import { getBoundaries, getListingDetail, similarListings } from "@propertyx/core";
-import { formatPKR, formatArea, formatPriceWords, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, CONDITION_LABELS, FEATURE_GROUP_LABELS, verificationInfo, describeSqft, truncate } from "@propertyx/shared";
+import { formatPKR, formatArea, formatPriceWords, PROPERTY_TYPE_LABELS, FURNISHING_LABELS, CONDITION_LABELS, FEATURE_GROUP_LABELS, verificationInfo, describeSqft, truncate, isUAE } from "@propertyx/shared";
 import { db, getUser, appUrl } from "@/lib/server";
 import { savedIdsFor } from "@/lib/queries";
 import { Gallery } from "@/components/listing/gallery";
@@ -222,7 +222,7 @@ export default async function PropertyPage({ params }: Props) {
               <li>Never pay token money before visiting and checking ownership documents.</li>
               <li>Pay only by bank transfer or pay order in the registered owner's name.</li>
               <li>
-                Read our <Link href="/blog/verify-property-documents-pakistan" className="text-brand-700 underline">document checklist</Link>.
+                Read our <Link href={isUAE ? "/safety" : "/blog/verify-property-documents-pakistan"} className="text-brand-700 underline">{isUAE ? "safety tips" : "document checklist"}</Link>.
               </li>
             </ul>
           </section>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Search } from "lucide-react";
 import { listProjects } from "@propertyx/core";
-import { PROJECT_STATUSES, PROJECT_STATUS_LABELS, UNIT_TYPES } from "@propertyx/shared";
+import { PROJECT_STATUSES, PROJECT_STATUS_LABELS, UNIT_TYPES, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { ProjectCard } from "@/components/directory/cards";
@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
   const name = cityName(city?.[0]);
   return {
-    title: name ? `New projects in ${name}` : "New projects in Pakistan",
-    description: `Apartments, villas and plots in new housing projects${name ? ` in ${name}` : " across Pakistan"}, with payment plans, construction progress and developer details.`,
+    title: name ? `New projects in ${name}` : `New projects in ${COUNTRY.inName}`,
+    description: `Apartments, villas and plots in new housing projects${name ? ` in ${name}` : " across ${COUNTRY.inName}"}, with payment plans, construction progress and developer details.`,
     alternates: { canonical: name ? `/projects/${city![0]}` : "/projects" },
   };
 }

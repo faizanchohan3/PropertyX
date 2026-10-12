@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Map as MapIcon } from "lucide-react";
-import { serializeSearchQuery, PROPERTY_TYPES, TYPE_GROUPS, type SearchQuery, type PropertyType } from "@propertyx/shared";
+import { serializeSearchQuery, PROPERTY_TYPES, TYPE_GROUPS, type SearchQuery, type PropertyType, isUAE } from "@propertyx/shared";
 import { CITY_LINKS } from "./nav-data";
 import { useT } from "./i18n";
 import { LocationAutocomplete } from "./location-autocomplete";
@@ -17,7 +17,7 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
-const PRICE_SALE = [
+const PK_PRICE_SALE = [
   { v: "", l: "Any" },
   { v: "5000000", l: "50 Lakh" },
   { v: "10000000", l: "1 Crore" },
@@ -27,7 +27,7 @@ const PRICE_SALE = [
   { v: "100000000", l: "10 Crore" },
   { v: "200000000", l: "20 Crore" },
 ];
-const PRICE_RENT = [
+const PK_PRICE_RENT = [
   { v: "", l: "Any" },
   { v: "25000", l: "25 Thousand" },
   { v: "50000", l: "50 Thousand" },
@@ -35,6 +35,28 @@ const PRICE_RENT = [
   { v: "200000", l: "2 Lakh" },
   { v: "500000", l: "5 Lakh" },
 ];
+// UAE: sale prices in AED, rents quoted per year
+const AE_PRICE_SALE = [
+  { v: "", l: "Any" },
+  { v: "500000", l: "500K" },
+  { v: "1000000", l: "1M" },
+  { v: "2000000", l: "2M" },
+  { v: "3500000", l: "3.5M" },
+  { v: "5000000", l: "5M" },
+  { v: "10000000", l: "10M" },
+  { v: "20000000", l: "20M" },
+];
+const AE_PRICE_RENT = [
+  { v: "", l: "Any" },
+  { v: "40000", l: "40K / yr" },
+  { v: "60000", l: "60K / yr" },
+  { v: "90000", l: "90K / yr" },
+  { v: "120000", l: "120K / yr" },
+  { v: "200000", l: "200K / yr" },
+  { v: "350000", l: "350K / yr" },
+];
+const PRICE_SALE = isUAE ? AE_PRICE_SALE : PK_PRICE_SALE;
+const PRICE_RENT = isUAE ? AE_PRICE_RENT : PK_PRICE_RENT;
 
 function typesFor(tab: Tab) {
   if (tab === "plots") return PROPERTY_TYPES.filter((t) => t.category === "plot" || t.category === "agricultural");
@@ -46,7 +68,7 @@ export function HeroSearch() {
   const router = useRouter();
   const tr = useT();
   const [tab, setTab] = useState<Tab>("buy");
-  const [city, setCity] = useState("lahore");
+  const [city, setCity] = useState(CITY_LINKS[0].slug);
   const [loc, setLoc] = useState<{ slug: string; label: string } | null>(null);
   const [type, setType] = useState("");
   const [priceMin, setPriceMin] = useState("");
@@ -128,7 +150,7 @@ export function HeroSearch() {
                 setLoc(s ? { slug: s.slug, label: s.name } : null);
                 if (s?.citySlug) setCity(s.citySlug);
               }}
-              placeholder={tr("e.g. DHA Phase 6, Bahria Town, F-11")}
+              placeholder={tr(isUAE ? "e.g. Dubai Marina, JVC, Al Reem Island" : "e.g. DHA Phase 6, Bahria Town, F-11")}
             />
           </div>
           {tab !== "projects" ? (

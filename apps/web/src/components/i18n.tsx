@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Languages } from "lucide-react";
+import { COUNTRY } from "@propertyx/shared";
 import { LANG_COOKIE, makeT, type Lang, type TFunc } from "@/lib/i18n";
 
 const LangContext = createContext<Lang>("en");
@@ -23,6 +24,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
   const lang = useLang();
   const router = useRouter();
   const [pending, start] = useTransition();
+  if (COUNTRY.altLang !== "ur") return null;
   const next: Lang = lang === "ur" ? "en" : "ur";
   return (
     <button

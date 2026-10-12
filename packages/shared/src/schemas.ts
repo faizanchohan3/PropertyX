@@ -1,15 +1,24 @@
 import { z } from "zod";
+import { COUNTRY } from "./country";
 import { FEATURES, FURNISHING, CONDITIONS, PROPERTY_TYPE_KEYS, PURPOSES, REPORT_REASONS, APPOINTMENT_STATUSES, LEAD_STATUSES, NOTIFICATION_CHANNELS } from "./constants";
 import { AREA_UNITS } from "./units";
 import { SELF_SERVICE_ROLES } from "./permissions";
 
-/** Pakistani mobile: 03XXXXXXXXX or +923XXXXXXXXX. Normalised to +923XXXXXXXXX */
-export const pkPhone = z
-  .string()
-  .trim()
-  .transform((s) => s.replace(/[\s-]/g, ""))
-  .refine((s) => /^(\+92|0092|92|0)3\d{9}$/.test(s), "Enter a valid Pakistani mobile number, e.g. 0300 1234567")
-  .transform((s) => "+92" + s.replace(/^(\+92|0092|92|0)/, ""));
+/** Mobile number for the deployment's country, normalised to E.164 (+923001234567 / +971501234567). */
+export const pkPhone = COUNTRY.code === "ae"
+  ? z
+      .string()
+      .trim()
+      .transform((s) => s.replace(/[\s-]/g, ""))
+      .refine((s) => /^(\+971|00971|971|0)5\d{8}$/.test(s), `Enter a valid ${COUNTRY.phone.label}, e.g. ${COUNTRY.phone.example}`)
+      .transform((s) => "+971" + s.replace(/^(\+971|00971|971|0)/, ""))
+  : z
+      .string()
+      .trim()
+      .transform((s) => s.replace(/[\s-]/g, ""))
+      .refine((s) => /^(\+92|0092|92|0)3\d{9}$/.test(s), "Enter a valid Pakistani mobile number, e.g. 0300 1234567")
+      .transform((s) => "+92" + s.replace(/^(\+92|0092|92|0)/, ""));
+export const phoneSchema = pkPhone;
 
 export const optionalPkPhone = z.union([z.literal("").transform(() => undefined), pkPhone]).optional();
 
@@ -66,8 +75,8 @@ export const listingInputSchema = z.object({
   societyId: z.string().uuid().optional().nullable(),
   blockId: z.string().uuid().optional().nullable(),
   address: z.string().trim().max(200).optional().default(""),
-  lat: z.coerce.number().min(23).max(38).optional().nullable(),
-  lng: z.coerce.number().min(60).max(78).optional().nullable(),
+  lat: z.coerce.number().min(COUNTRY.map.bounds.south).max(COUNTRY.map.bounds.north).optional().nullable(),
+  lng: z.coerce.number().min(COUNTRY.map.bounds.west).max(COUNTRY.map.bounds.east).optional().nullable(),
   price: z.coerce.number().int().positive("Enter a price").max(1e12),
   rentPeriod: z.enum(["monthly", "yearly"]).optional().nullable(),
   installmentAvailable: z.boolean().default(false),

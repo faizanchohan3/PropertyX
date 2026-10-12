@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import { Home, Building, LandPlot, Store, Trees, HardHat, KeyRound, Sparkles, Calculator, TrendingUp, Landmark, Hammer, Scale, ArrowRight, ShieldCheck, BadgeCheck, LineChart, Building2, MapPinned, Ruler, Flame } from "lucide-react";
 import { createSearchEngine } from "@propertyx/search";
 import { listProjects, listPosts, recommendedFor, serveAds, getSetting, listAgents } from "@propertyx/core";
-import { formatPKR, PROJECT_STATUS_LABELS } from "@propertyx/shared";
+import { formatPKR, PROJECT_STATUS_LABELS, COUNTRY, isUAE } from "@propertyx/shared";
 import { db, getUser } from "@/lib/server";
 import { HeroSearch } from "@/components/hero-search";
 import { PropertyGrid } from "@/components/property-card";
@@ -16,15 +16,25 @@ import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 0;
 
-const CATEGORIES = [
-  { label: "Houses", href: "/buy/house", icon: Home },
-  { label: "Flats", href: "/buy/flat", icon: Building },
-  { label: "Plots", href: "/plots-for-sale", icon: LandPlot },
-  { label: "Commercial", href: "/commercial-property", icon: Store },
-  { label: "Farmhouses", href: "/buy/farmhouse", icon: Trees },
-  { label: "New Projects", href: "/projects", icon: HardHat },
-  { label: "Rentals", href: "/rent", icon: KeyRound },
-];
+const CATEGORIES = isUAE
+  ? [
+      { label: "Apartments", href: "/buy/apartment", icon: Building },
+      { label: "Villas", href: "/buy/villa", icon: Home },
+      { label: "Penthouses", href: "/buy/penthouse", icon: Building2 },
+      { label: "Off-plan", href: "/projects", icon: HardHat },
+      { label: "Commercial", href: "/commercial-property", icon: Store },
+      { label: "Plots", href: "/plots-for-sale", icon: LandPlot },
+      { label: "Rentals", href: "/rent", icon: KeyRound },
+    ]
+  : [
+      { label: "Houses", href: "/buy/house", icon: Home },
+      { label: "Flats", href: "/buy/flat", icon: Building },
+      { label: "Plots", href: "/plots-for-sale", icon: LandPlot },
+      { label: "Commercial", href: "/commercial-property", icon: Store },
+      { label: "Farmhouses", href: "/buy/farmhouse", icon: Trees },
+      { label: "New Projects", href: "/projects", icon: HardHat },
+      { label: "Rentals", href: "/rent", icon: KeyRound },
+    ];
 
 const TOOLS = [
   { label: "AI Property Assistant", desc: "Describe what you need in plain words.", href: "/ai", icon: Sparkles },
@@ -33,18 +43,18 @@ const TOOLS = [
   { label: "Home Finance", desc: "Conventional and Islamic financing.", href: "/tools/home-loan", icon: Landmark },
   { label: "Installment Planner", desc: "Full schedule for any payment plan.", href: "/tools/installment", icon: Calculator },
   { label: "Construction Cost", desc: "Grey structure to finishing, itemised.", href: "/tools/construction-cost", icon: Hammer },
-];
+].filter((x) => !isUAE || x.href !== "/tools/construction-cost");
 
 const EXPLORE = [
   { label: "New Projects", desc: "The best investment opportunities", href: "/projects", icon: Building2 },
   { label: "Construction Cost Calculator", desc: "Get construction cost estimate", href: "/tools/construction-cost", icon: Hammer },
   { label: "Home Loan Calculator", desc: "Find affordable loan packages", href: "/tools/home-loan", icon: Landmark },
-  { label: "Area Guides", desc: "Explore housing societies in Pakistan", href: "/areas", icon: MapPinned },
-  { label: "Plot Finder", desc: "Find plots in any housing society", href: "/map", icon: LandPlot },
+  { label: "Area Guides", desc: isUAE ? "Explore communities across the UAE" : "Explore housing societies in Pakistan", href: "/areas", icon: MapPinned },
+  { label: isUAE ? "Map Search" : "Plot Finder", desc: isUAE ? "Find homes in any community on the map" : "Find plots in any housing society", href: "/map", icon: LandPlot },
   { label: "Property Index", desc: "Track changes in real estate prices", href: "/price-index", icon: LineChart },
   { label: "Area Unit Converter", desc: "Convert any area unit instantly", href: "/tools/area-unit-converter", icon: Ruler },
   { label: "Property Trends", desc: "Find popular areas to buy property", href: "/trends", icon: Flame },
-];
+].filter((x) => !isUAE || x.href !== "/tools/construction-cost");
 
 export default async function HomePage() {
   const [user, t] = await Promise.all([getUser(), getT()]);
@@ -122,7 +132,7 @@ export default async function HomePage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <h2 className="section-title">{t("Featured properties")}</h2>
-              <p className="mt-1 text-slate-500">{t("Hand-picked and promoted listings across Pakistan")}</p>
+              <p className="mt-1 text-slate-500">{t(`Hand-picked and promoted listings across ${COUNTRY.inName}`)}</p>
             </div>
             <Link href="/search?purpose=sale" className="hidden items-center gap-1 text-sm font-semibold text-brand-700 sm:flex">
               View all <ArrowRight className="h-4 w-4" />
@@ -252,7 +262,7 @@ export default async function HomePage() {
       {homepage.sections.tools !== false && (
         <section className="container-px mt-16">
           <h2 className="section-title">{t("Smarter decisions")}</h2>
-          <p className="mb-6 mt-1 text-slate-500">{t("Free calculators built for Pakistani property")}</p>
+          <p className="mb-6 mt-1 text-slate-500">{t(`Free calculators built for ${COUNTRY.adjective} property`)}</p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {TOOLS.map(({ label, desc, href, icon: Icon }) => (
               <Link key={href} href={href} className="card group flex items-start gap-4 p-5 hover:border-brand-300">

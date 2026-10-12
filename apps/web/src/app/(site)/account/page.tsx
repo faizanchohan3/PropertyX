@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAccount } from "@propertyx/core";
-import { verificationInfo } from "@propertyx/shared";
+import { verificationInfo, COUNTRY } from "@propertyx/shared";
 import { requireUser, db } from "@/lib/server";
 import { allCities } from "@/lib/queries";
 import { ProfileForm, PhoneVerify, PasswordForm, RolesForm } from "@/components/account/account-forms";
@@ -34,7 +34,7 @@ export default async function AccountPage() {
       <div id="security" className="scroll-mt-24 space-y-6">
         <Panel title="Phone verification">
           <p className="mb-3 text-sm text-slate-600">A verified phone earns the phone-verified badge on your listings and lets you receive SMS and WhatsApp alerts.</p>
-          <PhoneVerify phone={(acc.user.phone ?? "").replace("+92", "0")} verified={!!acc.user.phoneVerifiedAt} />
+          <PhoneVerify phone={(acc.user.phone ?? "").replace(COUNTRY.phone.dial, "0")} verified={!!acc.user.phoneVerifiedAt} />
         </Panel>
         <Panel title="Password">
           <PasswordForm />

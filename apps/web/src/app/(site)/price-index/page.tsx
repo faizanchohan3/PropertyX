@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSetting, listAreaDirectory, priceIndex, propertyTrends } from "@propertyx/core";
-import { TYPE_GROUPS, areaPath, formatPKR } from "@propertyx/shared";
+import { TYPE_GROUPS, areaPath, formatPKR, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { IndexBars, IndexChart } from "@/components/market/index-chart";
 import { ChangePill, MarketDataNote, Stat } from "@/components/market/data-note";
 
 export const metadata: Metadata = {
-  title: "Property price index — Pakistan real estate prices",
-  description: "Track how property prices and rents are changing in Pakistan's cities, areas and housing societies, month by month.",
+  title: `Property price index — ${COUNTRY.inName} real estate prices`,
+  description: `Track how property prices and rents are changing in ${COUNTRY.name}'s cities, areas and housing societies, month by month.`,
   alternates: { canonical: "/price-index" },
 };
 
@@ -28,7 +28,7 @@ type Props = { searchParams: Promise<{ city?: string; location?: string; group?:
 
 export default async function PriceIndexPage({ searchParams }: Props) {
   const sp = await searchParams;
-  const city = CITY_LINKS.find((c) => c.slug === sp.city)?.slug ?? "lahore";
+  const city = CITY_LINKS.find((c) => c.slug === sp.city)?.slug ?? CITY_LINKS[0].slug;
   const group = GROUPS.find((g) => g.key === sp.group)?.key ?? "homes";
   const period = PERIODS.find((p) => p.key === sp.period)?.key ?? "monthly";
   const [areas, demo] = await Promise.all([listAreaDirectory(db, { city, perCity: 200 }), getSetting<boolean>(db, "demo_mode")]);

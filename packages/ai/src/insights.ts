@@ -1,4 +1,4 @@
-import { formatPKR, type InvestmentResult } from "@propertyx/shared";
+import { formatPKR, type InvestmentResult, COUNTRY } from "@propertyx/shared";
 import { tryLLM, getLLM, type JsonSchema, type DocumentInput } from "./providers";
 
 /* ------------------------------------------------------------------ */
@@ -132,7 +132,7 @@ export async function answerAreaQuestion(facts: AreaFacts, question: string): Pr
     p.generateText({
       effort: "low",
       maxTokens: 1500,
-      system: "You answer questions about a Pakistani neighbourhood using ONLY the facts given. Do not invent schools, landmarks, prices, crime figures or future developments. If the facts don't answer the question, say so and suggest checking with local agents. Under 150 words.",
+      system: `You answer questions about a ${COUNTRY.adjective} neighbourhood using ONLY the facts given. Do not invent schools, landmarks, prices, crime figures or future developments. If the facts don't answer the question, say so and suggest checking with local agents. Under 150 words.`,
       prompt: `Facts about ${facts.name}, ${facts.cityName}:\n${basics}\nMost listed types: ${facts.topTypes.map((t) => `${t.type} (${t.count})`).join(", ")}\n\nQuestion: ${question}`,
     }),
   );
@@ -197,7 +197,7 @@ export async function extractDocument(doc: DocumentInput): Promise<ExtractedDocu
       document: doc,
       effort: "low",
       maxTokens: 2000,
-      system: "You assist a property verification officer in Pakistan. Extract only what is clearly printed on the document. For any ID number return only the last 4 digits. If unreadable, set legible=false. Never guess.",
+      system: `You assist a property verification officer in ${COUNTRY.inName}. Extract only what is clearly printed on the document. For any ID number return only the last 4 digits. If unreadable, set legible=false. Never guess.`,
       prompt: "Extract the document fields.",
     });
   } catch (e) {

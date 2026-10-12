@@ -1,9 +1,10 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import { InvestmentCalculator } from "@/components/tools/investment-calculator";
 
 export const metadata: Metadata = {
   title: "Property investment calculator — yield, ROI and cash flow",
-  description: "Analyse a property investment in Pakistan: rental yield, cash flow, appreciation, ROI, break-even and a clear investment score.",
+  description: `Analyse a property investment in ${COUNTRY.inName}: rental yield, cash flow, appreciation, ROI, break-even and a clear investment score.`,
   alternates: { canonical: "/tools/investment" },
 };
 

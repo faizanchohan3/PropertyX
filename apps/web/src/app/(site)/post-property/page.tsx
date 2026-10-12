@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/server";
 import { allCities } from "@/lib/queries";
@@ -16,7 +17,7 @@ export default async function PostPropertyPage() {
         <p className="mt-1 text-slate-500">Free for owners. Takes about 5 minutes — your progress is saved on this device.</p>
       </div>
       {user.permissions.includes("listing.create") ? (
-        <ListingWizard cities={cities} contact={{ name: user.name, phone: user.phone?.replace("+92", "0") ?? "", email: user.email }} />
+        <ListingWizard cities={cities} contact={{ name: user.name, phone: user.phone?.replace(COUNTRY.phone.dial, "0") ?? "", email: user.email }} />
       ) : (
         <BecomeSeller />
       )}

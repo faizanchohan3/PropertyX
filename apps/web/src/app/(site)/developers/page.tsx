@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listDevelopers } from "@propertyx/core";
@@ -5,8 +6,8 @@ import { db } from "@/lib/server";
 import { DeveloperCard } from "@/components/directory/cards";
 
 export const metadata: Metadata = {
-  title: "Property developers in Pakistan",
-  description: "Builders and developers behind new housing and commercial projects in Pakistan, with their projects and track record.",
+  title: `Property developers in ${COUNTRY.inName}`,
+  description: `Builders and developers behind new housing and commercial projects in ${COUNTRY.inName}, with their projects and track record.`,
   alternates: { canonical: "/developers" },
 };
 

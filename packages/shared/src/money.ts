@@ -1,4 +1,10 @@
-/** PKR formatting and parsing using the South Asian numbering system (lakh / crore / arab). */
+/**
+ * Price formatting and parsing for the deployment's currency: PKR with the South Asian
+ * numbering system (lakh / crore / arab) in Pakistan, AED with thousands / millions in the UAE.
+ */
+import { COUNTRY } from "./country";
+
+const AED = COUNTRY.currency === "AED";
 
 export const LAKH = 100_000;
 export const CRORE = 10_000_000;
@@ -8,11 +14,16 @@ function trim(n: number, digits = 2) {
   return Number(n.toFixed(digits)).toString();
 }
 
-/** 25000000 -> "2.5 Crore", 4500000 -> "45 Lakh", 85000 -> "85 Thousand" */
+/** PK: 25000000 -> "2.5 Crore", 4500000 -> "45 Lakh". AE: 1250000 -> "1.25M", 85000 -> "85,000" */
 export function formatPriceWords(amount: number | null | undefined): string {
   if (amount == null || !Number.isFinite(amount)) return "—";
   const a = Math.abs(amount);
   const sign = amount < 0 ? "-" : "";
+  if (AED) {
+    if (a >= 1_000_000_000) return `${sign}${trim(a / 1_000_000_000)}B`;
+    if (a >= 1_000_000) return `${sign}${trim(a / 1_000_000)}M`;
+    return `${sign}${Math.round(a).toLocaleString("en-US")}`;
+  }
   if (a >= ARAB) return `${sign}${trim(a / ARAB)} Arab`;
   if (a >= CRORE) return `${sign}${trim(a / CRORE)} Crore`;
   if (a >= LAKH) return `${sign}${trim(a / LAKH)} Lakh`;
@@ -20,20 +31,27 @@ export function formatPriceWords(amount: number | null | undefined): string {
   return `${sign}${Math.round(a)}`;
 }
 
-/** "PKR 2.5 Crore" */
+/** "PKR 2.5 Crore" / "AED 1.25M". (Name kept for history: it formats the deployment's currency.) */
 export function formatPKR(amount: number | null | undefined): string {
   if (amount == null) return "Price on request";
-  return `PKR ${formatPriceWords(amount)}`;
+  return `${COUNTRY.currency} ${formatPriceWords(amount)}`;
 }
+export const formatPrice = formatPKR;
 
-/** Full digits with South Asian grouping: 25000000 -> "2,50,00,000" */
+/** Full digits: PK "PKR 2,50,00,000" (South Asian grouping), AE "AED 1,250,000" */
 export function formatPKRFull(amount: number): string {
-  return `PKR ${Math.round(amount).toLocaleString("en-IN")}`;
+  return `${COUNTRY.currency} ${Math.round(amount).toLocaleString(AED ? "en-US" : "en-IN")}`;
 }
+export const formatPriceFull = formatPKRFull;
 
-/** Compact for cards and map pins: "2.5Cr", "45L", "85K" */
+/** Compact for cards and map pins: PK "2.5Cr", "45L", "85K"; AE "1.25M", "85K" */
 export function formatPriceShort(amount: number): string {
   const a = Math.abs(amount);
+  if (AED) {
+    if (a >= 1_000_000) return `${trim(a / 1_000_000, a >= 10_000_000 ? 1 : 2)}M`;
+    if (a >= 1000) return `${trim(a / 1000, 0)}K`;
+    return String(Math.round(a));
+  }
   if (a >= CRORE) return `${trim(a / CRORE, a >= 10 * CRORE ? 0 : 2)}Cr`;
   if (a >= LAKH) return `${trim(a / LAKH, a >= 10 * LAKH ? 0 : 1)}L`;
   if (a >= 1000) return `${trim(a / 1000, 0)}K`;
@@ -44,6 +62,7 @@ const UNIT_MULTIPLIERS: [RegExp, number][] = [
   [/^(arab|arb)$/i, ARAB],
   [/^(crore|crores|cr|caror|karor|karod)$/i, CRORE],
   [/^(lakh|lakhs|lac|lacs|lak|l)$/i, LAKH],
+  [/^(billion|bn|b)$/i, 1_000_000_000],
   [/^(million|mn|m)$/i, 1_000_000],
   [/^(thousand|k|hazar|hazaar)$/i, 1_000],
 ];
@@ -53,7 +72,7 @@ const UNIT_MULTIPLIERS: [RegExp, number][] = [
  * Returns null when it can't be interpreted.
  */
 export function parsePrice(input: string): number | null {
-  const s = input.toLowerCase().replace(/pkr|rs\.?|rupees?/g, "").trim();
+  const s = input.toLowerCase().replace(/pkr|aed|dhs?\.?|dirhams?|rs\.?|rupees?/g, "").trim();
   const m = s.match(/^([\d.,]+)\s*([a-z]+)?$/);
   if (!m) return null;
   const num = Number(m[1].replace(/,/g, ""));
@@ -64,7 +83,7 @@ export function parsePrice(input: string): number | null {
 }
 
 export function formatNumber(n: number, digits = 0) {
-  return n.toLocaleString("en-PK", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  return n.toLocaleString(COUNTRY.locale, { maximumFractionDigits: digits, minimumFractionDigits: digits });
 }
 
 export function formatPercent(n: number, digits = 1) {

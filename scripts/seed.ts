@@ -2,14 +2,12 @@
  * npm run db:seed                 -> wipe + reference data + demo data + post-processing
  * npm run db:seed -- --reference-only   -> only idempotent reference data (safe for production)
  */
+import "./load-env";
 import { createDb } from "@propertyx/database";
+import { COUNTRY } from "@propertyx/shared";
 import { syncReferenceData } from "@propertyx/database/reference";
 import { seedDemo } from "@propertyx/database/seed/index";
 import { postSeed } from "./post-seed";
-import { existsSync } from "node:fs";
-
-// variables already set in the shell win over .env
-if (existsSync(".env")) process.loadEnvFile(".env");
 
 async function main() {
   const url = process.env.DIRECT_URL || process.env.DATABASE_URL || "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx";
@@ -18,11 +16,14 @@ async function main() {
   try {
     if (process.argv.includes("--reference-only")) {
       await syncReferenceData(db);
-      console.log("✔ reference data synced");
+      console.log(`✔ reference data synced (${COUNTRY.name})`);
       return;
     }
     if (process.env.NODE_ENV === "production" && !process.argv.includes("--force")) {
       throw new Error("Refusing to load demo data in production. Use --reference-only, or --force if you really mean it.");
+    }
+    if (COUNTRY.code !== "pk") {
+      throw new Error(`The demo data is Pakistani sample listings. For the ${COUNTRY.name} site run: npm run db:reference`);
     }
     await seedDemo(db);
     await postSeed(db);

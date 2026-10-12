@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { getSetting } from "@propertyx/core";
-import { DEFAULT_FINANCING_PRODUCTS, type FinancingProduct } from "@propertyx/shared";
+import { DEFAULT_FINANCING_PRODUCTS, type FinancingProduct, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { HomeLoanCalculator } from "@/components/tools/home-loan-calculator";
 
 export const metadata: Metadata = {
   title: "Home loan & Islamic financing calculator",
-  description: "Work out your monthly installment for a conventional home loan, Diminishing Musharakah, Ijarah or Murabaha in Pakistan, with a year-by-year repayment schedule.",
+  description: `Work out your monthly installment for a conventional home loan, Diminishing Musharakah, Ijarah or Murabaha in ${COUNTRY.inName}, with a year-by-year repayment schedule.`,
   alternates: { canonical: "/tools/home-loan" },
 };
 

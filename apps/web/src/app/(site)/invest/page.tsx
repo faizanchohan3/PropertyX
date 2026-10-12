@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Building2, Coins, Flame, Percent, Sprout, TrendingUp, Wallet, type LucideIcon } from "lucide-react";
 import { investmentOpportunities, type Opportunity } from "@propertyx/core";
-import { areaPath, formatPKR, projectPath, searchPath } from "@propertyx/shared";
+import { areaPath, formatPKR, projectPath, searchPath, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { ProjectCard } from "@/components/directory/cards";
 import { MarketDataNote } from "@/components/market/data-note";
 
 export const metadata: Metadata = {
-  title: "Property investment opportunities in Pakistan",
+  title: `Property investment opportunities in ${COUNTRY.inName}`,
   description: "Areas with the best rental yields, fastest price growth, affordable entry prices and installment plans, worked out from live listings.",
   alternates: { canonical: "/invest" },
 };
@@ -30,7 +30,7 @@ export default async function InvestPage({ searchParams }: Props) {
   const city = CITY_LINKS.find((c) => c.slug === sp.city)?.slug;
   const data = await investmentOpportunities(db, { city });
   const cats = data.categories as Record<string, Opportunity[]>;
-  const cityName = city ? CITY_LINKS.find((c) => c.slug === city)!.name : "Pakistan";
+  const cityName = city ? CITY_LINKS.find((c) => c.slug === city)!.name : `${COUNTRY.inName}`;
 
   return (
     <div className="container-px py-12">
@@ -131,7 +131,7 @@ export default async function InvestPage({ searchParams }: Props) {
       {data.overseasPicks.length > 0 && (
         <section className="mt-12">
           <h2 className="section-title">Ready or near completion</h2>
-          <p className="mb-5 mt-1 text-slate-500">Lower delivery risk, good for overseas Pakistanis</p>
+          <p className="mb-5 mt-1 text-slate-500">Lower delivery risk, good for buyers living abroad</p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {data.overseasPicks.map((p) => (
               <Link key={p.slug} href={projectPath(p.slug)} className="card flex items-center justify-between p-4 hover:border-brand-300">

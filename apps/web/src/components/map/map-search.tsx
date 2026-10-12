@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import type { Map as LMap, LayerGroup, Polygon, Circle, Polyline } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Pentagon, CircleDot, X, List, RefreshCw, MapPin, Loader2, SlidersHorizontal, Shapes } from "lucide-react";
-import { formatPriceShort, formatPKR, formatArea, parseSearchQuery, serializeSearchQuery, PROPERTY_TYPES, type SearchQuery } from "@propertyx/shared";
+import { formatPriceShort, formatPKR, formatArea, parseSearchQuery, serializeSearchQuery, PROPERTY_TYPES, type SearchQuery, COUNTRY } from "@propertyx/shared";
 import type { MapResult, ListingCard } from "@propertyx/search";
 
 type Boundary = { slug: string; name: string; kind: string; polygon: [number, number][]; source: "drawn" | "approximate"; activeListings: number };
@@ -89,8 +89,8 @@ export function MapSearch({ cities }: { cities: { slug: string; name: string; la
       if (cancelled || !el.current || map.current) return;
       L.current = leaflet;
       const city = cities.find((c) => c.slug === initial.city);
-      const center: [number, number] = initial.lat != null && initial.lng != null ? [initial.lat, initial.lng] : city ? [city.lat, city.lng] : [30.3753, 69.3451];
-      const m = leaflet.map(el.current, { center, zoom: initial.lat != null ? 13 : city ? 12 : 6, zoomControl: false });
+      const center: [number, number] = initial.lat != null && initial.lng != null ? [initial.lat, initial.lng] : city ? [city.lat, city.lng] : COUNTRY.map.center;
+      const m = leaflet.map(el.current, { center, zoom: initial.lat != null ? 13 : city ? 12 : COUNTRY.map.zoom, zoomControl: false });
       leaflet.control.zoom({ position: "bottomright" }).addTo(m);
       leaflet.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
       boundaryLayer.current = leaflet.layerGroup().addTo(m);

@@ -9,6 +9,7 @@ import { eq, sql } from "drizzle-orm";
 import type { Database } from "@propertyx/database";
 import * as s from "@propertyx/database";
 import { audit } from "@propertyx/auth";
+import { COUNTRY, inCountry } from "@propertyx/shared";
 import { badRequest, notFound, requirePerm, type Actor } from "./errors";
 import { clearSettingCache, getSetting } from "./settings";
 
@@ -111,7 +112,7 @@ export async function saveBoundary(db: Database, actor: Actor | null, slug: stri
     if (!Array.isArray(polygon) || polygon.length < 3 || polygon.length > 300) throw badRequest("Draw at least 3 points (and at most 300)");
     const clean = polygon.map((p) => {
       const [a, b] = Array.isArray(p) ? p.map(Number) : [NaN, NaN];
-      if (!(a > 23 && a < 38 && b > 60 && b < 78)) throw badRequest("Every point must be inside Pakistan");
+      if (!inCountry(a, b)) throw badRequest(`Every point must be inside ${COUNTRY.name}`);
       return [+a.toFixed(6), +b.toFixed(6)] as LatLng;
     });
     all[slug] = clean;

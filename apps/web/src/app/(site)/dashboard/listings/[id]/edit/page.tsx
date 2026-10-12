@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import { notFound } from "next/navigation";
 import { getListingForEdit, AppError } from "@propertyx/core";
 import { requirePermission, db } from "@/lib/server";
@@ -23,8 +24,8 @@ export default async function EditListing({ params }: { params: Promise<{ id: st
   const initial: Partial<WizardData> = {
     ...i,
     rentPeriod: (i.rentPeriod as WizardData["rentPeriod"]) ?? "monthly",
-    contactPhone: i.contactPhone.replace("+92", "0"),
-    contactWhatsapp: (i.contactWhatsapp ?? "").replace("+92", "0"),
+    contactPhone: i.contactPhone.replace(COUNTRY.phone.dial, "0"),
+    contactWhatsapp: (i.contactWhatsapp ?? "").replace(COUNTRY.phone.dial, "0"),
     media: i.media.map((m) => ({ ...m, kind: m.kind as "image" | "floor_plan" })),
   };
   return (

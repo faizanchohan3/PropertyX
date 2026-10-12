@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPinned, Search } from "lucide-react";
 import { listAreaDirectory } from "@propertyx/core";
-import { areaPath } from "@propertyx/shared";
+import { areaPath, COUNTRY, isUAE } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 
 export const metadata: Metadata = {
-  title: "Area guides — housing societies and neighbourhoods in Pakistan",
-  description: "Explore housing societies and neighbourhoods across Pakistan: prices, rents, listings, local agents and what it is like to live there.",
+  title: `Area guides — housing societies and neighbourhoods in ${COUNTRY.inName}`,
+  description: `Explore housing societies and neighbourhoods across ${COUNTRY.inName}: prices, rents, listings, local agents and what it is like to live there.`,
   alternates: { canonical: "/areas" },
 };
 
@@ -24,7 +24,7 @@ export default async function AreasPage({ searchParams }: Props) {
     <div className="container-px py-12">
       <div className="max-w-2xl">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Area guides</h1>
-        <p className="mt-3 text-slate-500">Prices, rents, listings and local agents for housing societies and neighbourhoods across Pakistan.</p>
+        <p className="mt-3 text-slate-500">Prices, rents, listings and local agents for housing societies and neighbourhoods across {COUNTRY.inName}.</p>
       </div>
       <form className="mt-6 flex max-w-2xl flex-col gap-2 sm:flex-row" action="/areas">
         <select name="city" defaultValue={city ?? ""} className="input sm:w-48" aria-label="City">
@@ -33,7 +33,7 @@ export default async function AreasPage({ searchParams }: Props) {
             <option key={c.slug} value={c.slug}>{c.name}</option>
           ))}
         </select>
-        <input name="q" defaultValue={query ?? ""} className="input" placeholder="Search an area or society, e.g. DHA, Bahria, F-11" aria-label="Area or society" />
+        <input name="q" defaultValue={query ?? ""} className="input" placeholder={isUAE ? "Search a community, e.g. Dubai Marina, JVC, Al Reem" : "Search an area or society, e.g. DHA, Bahria, F-11"} aria-label="Area or society" />
         <button className="btn-primary">
           <Search className="h-4 w-4" /> Search
         </button>

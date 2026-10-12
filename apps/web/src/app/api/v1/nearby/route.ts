@@ -1,3 +1,4 @@
+import { COUNTRY, inCountry } from "@propertyx/shared";
 import { route, json } from "@/lib/api";
 
 /**
@@ -34,7 +35,7 @@ async function overpass(query: string): Promise<OverpassResult> {
       const res = await fetch(url, {
         method: "POST",
         body: new URLSearchParams({ data: query }),
-        headers: { "user-agent": "Bismillah-Pakistan/1.0 (nearby places)", accept: "application/json" },
+        headers: { "user-agent": `Bismillah-${COUNTRY.inName}/1.0 (nearby places)`, accept: "application/json" },
         signal: AbortSignal.timeout(28_000),
         cache: "no-store",
       });
@@ -59,7 +60,7 @@ export const GET = route(async ({ req }) => {
   const lat = Number(req.nextUrl.searchParams.get("lat"));
   const lng = Number(req.nextUrl.searchParams.get("lng"));
   const radius = Math.min(3000, Math.max(300, Number(req.nextUrl.searchParams.get("radius") ?? 1500)));
-  if (!(lat > 23 && lat < 38 && lng > 60 && lng < 78)) return json({ error: { code: "bad_request", message: "Coordinates outside Pakistan" } }, 400);
+  if (!inCountry(lat, lng)) return json({ error: { code: "bad_request", message: `Coordinates outside ${COUNTRY.name}` } }, 400);
   const a = `(around:${radius},${lat.toFixed(5)},${lng.toFixed(5)})`;
   const r = `(around:${Math.round(radius * 1.5)},${lat.toFixed(5)},${lng.toFixed(5)})`;
   // few, broad statements keep public Overpass instances fast

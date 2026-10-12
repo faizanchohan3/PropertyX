@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Sparkles, ArrowUp, Loader2, MapPin, BedDouble, Maximize, Wallet, RotateCcw, ExternalLink, Info } from "lucide-react";
-import { formatPKR, formatArea } from "@propertyx/shared";
+import { formatPKR, formatArea, isUAE } from "@propertyx/shared";
 import { api } from "@/lib/client";
+
+const EXAMPLES = isUAE
+  ? ["2 bed apartment in Dubai Marina under AED 2M", "Villa for rent in Arabian Ranches", "Off-plan apartment in Business Bay with payment plan", "Studio for rent in JVC under 60K a year", "3 bed townhouse in Dubai Hills", "Apartment on Al Reem Island Abu Dhabi"]
+  : ["I have 2 crore budget and want a 10 marla house in Lahore", "5 marla house near DHA Lahore under 1.5 crore", "2 bed apartment for rent in E-11 Islamabad under 1.5 lakh", "Residential plot on installments in Multan", "Office for rent in Blue Area Islamabad", "Farmhouse near Bedian Road Lahore"];
 
 type Ranked = { listing: { id: string; slug: string; title: string; price: number; purpose: string; coverUrl: string | null; locationFullName: string | null; beds: number | null; areaValue: number; areaUnit: "marla"; verificationLevel: number; isSeed: boolean }; score: number; reasons: string[]; caveats: string[] };
 type Resp = {
@@ -34,7 +38,7 @@ function ResultCard({ r }: { r: Ranked }) {
         <div className="flex items-start justify-between gap-2">
           <p className="font-bold text-slate-900">
             {formatPKR(l.price)}
-            {l.purpose === "rent" ? "/mo" : ""}
+            {l.purpose === "rent" ? (isUAE ? "/yr" : "/mo") : ""}
           </p>
           <span className="badge shrink-0 bg-brand-50 text-brand-800" title="Match score">
             {r.score}% match
@@ -134,9 +138,9 @@ export function AssistantChat() {
               <Sparkles className="h-7 w-7" />
             </span>
             <h1 className="mt-5 text-3xl font-extrabold">AI Property Assistant</h1>
-            <p className="mx-auto mt-2 max-w-xl text-slate-500">Describe what you're looking for in plain words — budget in lakh or crore, size in marla or kanal, area, bedrooms. I'll search live listings and explain every match.</p>
+            <p className="mx-auto mt-2 max-w-xl text-slate-500">Describe what you're looking for in plain words — {isUAE ? "budget in AED, size in sq ft, community, bedrooms." : "budget in lakh or crore, size in marla or kanal, area, bedrooms."} I'll search live listings and explain every match.</p>
             <div className="mx-auto mt-6 grid max-w-2xl gap-2 sm:grid-cols-2">
-              {["I have 2 crore budget and want a 10 marla house in Lahore", "5 marla house near DHA Lahore under 1.5 crore", "2 bed apartment for rent in E-11 Islamabad under 1.5 lakh", "Residential plot on installments in Multan", "Office for rent in Blue Area Islamabad", "Farmhouse near Bedian Road Lahore"].map((e) => (
+              {EXAMPLES.map((e) => (
                 <button key={e} onClick={() => send(e)} className="card px-4 py-3 text-left text-sm text-slate-700 hover:border-brand-300">
                   {e}
                 </button>

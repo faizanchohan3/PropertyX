@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { ArrowLeftRight } from "lucide-react";
-import { AREA_UNITS, AREA_UNIT_LABELS, DEFAULT_MARLA_SQFT, fromSqft, toSqft, type AreaUnit } from "@propertyx/shared";
+import { AREA_UNITS, AREA_UNIT_LABELS, DEFAULT_MARLA_SQFT, fromSqft, toSqft, type AreaUnit, COUNTRY } from "@propertyx/shared";
+
+/** Pakistan uses marla / kanal; other markets get the international units only. */
+const UNITS: AreaUnit[] = COUNTRY.code === "pk" ? [...AREA_UNITS] : ["sqft", "sqm", "sqyd", "acre"];
 
 const MARLA_SIZES = [
   { sqft: DEFAULT_MARLA_SQFT, label: "225 sq ft", hint: "DHA, Bahria and most housing societies" },
@@ -12,9 +15,9 @@ const MARLA_SIZES = [
 const fmt = (n: number) => (n === 0 ? "0" : Math.abs(n) >= 1 ? n.toLocaleString("en-PK", { maximumFractionDigits: 2 }) : n.toLocaleString("en-PK", { maximumSignificantDigits: 4 }));
 
 export function AreaConverter() {
-  const [value, setValue] = useState("1");
-  const [from, setFrom] = useState<AreaUnit>("kanal");
-  const [to, setTo] = useState<AreaUnit>("marla");
+  const [value, setValue] = useState(COUNTRY.code === "pk" ? "1" : "1000");
+  const [from, setFrom] = useState<AreaUnit>(COUNTRY.code === "pk" ? "kanal" : "sqft");
+  const [to, setTo] = useState<AreaUnit>(COUNTRY.code === "pk" ? "marla" : "sqm");
   const [marla, setMarla] = useState(DEFAULT_MARLA_SQFT);
 
   const n = Number(value);
@@ -30,7 +33,7 @@ export function AreaConverter() {
             <div className="flex gap-2">
               <input id="ac-value" className="input" type="number" min={0} step="any" inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
               <select className="input w-28 shrink-0" value={from} onChange={(e) => setFrom(e.target.value as AreaUnit)} aria-label="From unit">
-                {AREA_UNITS.map((u) => (
+                {UNITS.map((u) => (
                   <option key={u} value={u}>{AREA_UNIT_LABELS[u]}</option>
                 ))}
               </select>
@@ -42,7 +45,7 @@ export function AreaConverter() {
           <div>
             <label className="label" htmlFor="ac-to">Convert to</label>
             <select id="ac-to" className="input" value={to} onChange={(e) => setTo(e.target.value as AreaUnit)}>
-              {AREA_UNITS.map((u) => (
+              {UNITS.map((u) => (
                 <option key={u} value={u}>{AREA_UNIT_LABELS[u]}</option>
               ))}
             </select>
@@ -56,6 +59,7 @@ export function AreaConverter() {
             {fmt(result)} {AREA_UNIT_LABELS[to]}
           </p>
         </div>
+        {COUNTRY.code === "pk" && (
         <div>
           <p className="label">Marla size</p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -68,6 +72,7 @@ export function AreaConverter() {
           </div>
           <p className="mt-2 text-xs text-slate-500">1 kanal = 20 marla. Check which marla size your society or land record uses.</p>
         </div>
+        )}
       </div>
 
       <div className="card overflow-hidden">
@@ -75,14 +80,14 @@ export function AreaConverter() {
           {fmt(n || 0)} {AREA_UNIT_LABELS[from]} in every unit
         </h2>
         <ul className="mt-3 divide-y divide-slate-100">
-          {AREA_UNITS.map((u) => (
+          {UNITS.map((u) => (
             <li key={u} className={`flex justify-between px-6 py-3 text-sm ${u === from ? "bg-slate-50" : ""}`}>
               <span className="text-slate-600">{AREA_UNIT_LABELS[u]}</span>
               <span className="font-semibold text-slate-900">{fmt(fromSqft(sqft, u, marla))}</span>
             </li>
           ))}
         </ul>
-        <p className="px-6 py-4 text-xs text-slate-400">Common sizes: 5 marla = {fmt(toSqft(5, "marla", marla))} sq ft · 10 marla = {fmt(toSqft(10, "marla", marla))} sq ft · 1 kanal = {fmt(toSqft(1, "kanal", marla))} sq ft</p>
+        {COUNTRY.code === "pk" && <p className="px-6 py-4 text-xs text-slate-400">Common sizes: 5 marla = {fmt(toSqft(5, "marla", marla))} sq ft · 10 marla = {fmt(toSqft(10, "marla", marla))} sq ft · 1 kanal = {fmt(toSqft(1, "kanal", marla))} sq ft</p>}
       </div>
     </div>
   );

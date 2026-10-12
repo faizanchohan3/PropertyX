@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Phone, MessageCircle, Mail, Star, Search, Flame, StickyNote, Loader2, UserPlus } from "lucide-react";
-import { LEAD_STATUSES, formatPKR } from "@propertyx/shared";
+import { LEAD_STATUSES, formatPKR, COUNTRY } from "@propertyx/shared";
 import { api } from "@/lib/client";
 import { StatusPill } from "../badges";
 import { toast } from "../toast";
@@ -127,7 +127,7 @@ export function LeadsBoard({ leads: initial, team, members = [] }: { leads: Lead
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
                 <a href={`tel:${l.phone}`} onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
-                  <Phone className="h-3.5 w-3.5" /> {l.phone.replace("+92", "0")}
+                  <Phone className="h-3.5 w-3.5" /> {l.phone.replace(COUNTRY.phone.dial, "0")}
                 </a>
                 <a href={`https://wa.me/${l.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
                   <MessageCircle className="h-3.5 w-3.5" /> WhatsApp

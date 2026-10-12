@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Flame } from "lucide-react";
 import { getSetting, propertyTrends } from "@propertyx/core";
-import { areaPath, formatPKR, searchPath } from "@propertyx/shared";
+import { areaPath, formatPKR, searchPath, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { ChangePill, MarketDataNote } from "@/components/market/data-note";
 
 export const metadata: Metadata = {
-  title: "Property trends — popular areas to buy and rent in Pakistan",
+  title: `Property trends — popular areas to buy and rent in ${COUNTRY.inName}`,
   description: "See which areas and housing societies buyers and renters are looking at most, with prices per marla and how they are changing.",
   alternates: { canonical: "/trends" },
 };
@@ -22,7 +22,7 @@ export default async function TrendsPage({ searchParams }: Props) {
   const [rows, demo] = await Promise.all([propertyTrends(db, { city, purpose, limit: 25 }), getSetting<boolean>(db, "demo_mode")]);
   const hasInterest = rows.some((r) => r.views > 0);
   const tab = (p: "sale" | "rent") => `/trends?${new URLSearchParams({ ...(city ? { city } : {}), purpose: p })}`;
-  const cityName = city ? CITY_LINKS.find((c) => c.slug === city)!.name : "Pakistan";
+  const cityName = city ? CITY_LINKS.find((c) => c.slug === city)!.name : `${COUNTRY.inName}`;
 
   return (
     <div className="container-px py-12">

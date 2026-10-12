@@ -1,7 +1,8 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import { StaticPage } from "@/components/static-page";
 
-export const metadata: Metadata = { title: "Safety tips for buying and renting", description: "How to avoid property scams in Pakistan: checking documents, visiting before paying, and spotting fake listings.", alternates: { canonical: "/safety" } };
+export const metadata: Metadata = { title: "Safety tips for buying and renting", description: `How to avoid property scams in ${COUNTRY.inName}: checking documents, visiting before paying, and spotting fake listings.`, alternates: { canonical: "/safety" } };
 
 export default function SafetyPage() {
   return (

@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { constructionRates, cities } from "@propertyx/database";
@@ -8,7 +9,7 @@ import { ConstructionCalculator, type CityRates } from "@/components/tools/const
 
 export const metadata: Metadata = {
   title: "House construction cost calculator",
-  description: "Estimate the cost of building a house in Pakistan — grey structure, finishing, electrical, plumbing, woodwork, kitchens, bathrooms and labour — with current per-city rates.",
+  description: `Estimate the cost of building a house in ${COUNTRY.inName} — grey structure, finishing, electrical, plumbing, woodwork, kitchens, bathrooms and labour — with current per-city rates.`,
   alternates: { canonical: "/tools/construction-cost" },
 };
 

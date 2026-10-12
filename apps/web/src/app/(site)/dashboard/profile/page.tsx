@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { agentAreas, locations } from "@propertyx/database";
@@ -34,8 +35,8 @@ export default async function ProfilePage() {
               displayName: agent?.displayName ?? user.name,
               bio: agent?.bio ?? "",
               experienceYears: agent?.experienceYears ?? null,
-              phone: (agent?.phone ?? user.phone ?? "").replace("+92", "0"),
-              whatsapp: (agent?.whatsapp ?? "").replace("+92", "0"),
+              phone: (agent?.phone ?? user.phone ?? "").replace(COUNTRY.phone.dial, "0"),
+              whatsapp: (agent?.whatsapp ?? "").replace(COUNTRY.phone.dial, "0"),
               specializations: agent?.specializations ?? [],
               languages: agent?.languages ?? ["Urdu", "English"],
               areas,
@@ -48,7 +49,7 @@ export default async function ProfilePage() {
           {agency && agency.role !== "admin" ? (
             <p className="text-sm text-slate-500">You're a {agency.role} at {agency.agency.name}. Only agency admins can edit the agency profile.</p>
           ) : (
-            <OrgForm kind="agency" exists={!!agency} initial={{ name: agency?.agency.name ?? "", description: agency?.agency.description ?? "", phone: (agency?.agency.phone ?? "").replace("+92", "0"), website: agency?.agency.website ?? "", email: agency?.agency.email ?? "", establishedYear: agency?.agency.establishedYear ?? null, whatsapp: agency?.agency.whatsapp ?? "", address: agency?.agency.address ?? "" }} />
+            <OrgForm kind="agency" exists={!!agency} initial={{ name: agency?.agency.name ?? "", description: agency?.agency.description ?? "", phone: (agency?.agency.phone ?? "").replace(COUNTRY.phone.dial, "0"), website: agency?.agency.website ?? "", email: agency?.agency.email ?? "", establishedYear: agency?.agency.establishedYear ?? null, whatsapp: agency?.agency.whatsapp ?? "", address: agency?.agency.address ?? "" }} />
           )}
         </Panel>
       )}

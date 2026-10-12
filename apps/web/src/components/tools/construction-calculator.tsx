@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CITY_LINKS } from "../nav-data";
 import { estimateConstructionCost, formatPKR, formatPKRFull, formatNumber, sqftPerUnit, type ConstructionInput, type ConstructionRates, type FinishingQuality } from "@propertyx/shared";
 
 export type CityRates = { slug: string; name: string; rates: ConstructionRates };
@@ -28,7 +29,7 @@ const FINISHING: { key: FinishingQuality; label: string; hint: string }[] = [
 const BAR_COLORS = ["bg-brand-700", "bg-gold-500", "bg-sky-500", "bg-teal-500", "bg-amber-700", "bg-rose-500", "bg-violet-500", "bg-slate-500"];
 
 export function ConstructionCalculator({ cities }: { cities: CityRates[] }) {
-  const [city, setCity] = useState(cities.find((c) => c.slug === "lahore")?.slug ?? cities[0].slug);
+  const [city, setCity] = useState(cities.find((c) => c.slug === CITY_LINKS[0].slug)?.slug ?? cities[0].slug);
   const [plotSize, setPlotSize] = useState("10");
   const [unit, setUnit] = useState<(typeof PLOT_UNITS)[number]["key"]>("marla");
   const [floors, setFloors] = useState(2);

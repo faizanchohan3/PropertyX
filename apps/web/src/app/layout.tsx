@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
 import { Toaster } from "@/components/toast";
-import { publicAppUrl } from "@propertyx/shared";
+import { publicAppUrl, COUNTRY } from "@propertyx/shared";
 import { LangProvider } from "@/components/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { dirFor } from "@/lib/i18n";
@@ -15,10 +15,10 @@ const APP_URL = publicAppUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: { default: "Bismillah Pakistan — Homes, Plots & Commercial Property", template: "%s | Bismillah Pakistan" },
-  description: "Search verified houses, flats, plots and commercial property for sale and rent across Pakistan. AI-powered search, price index, valuation and investment tools.",
-  applicationName: "Bismillah Pakistan",
-  openGraph: { type: "website", siteName: "Bismillah Pakistan", locale: "en_PK" },
+  title: { default: `${COUNTRY.brand} — Homes, Plots & Commercial Property`, template: `%s | ${COUNTRY.brand}` },
+  description: `Search verified houses, flats, plots and commercial property for sale and rent across ${COUNTRY.inName}. AI-powered search, price index, valuation and investment tools.`,
+  applicationName: `${COUNTRY.brand}`,
+  openGraph: { type: "website", siteName: `${COUNTRY.brand}`, locale: COUNTRY.ogLocale },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/icon.svg" },
 };
@@ -28,7 +28,7 @@ export const viewport: Viewport = { themeColor: "#047857", width: "device-width"
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = await getLang();
   return (
-    <html lang={lang === "ur" ? "ur-PK" : "en-PK"} dir={dirFor(lang)} className={`${jakarta.variable} ${urdu.variable}`}>
+    <html lang={lang === "ur" ? "ur-PK" : COUNTRY.locale} dir={dirFor(lang)} className={`${jakarta.variable} ${urdu.variable}`}>
       <body className="min-h-dvh">
         <LangProvider lang={lang}>
           {children}

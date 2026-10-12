@@ -6,6 +6,8 @@
  * 272.25 sq ft. We normalise everything to square feet using a configurable marla
  * size (default 225) so comparisons are consistent.
  */
+import { COUNTRY } from "./country";
+
 export const AREA_UNITS = ["sqft", "sqyd", "marla", "kanal", "acre", "sqm"] as const;
 export type AreaUnit = (typeof AREA_UNITS)[number];
 export const AREA_UNIT_LABELS: Record<AreaUnit, string> = {
@@ -54,8 +56,9 @@ export function formatArea(value: number, unit: AreaUnit): string {
   return `${v} ${AREA_UNIT_LABELS[unit]}`;
 }
 
-/** Best Pakistani-style unit for a square feet value (for descriptions and AI answers). */
+/** Best local unit for a square feet value (for descriptions and AI answers): marla/kanal in Pakistan, sq ft elsewhere. */
 export function describeSqft(sqft: number, marlaSqft = DEFAULT_MARLA_SQFT): string {
+  if (!COUNTRY.areaUnits.includes("marla")) return sqft >= 43560 * 2 ? formatArea(sqft / 43560, "acre") : formatArea(sqft, "sqft");
   if (sqft >= 43560 * 2) return formatArea(sqft / 43560, "acre");
   const kanal = marlaSqft * 20;
   if (sqft >= kanal && Math.abs(sqft / kanal - Math.round(sqft / kanal)) < 0.05) return formatArea(sqft / kanal, "kanal");

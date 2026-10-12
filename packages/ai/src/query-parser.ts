@@ -1,4 +1,4 @@
-import { parsePrice, type SearchQuery, type AreaUnit, type PropertyType } from "@propertyx/shared";
+import { parsePrice, type SearchQuery, type AreaUnit, type PropertyType, COUNTRY } from "@propertyx/shared";
 
 /** Criteria accumulated across an assistant conversation. */
 export interface AssistantCriteria extends Partial<SearchQuery> {
@@ -68,7 +68,7 @@ const FEATURE_WORDS: [RegExp, string][] = [
   [/\bparking\b/, "parking"],
 ];
 
-const CITY_ALIASES: Record<string, string> = {
+const PK_CITY_ALIASES: Record<string, string> = {
   lahore: "lahore",
   lhr: "lahore",
   islamabad: "islamabad",
@@ -87,6 +87,25 @@ const CITY_ALIASES: Record<string, string> = {
   peshawar: "peshawar",
   pesh: "peshawar",
 };
+
+const AE_CITY_ALIASES: Record<string, string> = {
+  dubai: "dubai",
+  dxb: "dubai",
+  "abu dhabi": "abu-dhabi",
+  abudhabi: "abu-dhabi",
+  auh: "abu-dhabi",
+  sharjah: "sharjah",
+  shj: "sharjah",
+  ajman: "ajman",
+  "ras al khaimah": "ras-al-khaimah",
+  rak: "ras-al-khaimah",
+  "al ain": "al-ain",
+  fujairah: "fujairah",
+  "umm al quwain": "umm-al-quwain",
+  uaq: "umm-al-quwain",
+};
+
+const CITY_ALIASES = COUNTRY.code === "ae" ? AE_CITY_ALIASES : PK_CITY_ALIASES;
 
 const AMOUNT = String.raw`(\d+(?:[.,]\d+)?)\s*(arab|crores?|cr|caror|karor|lakhs?|lacs?|lac|lak|l|million|mn|m|thousand|k|hazar)?\b`;
 

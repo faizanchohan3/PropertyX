@@ -3,12 +3,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { listPosts } from "@propertyx/core";
-import { BLOG_CATEGORIES, blogPath } from "@propertyx/shared";
+import { BLOG_CATEGORIES, blogPath, COUNTRY } from "@propertyx/shared";
 import { db } from "@/lib/server";
 
 export const metadata: Metadata = {
   title: "Property guides & news",
-  description: "Buying, selling, renting, investment and construction guides for Pakistani property, plus market news.",
+  description: `Buying, selling, renting, investment and construction guides for ${COUNTRY.adjective} property, plus market news.`,
   alternates: { canonical: "/blog" },
 };
 
@@ -28,7 +28,7 @@ export default async function BlogPage({ searchParams }: Props) {
     <div className="container-px py-12">
       <div className="max-w-2xl">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Guides &amp; news</h1>
-        <p className="mt-3 text-slate-500">Practical guides for buying, selling, renting and investing in Pakistani property.</p>
+        <p className="mt-3 text-slate-500">Practical guides for buying, selling, renting and investing in {COUNTRY.adjective} property.</p>
       </div>
       <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">

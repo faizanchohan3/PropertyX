@@ -1,3 +1,4 @@
+import { COUNTRY } from "@propertyx/shared";
 import Link from "next/link";
 import { asc } from "drizzle-orm";
 import { UserPlus } from "lucide-react";
@@ -63,7 +64,7 @@ export default async function AdminAccounts({ searchParams }: { searchParams: Pr
                 <td className={td}>
                   <span className="font-semibold text-white">{x.name as string}</span>
                   {x.is_seed ? <span className="ml-1 text-[10px] text-slate-500">demo</span> : null}
-                  <p className="text-xs text-slate-500">{(x.email as string) ?? ""}{x.phone ? ` · ${(x.phone as string).replace("+92", "0")}` : ""}</p>
+                  <p className="text-xs text-slate-500">{(x.email as string) ?? ""}{x.phone ? ` · ${(x.phone as string).replace(COUNTRY.phone.dial, "0")}` : ""}</p>
                 </td>
                 <td className={td}>{(x.parent as string) ?? "—"}</td>
                 <td className={td}>{(x.city as string) ?? "—"}</td>

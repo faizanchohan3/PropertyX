@@ -1,4 +1,4 @@
-import { PROPERTY_TYPE_LABELS, FEATURE_LABELS, formatArea, formatPKR, propertyTypeInfo, type AreaUnit, type FeatureKey } from "@propertyx/shared";
+import { PROPERTY_TYPE_LABELS, FEATURE_LABELS, formatArea, formatPKR, propertyTypeInfo, type AreaUnit, type FeatureKey, COUNTRY } from "@propertyx/shared";
 import { tryLLM, type JsonSchema } from "./providers";
 
 export interface ListingDraft {
@@ -114,7 +114,7 @@ export async function generateListingCopy(d: ListingDraft): Promise<ListingCopy>
       effort: "low",
       maxTokens: 3000,
       system:
-        "You write clear, honest Pakistani real-estate listing copy in English. Use ONLY the facts provided. Never invent amenities, distances, prices, legal status, ownership, returns or availability. No exaggeration, no urgency or guarantee language. Title max 100 characters. Description 120-250 words in 2-4 short paragraphs. Up to 5 short highlights, each a fact from the input.",
+        `You write clear, honest ${COUNTRY.adjective} real-estate listing copy in English. Use ONLY the facts provided. Never invent amenities, distances, prices, legal status, ownership, returns or availability. No exaggeration, no urgency or guarantee language. Title max 100 characters. Description 120-250 words in 2-4 short paragraphs. Up to 5 short highlights, each a fact from the input.`,
       prompt: `Facts (JSON):\n${JSON.stringify({ ...d, title: undefined, description: undefined })}\n\nA plain draft for reference:\n${base.title}\n${base.description}`,
     }),
   );

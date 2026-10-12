@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPaymentByInvoice } from "@propertyx/core";
 import { signSandbox } from "@propertyx/payments";
-import { formatPKRFull } from "@propertyx/shared";
+import { formatPKRFull, COUNTRY } from "@propertyx/shared";
 import { requireUser, db } from "@/lib/server";
 import { LogoMark } from "@/components/logo";
 
@@ -34,7 +34,7 @@ export default async function SandboxCheckout({ params }: { params: Promise<{ in
           <div className="flex items-center gap-3">
             <LogoMark className="h-10 w-10" />
             <div>
-              <p className="font-bold">Bismillah Pakistan</p>
+              <p className="font-bold">{COUNTRY.brand}</p>
               <p className="text-xs text-slate-500">Invoice {p.invoiceNumber}</p>
             </div>
           </div>

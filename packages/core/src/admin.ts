@@ -3,7 +3,7 @@ import type { Database } from "@propertyx/database";
 import * as s from "@propertyx/database";
 import { assignRole, removeRole, audit, revokeAllSessions } from "@propertyx/auth";
 import { notify } from "@propertyx/notifications";
-import { STAFF_ROLES, ROLE_KEYS, slugify, adminAccountSchema, type Role } from "@propertyx/shared";
+import { STAFF_ROLES, ROLE_KEYS, slugify, adminAccountSchema, type Role, COUNTRY, inCountry } from "@propertyx/shared";
 import { badRequest, conflict, forbidden, notFound, requirePerm, type Actor } from "./errors";
 import { insertAccount } from "./accounts";
 
@@ -67,7 +67,7 @@ export async function addLocation(db: Database, actor: Actor | null, input: { ki
   const [city] = await db.select().from(s.cities).where(eq(s.cities.id, input.cityId));
   if (!city) throw badRequest("Unknown city");
   if (!input.name?.trim()) throw badRequest("Enter a name");
-  if (!(input.lat > 23 && input.lat < 38 && input.lng > 60 && input.lng < 78)) throw badRequest("Coordinates must be inside Pakistan");
+  if (!inCountry(input.lat, input.lng)) throw badRequest(`Coordinates must be inside ${COUNTRY.name}`);
   const base = slugify(input.name);
   let refId: string;
   let parentLoc: typeof s.locations.$inferSelect | undefined;

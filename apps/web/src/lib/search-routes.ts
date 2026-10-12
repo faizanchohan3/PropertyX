@@ -1,7 +1,7 @@
 import "server-only";
 import type { Metadata } from "next";
 import { createSearchEngine } from "@propertyx/search";
-import { parseSearchQuery, parseSearchSegments, TYPE_SLUGS, TYPE_GROUPS, type SearchQuery, type PropertyType, type Purpose } from "@propertyx/shared";
+import { parseSearchQuery, parseSearchSegments, TYPE_SLUGS, TYPE_GROUPS, type SearchQuery, type PropertyType, type Purpose, COUNTRY } from "@propertyx/shared";
 import { db } from "./server";
 import { searchTitle } from "@/components/search/search-view";
 
@@ -46,7 +46,7 @@ export async function searchMetadata(query: SearchQuery, canonicalPath: string):
     title,
     description,
     alternates: { canonical: canonicalPath },
-    openGraph: { title: `${title} | Bismillah Pakistan`, description, url: canonicalPath },
+    openGraph: { title: `${title} | ${COUNTRY.brand}`, description, url: canonicalPath },
     robots: query.page && query.page > 1 ? { index: false, follow: true } : undefined,
   };
 }

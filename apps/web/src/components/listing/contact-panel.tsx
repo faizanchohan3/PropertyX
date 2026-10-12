@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, MessageCircle, MessageSquare, CalendarDays, HandCoins, Share2, Flag, Loader2, Info } from "lucide-react";
-import { REPORT_REASONS, formatPKR } from "@propertyx/shared";
+import { REPORT_REASONS, formatPKR, COUNTRY } from "@propertyx/shared";
 import { api, ApiError, anonId, fieldError } from "@/lib/client";
 import { Modal, FieldError, FormError } from "../modal";
 import { SaveButton } from "../save-button";
@@ -105,7 +105,7 @@ export function ContactPanel(p: ContactProps) {
       <div className="grid grid-cols-2 gap-2">
         {showPhone && !contactsDisabled ? (
           <a href={`tel:${p.contactPhone}`} className="btn-primary" onClick={() => track(p.listingId, "call_click")}>
-            <Phone className="h-4 w-4" /> {p.contactPhone.replace("+92", "0")}
+            <Phone className="h-4 w-4" /> {p.contactPhone.replace(COUNTRY.phone.dial, "0")}
           </a>
         ) : (
           <button
@@ -237,7 +237,7 @@ function VisitModal({ open, onClose, onSubmit, busy, err, phone: initialPhone }:
 
 function LeadModal({ mode, open, onClose, onSubmit, busy, err, user, price, purpose }: { mode: "offer" | "enquiry"; open: boolean; onClose: () => void; onSubmit: (v: Record<string, unknown>) => void; busy: boolean; err: unknown; user: ContactProps["user"]; price: number; purpose: string }) {
   const [name, setName] = useState(user?.name ?? "");
-  const [phone, setPhone] = useState(user?.phone?.replace("+92", "0") ?? "");
+  const [phone, setPhone] = useState(user?.phone?.replace(COUNTRY.phone.dial, "0") ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [offer, setOffer] = useState(String(Math.round((price * 0.95) / 100_000) * 100_000));
   const [message, setMessage] = useState(mode === "offer" ? "" : "Please call me back to arrange a viewing.");

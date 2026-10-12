@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { Database } from "@propertyx/database";
 import type { ListingCard, ListingSearchEngine } from "@propertyx/search";
-import { calculateFinancing, formatPKR, formatPriceWords, toSqft, fromSqft, PROPERTY_TYPE_LABELS, FEATURE_LABELS, type SearchQuery, type FeatureKey } from "@propertyx/shared";
+import { calculateFinancing, formatPKR, formatPriceWords, toSqft, fromSqft, PROPERTY_TYPE_LABELS, FEATURE_LABELS, type SearchQuery, type FeatureKey, COUNTRY } from "@propertyx/shared";
 import { parseQuery, describeCriteria, type AssistantCriteria, type LocationIndexEntry } from "./query-parser";
 import { tryLLM, aiProviderName, type JsonSchema } from "./providers";
 
@@ -153,7 +153,7 @@ const LLM_CRITERIA_SCHEMA: JsonSchema = {
   properties: {
     purpose: { type: ["string", "null"], enum: ["sale", "rent", null] },
     types: { type: "array", items: { type: "string", enum: Object.keys(PROPERTY_TYPE_LABELS) } },
-    city: { type: ["string", "null"], enum: ["lahore", "islamabad", "karachi", "rawalpindi", "multan", "faisalabad", "gujranwala", "peshawar", null] },
+    city: { type: ["string", "null"], enum: COUNTRY.code === "ae" ? ["dubai", "abu-dhabi", "sharjah", "ajman", "ras-al-khaimah", "al-ain", "fujairah", "umm-al-quwain", null] : ["lahore", "islamabad", "karachi", "rawalpindi", "multan", "faisalabad", "gujranwala", "peshawar", null] },
     locationName: { type: ["string", "null"] },
     near: { type: "boolean" },
     priceMin: { type: ["number", "null"] },
@@ -192,7 +192,7 @@ async function llmCriteria(message: string, previous: AssistantCriteria) {
       effort: "low",
       maxTokens: 2000,
       system:
-        "You convert Pakistani property search requests into structured filters. Prices are in PKR: 1 lakh = 100,000; 1 crore = 10,000,000. Only extract what the user said; use null for anything not mentioned. Do not invent locations.",
+        `You convert ${COUNTRY.adjective} property search requests into structured filters. ${COUNTRY.currency === "AED" ? "Prices are in AED: 1k = 1,000; 1m = 1,000,000; rents are usually quoted per year. Areas are in sq ft." : "Prices are in PKR: 1 lakh = 100,000; 1 crore = 10,000,000."} Only extract what the user said; use null for anything not mentioned. Do not invent locations.`,
       prompt: `Previous filters (JSON): ${JSON.stringify(previous)}\nUser message: ${message}\nReturn the complete updated filters.`,
     }),
   );
