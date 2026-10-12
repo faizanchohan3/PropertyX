@@ -21,6 +21,9 @@ declare global {
  */
 export function connectionOptions(rawUrl: string) {
   const url = new URL(rawUrl);
+  // Supabase's pooler on 5432 is session mode (one server connection per client, 15 max on small plans),
+  // which serverless instances exhaust within seconds; the same pooler on 6543 is transaction mode
+  if (process.env.VERCEL && url.hostname.endsWith(".pooler.supabase.com") && url.port === "5432") url.port = "6543";
   const local = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname);
   const pooled = url.port === "6543" || url.searchParams.get("pgbouncer") === "true" || url.hostname.includes("-pooler.");
   const prepare = process.env.DB_PREPARE ? process.env.DB_PREPARE === "true" : !pooled;

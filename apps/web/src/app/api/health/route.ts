@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   const checks: Record<string, unknown> = {
     DATABASE_URL: url ? "set" : process.env.NODE_ENV === "production" ? "MISSING — add it in Vercel → Settings → Environment Variables" : "not set (local dev database in use)",
     databaseHost: url ? (url.match(/@([^:/?]+)/)?.[1] ?? "unparseable") : null,
+    ...(/\.pooler\.supabase\.com:5432\b/.test(url) ? { databasePort: "5432 (session mode) — use port 6543 in DATABASE_URL for the website; the app switches automatically on Vercel" } : {}),
     AUTH_SECRET: (process.env.AUTH_SECRET?.length ?? 0) >= 32 ? "set" : process.env.NODE_ENV === "production" ? "MISSING or shorter than 32 characters" : "not set (development fallback in use)",
     CRON_SECRET: process.env.CRON_SECRET ? "set" : "not set — scheduled alerts (/api/cron) will not run on Vercel",
     notificationProviders: { email: process.env.EMAIL_PROVIDER ?? "console", sms: process.env.SMS_PROVIDER ?? "console", whatsapp: process.env.WHATSAPP_PROVIDER ?? "console" },
