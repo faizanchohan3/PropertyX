@@ -82,6 +82,8 @@ export async function GET(req: Request) {
       timed("projects", () => listProjects(db)),
       timed("posts", () => listPosts(db, {})),
       timed("agents", () => listAgents(db, { verified: true })),
+      timed("search_all", () => engine.search({ sort: "recommended", page: 1, pageSize: 20 })),
+      timed("facets_all", () => engine.facets({ sort: "recommended", page: 1, pageSize: 20 })),
     ]);
     checks["7_app_pool"] = appSteps;
   }
