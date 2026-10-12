@@ -58,6 +58,7 @@ export async function GET(req: Request) {
         await step("4_cities", async () => (await sql<{ n: number }[]>`select count(*)::int as n from cities`)[0].n);
         await step("5_settings", async () => (await sql<{ n: number }[]>`select count(*)::int as n from site_settings`)[0].n);
         await step("6_listings", async () => (await sql<{ n: number }[]>`select count(*)::int as n from property_listings`)[0].n);
+        await step("migrations", async () => (await sql<{ n: number }[]>`select count(*)::int as n from drizzle.__drizzle_migrations`)[0].n);
         const c = checks["4_cities"] as { ok: boolean; result?: number };
         const st = checks["5_settings"] as { ok: boolean; result?: number };
         if (c.ok && st.ok && (!c.result || !st.result)) checks.fix = "Tables are empty — run `npm run db:reference` (or `npm run db:seed` for demo data)";
