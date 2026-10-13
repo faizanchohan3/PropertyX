@@ -19,13 +19,17 @@ export function useT(): TFunc {
   return useMemo(() => makeT(lang), [lang]);
 }
 
-/** Header switch between English and Urdu; remembers the choice for a year. */
+const ALT_LABEL = { ur: { name: "اردو", title: "اردو میں دیکھیں", aria: "اردو میں دیکھیں — Switch to Urdu", font: "font-urdu text-base leading-none" }, ar: { name: "العربية", title: "عرض بالعربية", aria: "عرض بالعربية — Switch to Arabic", font: "font-arabic text-sm" } } as const;
+
+/** Header switch between English and the site's second language (Urdu / Arabic); remembers the choice for a year. */
 export function LanguageToggle({ className = "" }: { className?: string }) {
   const lang = useLang();
   const router = useRouter();
   const [pending, start] = useTransition();
-  if (COUNTRY.altLang !== "ur") return null;
-  const next: Lang = lang === "ur" ? "en" : "ur";
+  const alt = COUNTRY.altLang;
+  if (!alt) return null;
+  const next: Lang = lang === alt ? "en" : alt;
+  const label = ALT_LABEL[alt];
   return (
     <button
       type="button"
@@ -34,12 +38,12 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
         start(() => router.refresh());
       }}
       className={`btn-ghost px-2.5 ${pending ? "opacity-60" : ""} ${className}`}
-      title={next === "ur" ? "اردو میں دیکھیں" : "View in English"}
-      aria-label={next === "ur" ? "اردو میں دیکھیں — Switch to Urdu" : "View in English"}
+      title={next === "en" ? "View in English" : label.title}
+      aria-label={next === "en" ? "View in English" : label.aria}
       lang={next}
     >
       <Languages className="h-5 w-5" />
-      <span className={next === "ur" ? "font-urdu text-base leading-none" : "text-sm"}>{next === "ur" ? "اردو" : "English"}</span>
+      <span className={next === "en" ? "text-sm" : label.font}>{next === "en" ? "English" : label.name}</span>
     </button>
   );
 }

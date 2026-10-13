@@ -243,7 +243,7 @@ export async function runAssistant(db: Database, engine: ListingSearchEngine, in
 
   const followUps: string[] = [];
   if (!c.city && !c.location && c.lat == null) followUps.push("Which city are you looking in? (e.g. Lahore, Islamabad, Karachi)");
-  if (c.priceMax == null && c.priceMin == null) followUps.push(c.purpose === "rent" ? "What's your monthly rent budget?" : "What's your budget? (e.g. 1.5 crore)");
+  if (c.priceMax == null && c.priceMin == null) followUps.push(c.purpose === "rent" ? (COUNTRY.code === "ae" ? "What's your yearly rent budget?" : "What's your monthly rent budget?") : COUNTRY.code === "ae" ? "What's your budget? (e.g. AED 1.5M)" : "What's your budget? (e.g. 1.5 crore)");
   if (!c.types?.length) followUps.push("What type of property — house, apartment, plot or commercial?");
   if (!c.purpose) followUps.push("Are you looking to buy or rent?");
 
@@ -254,7 +254,9 @@ export async function runAssistant(db: Database, engine: ListingSearchEngine, in
   if ((parsed.intents.greeting || parsed.intents.help) && !Object.keys(previous).length && parsed.changes.length === 0) {
     return {
       reply:
-        "Assalam o Alaikum! Tell me what you're looking for in plain words — for example “5 marla house near DHA Lahore under 1.5 crore” or “2 bed apartment for rent in E-11 Islamabad”. I'll search live listings, explain why each one matches, and help you check affordability.",
+        COUNTRY.code === "ae"
+          ? "Hello! Tell me what you're looking for in plain words — for example “2 bed apartment in Dubai Marina under AED 2M” or “villa for rent in Arabian Ranches”. I'll search live listings, explain why each one matches, and help you check affordability."
+          : "Assalam o Alaikum! Tell me what you're looking for in plain words — for example “5 marla house near DHA Lahore under 1.5 crore” or “2 bed apartment for rent in E-11 Islamabad”. I'll search live listings, explain why each one matches, and help you check affordability.",
       criteria: {},
       summary: "",
       total: 0,
@@ -263,7 +265,10 @@ export async function runAssistant(db: Database, engine: ListingSearchEngine, in
       affordability: null,
       recommendedLocations: [],
       followUps: [],
-      suggestions: ["10 marla house in Lahore under 4 crore", "2 bed apartment for rent in Islamabad", "Plots on installments in Multan", "Shop for sale in Karachi"],
+      suggestions:
+        COUNTRY.code === "ae"
+          ? ["2 bed apartment in Dubai Marina under AED 2M", "Villa for rent in Dubai Hills", "Off-plan apartment in Business Bay", "Office for rent in JLT"]
+          : ["10 marla house in Lahore under 4 crore", "2 bed apartment for rent in Islamabad", "Plots on installments in Multan", "Shop for sale in Karachi"],
       provider,
       searchUrl: "/search",
     };
@@ -292,10 +297,12 @@ export async function runAssistant(db: Database, engine: ListingSearchEngine, in
   }
 
   let affordability: AssistantResponse["affordability"] = null;
-  if ((c.purpose ?? "sale") === "sale" && c.priceMax != null && (parsed.intents.affordability || c.priceMax >= 3_000_000)) {
-    const rate = 14;
-    const tenureYears = 20;
-    const down = Math.round(c.priceMax * 0.3);
+  const ae = COUNTRY.code === "ae";
+  if ((c.purpose ?? "sale") === "sale" && c.priceMax != null && (parsed.intents.affordability || c.priceMax >= (ae ? 1_000_000 : 3_000_000))) {
+    // UAE: typical fixed-rate mortgage, 25 years, 20% down (expat first-home limit); Pakistan: bank home loan
+    const rate = ae ? 4.25 : 14;
+    const tenureYears = ae ? 25 : 20;
+    const down = Math.round(c.priceMax * (ae ? 0.2 : 0.3));
     const fin = calculateFinancing({ propertyPrice: c.priceMax, downPayment: down, annualRate: rate, tenureYears, mode: "conventional" });
     affordability = {
       budget: c.priceMax,
@@ -309,7 +316,7 @@ export async function runAssistant(db: Database, engine: ListingSearchEngine, in
           ? fin.monthlyPayment <= c.monthlyIncome * 0.4
             ? `With a monthly income of ${formatPKR(c.monthlyIncome)}, the estimated installment is within the commonly used 40% affordability guideline.`
             : `With a monthly income of ${formatPKR(c.monthlyIncome)}, the estimated installment is above the commonly used 40% affordability guideline — consider a larger down payment or a lower budget.`
-          : "Estimate assumes 30% down payment, 14% annual rate and a 20-year tenure. Actual bank offers vary — this is not financial advice.",
+          : `Estimate assumes ${ae ? "20" : "30"}% down payment, ${rate}% annual rate and a ${tenureYears}-year tenure${ae ? ", before DLD and other buying costs (about 7% of the price)" : ""}. Actual bank offers vary — this is not financial advice.`,
     };
   }
 

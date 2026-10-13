@@ -98,7 +98,7 @@ export function FloatingAssistant() {
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4">
             <div className="max-w-[90%] rounded-2xl rounded-ss-md bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
               {isUAE
-                ? "Hello! Tell me what you're looking for — budget in AED, size in sq ft, emirate or community — and I'll find matching listings."
+                ? t("Hello! Tell me what you're looking for — budget in AED, size in sq ft, emirate or community — and I'll find matching listings.")
                 : t("Assalam o Alaikum! Tell me what you're looking for — budget in lakh or crore, size in marla, city or area — and I'll find matching listings.")}
             </div>
             {msgs.length === 0 && (

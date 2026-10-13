@@ -70,7 +70,7 @@ export const COUNTRIES: Record<CountryCode, CountryConfig> = {
     defaultAreaUnit: "sqft",
     rentPeriod: "yearly",
     map: { center: [24.7, 54.9], zoom: 7, bounds: { south: 22.5, west: 51.4, north: 26.3, east: 56.6 } },
-    altLang: null,
+    altLang: "ar",
     regionLabel: "Emirate",
     inName: "the UAE",
     adjective: "UAE",

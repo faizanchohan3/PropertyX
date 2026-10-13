@@ -156,7 +156,11 @@ export default async function HomePage() {
               <Sparkles className="h-3.5 w-3.5" /> {t("AI Property Assistant")}
             </span>
             <h2 className="mt-3 text-3xl font-extrabold text-white">{t("Tell us what you need. We'll find it and explain why.")}</h2>
-            <p className="mt-3 text-brand-100/80">{t("Searches live listings only — it never invents properties or prices. Refine in plain words: “show cheaper options”, “only corner houses”, “with possession”.")}</p>
+            <p className="mt-3 text-brand-100/80">{t(
+                isUAE
+                  ? "Searches live listings only — it never invents properties or prices. Refine in plain words: “show cheaper options”, “only with sea view”, “ready to move in”."
+                  : "Searches live listings only — it never invents properties or prices. Refine in plain words: “show cheaper options”, “only corner houses”, “with possession”.",
+              )}</p>
           </div>
           <AiPromptBox />
         </div>

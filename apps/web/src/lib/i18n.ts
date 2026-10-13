@@ -1,11 +1,13 @@
+import { AR, AR_PATTERNS } from "./i18n-ar";
+
 /**
- * Minimal English / Urdu translation. Strings are keyed by their English text, so anything
+ * Minimal English / Urdu (Pakistan site) / Arabic (UAE site) translation. Strings are keyed by their English text, so anything
  * without an Urdu entry simply stays in English. Listing titles, descriptions and other
  * user-written content are never translated.
  */
-export type Lang = "en" | "ur";
+export type Lang = "en" | "ur" | "ar";
 export const LANG_COOKIE = "px_lang";
-export const LANGS: Lang[] = ["en", "ur"];
+export const LANGS: Lang[] = ["en", "ur", "ar"];
 
 const CITIES: Record<string, string> = {
   Lahore: "لاہور",
@@ -275,17 +277,23 @@ const PATTERNS: [RegExp, string][] = [
 
 export type TFunc = (text: string, vars?: Record<string, string | number>) => string;
 
+const TABLES: Partial<Record<Lang, { dict: Record<string, string>; patterns: [RegExp, string][] }>> = {
+  ur: { dict: UR, patterns: PATTERNS },
+  ar: { dict: AR, patterns: AR_PATTERNS },
+};
+
 export function makeT(lang: Lang): TFunc {
+  const table = TABLES[lang];
   return (text, vars) => {
     let out = text;
-    if (lang === "ur") {
-      const hit = UR[text];
+    if (table) {
+      const hit = table.dict[text];
       if (hit) out = hit;
       else
-        for (const [re, tpl] of PATTERNS) {
+        for (const [re, tpl] of table.patterns) {
           const m = text.match(re);
           if (m) {
-            out = tpl.replace("$1", UR[m[1]] ?? m[1]);
+            out = tpl.replace("$1", table.dict[m[1]] ?? m[1]);
             break;
           }
         }
@@ -295,5 +303,7 @@ export function makeT(lang: Lang): TFunc {
   };
 }
 
-export const isLang = (v: unknown): v is Lang => v === "en" || v === "ur";
-export const dirFor = (lang: Lang) => (lang === "ur" ? "rtl" : "ltr");
+export const isLang = (v: unknown): v is Lang => v === "en" || v === "ur" || v === "ar";
+export const dirFor = (lang: Lang) => (lang === "en" ? "ltr" : "rtl");
+/** value for <html lang>; the CSS keys the script-specific fonts off it */
+export const htmlLang = (lang: Lang, fallback: string) => (lang === "ur" ? "ur-PK" : lang === "ar" ? "ar-AE" : fallback);

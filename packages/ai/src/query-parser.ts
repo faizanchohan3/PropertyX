@@ -27,14 +27,16 @@ export interface ParseResult {
 }
 
 const TYPE_WORDS: [RegExp, PropertyType[]][] = [
+  [/\btown ?houses?\b/, ["townhouse"]],
+  [/\bhotel (apartments?|apts?)\b/, ["hotel_apartment"]],
   [/\bupper portions?\b/, ["upper_portion"]],
   [/\blower portions?\b/, ["lower_portion"]],
   [/\bportions?\b/, ["upper_portion", "lower_portion"]],
   [/\bpent ?house/, ["penthouse"]],
   [/\bfarm ?houses?\b/, ["farmhouse"]],
   [/\bvillas?\b/, ["villa", "house"]],
-  [/\b(apartments?|flats?|condos?)\b/, ["apartment", "flat"]],
-  [/\b(houses?|homes?|ghar|bungalows?|kothi)\b/, ["house"]],
+  [/\b(?<!hotel )(apartments?|flats?|condos?)\b/, ["apartment", "flat"]],
+  [/\b(?<!town |town|pent |pent)(houses?|homes?|ghar|bungalows?|kothi)\b/, ["house"]],
   [/\brooms?\b(?! *(?:house|flat|apartment))/, ["room"]],
   [/\bcommercial plots?\b/, ["commercial_plot"]],
   [/\b(plot files?|files?)\b/, ["plot_file"]],
@@ -105,6 +107,21 @@ const AE_CITY_ALIASES: Record<string, string> = {
   uaq: "umm-al-quwain",
 };
 
+/** Common short names for UAE communities -> the name used in the location index */
+const AE_PLACE_ALIASES: [RegExp, string][] = [
+  [/\bjlt\b/, "Jumeirah Lake Towers"],
+  [/\bjvc\b/, "Jumeirah Village Circle"],
+  [/\bjvt\b/, "Jumeirah Village Triangle"],
+  [/\bjbr\b/, "Jumeirah Beach Residence"],
+  [/\bdifc\b/, "DIFC"],
+  [/\bdowntown\b/, "Downtown Dubai"],
+  [/\bmarina\b(?! ?(?:bay|square))/, "Dubai Marina"],
+  [/\bthe palm\b|\bpalm\b/, "Palm Jumeirah"],
+  [/\bmbr city\b|\bmeydan\b/, "Meydan"],
+  [/\bdubai hills\b(?! estate)/, "Dubai Hills Estate"],
+  [/\bdamac hills\b/, "Damac Hills"],
+];
+
 const CITY_ALIASES = COUNTRY.code === "ae" ? AE_CITY_ALIASES : PK_CITY_ALIASES;
 
 const AMOUNT = String.raw`(\d+(?:[.,]\d+)?)\s*(arab|crores?|cr|caror|karor|lakhs?|lacs?|lac|lak|l|million|mn|m|thousand|k|hazar)?\b`;
@@ -148,6 +165,7 @@ export function findLocation(text: string, index: LocationIndexEntry[], citySlug
 }
 
 export function parseQuery(message: string, previous: AssistantCriteria, index: LocationIndexEntry[]): ParseResult {
+  if (COUNTRY.code === "ae") for (const [re, name] of AE_PLACE_ALIASES) if (re.test(message.toLowerCase())) message = `${message} ${name}`;
   const t = norm(message);
   const changes: string[] = [];
   const intents = {
@@ -223,11 +241,12 @@ export function parseQuery(message: string, previous: AssistantCriteria, index: 
   // price
   const between = t.match(new RegExp(String.raw`(?:between|from)\s+${AMOUNT}\s*(?:and|to|-)\s*${AMOUNT}`));
   const range = between ?? t.match(new RegExp(String.raw`\b${AMOUNT}\s*(?:to|-)\s*${AMOUNT}`));
-  const maxM = t.match(new RegExp(String.raw`\b(?:under|below|upto|up to|within|max(?:imum)?|less than|not more than|budget(?: is| of)?|tak)\s*(?:rs\.?|pkr)?\s*${AMOUNT}`));
-  const minM = t.match(new RegExp(String.raw`\b(?:above|over|more than|min(?:imum)?|at least|starting)\s*(?:rs\.?|pkr)?\s*${AMOUNT}`));
-  const aroundM = t.match(new RegExp(String.raw`\b(?:around|about|approx(?:imately)?|roughly|~)\s*(?:rs\.?|pkr)?\s*${AMOUNT}`));
+  const maxM = t.match(new RegExp(String.raw`\b(?:under|below|upto|up to|within|max(?:imum)?|less than|not more than|budget(?: is| of)?|tak)\s*(?:rs\.?|pkr|aed|dhs?|dirhams?)?\s*${AMOUNT}`));
+  const minM = t.match(new RegExp(String.raw`\b(?:above|over|more than|min(?:imum)?|at least|starting)\s*(?:rs\.?|pkr|aed|dhs?|dirhams?)?\s*${AMOUNT}`));
+  const aroundM = t.match(new RegExp(String.raw`\b(?:around|about|approx(?:imately)?|roughly|~)\s*(?:rs\.?|pkr|aed|dhs?|dirhams?)?\s*${AMOUNT}`));
   const budgetM = t.match(new RegExp(String.raw`${AMOUNT}\s*(?:budget|ka budget)`));
-  const isMoney = (unit?: string, n?: string) => !!unit && !/^(m)$/.test(unit) ? true : Number((n ?? "0").replace(/,/g, "")) >= 10_000;
+  // a bare "m" means million in the UAE ("under 2m"); in Pakistan it is too easily metres / marla
+  const isMoney = (unit?: string, n?: string) => (!!unit && (COUNTRY.code === "ae" || !/^(m)$/.test(unit)) ? true : Number((n ?? "0").replace(/,/g, "")) >= 10_000);
   if (range && isMoney(range[2], range[1]) && isMoney(range[4], range[3])) {
     const lo = amount(range[1], range[2] ?? range[4]);
     const hi = amount(range[3], range[4]);
@@ -318,13 +337,27 @@ export function parseQuery(message: string, previous: AssistantCriteria, index: 
     }
   }
   if (/\b(only|just)\b.*\bcorner\b/.test(t)) feats.add("corner");
+  // UAE: off-plan vs ready is a listing field, not an amenity
+  if (COUNTRY.code === "ae") {
+    if (/\boff[- ]?plan\b|\bunder construction\b|\bpayment plan\b/.test(t)) {
+      c.completion = "off_plan";
+      changes.push("completion");
+    } else if (/\bready\b/.test(t)) {
+      c.completion = "ready";
+      changes.push("completion");
+    }
+    feats.delete("ready_to_move");
+    if (c.completion === "off_plan" && !c.purpose) c.purpose = "sale";
+  }
   c.features = [...feats];
   if (!c.features.length) delete c.features;
 
   // infer purpose from the budget when the user didn't say buy or rent
   if (!c.purpose && c.priceMax != null) {
-    if (c.priceMax >= 2_000_000) c.purpose = "sale";
-    else if (c.priceMax <= 600_000 && !c.types?.some((x) => /plot|land|file/.test(x))) c.purpose = "rent";
+    // UAE rents are quoted per year, so the bands differ
+    const [saleFrom, rentUpTo] = COUNTRY.code === "ae" ? [700_000, 200_000] : [2_000_000, 600_000];
+    if (c.priceMax >= saleFrom) c.purpose = "sale";
+    else if (c.priceMax <= rentUpTo && !c.types?.some((x) => /plot|land|file/.test(x))) c.purpose = "rent";
   }
 
   // refinements relative to previous results
@@ -336,7 +369,7 @@ export function parseQuery(message: string, previous: AssistantCriteria, index: 
   if (/\b(most expensive|luxury|premium)\b/.test(t)) c.sort = "price_desc";
 
   // income for affordability
-  const income = t.match(new RegExp(String.raw`(?:salary|income|earn(?:ing)?)\s*(?:is|of)?\s*(?:rs\.?|pkr)?\s*${AMOUNT}`));
+  const income = t.match(new RegExp(String.raw`(?:salary|income|earn(?:ing)?)\s*(?:is|of)?\s*(?:rs\.?|pkr|aed|dhs?|dirhams?)?\s*${AMOUNT}`));
   if (income) {
     const v = amount(income[1], income[2]);
     if (v) c.monthlyIncome = v;
@@ -359,6 +392,8 @@ export function describeCriteria(c: AssistantCriteria, fmt: (n: number) => strin
     upper_portion: "upper portions",
     lower_portion: "lower portions",
     penthouse: "penthouses",
+    townhouse: "townhouses",
+    hotel_apartment: "hotel apartments",
     villa: "villas",
     room: "rooms",
     office: "offices",
@@ -382,6 +417,7 @@ export function describeCriteria(c: AssistantCriteria, fmt: (n: number) => strin
   else if (c.priceMin != null) parts.push(`above ${fmt(c.priceMin)}`);
   const extras = (c.features ?? []).filter((f) => f !== "corner").map((f) => f.replace(/_/g, " "));
   if (c.installments) extras.push("installments");
+  if (c.completion === "off_plan") parts.unshift("off-plan");
   if (extras.length) parts.push(`with ${extras.join(", ")}`);
   return parts.filter(Boolean).join(" ").replace(/\s+/g, " ");
 }

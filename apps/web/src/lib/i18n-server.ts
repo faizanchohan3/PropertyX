@@ -6,10 +6,10 @@ import { LANG_COOKIE, isLang, makeT, type Lang } from "./i18n";
 
 /** Visitor's chosen language (cookie set by the header language switch). */
 export const getLang = cache(async (): Promise<Lang> => {
-  // only offer the second language this country's site supports (Urdu on the Pakistan site)
-  if (COUNTRY.altLang !== "ur") return "en";
+  // only the second language this country's site supports: Urdu in Pakistan, Arabic in the UAE
+  if (!COUNTRY.altLang) return "en";
   const v = (await cookies()).get(LANG_COOKIE)?.value;
-  return isLang(v) ? v : "en";
+  return isLang(v) && v === COUNTRY.altLang ? v : "en";
 });
 
 export async function getT() {

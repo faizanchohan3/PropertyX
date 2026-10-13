@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, ArrowUp } from "lucide-react";
+import { isUAE } from "@propertyx/shared";
 
-const EXAMPLES = ["5 marla house near DHA Lahore under 1.5 crore", "2 bed apartment for rent in E-11 Islamabad", "Plots on installments in Multan", "Shop for sale in Gulberg Lahore"];
+const EXAMPLES = isUAE
+  ? ["2 bed apartment in Dubai Marina under AED 2M", "Villa for rent in Arabian Ranches", "Off-plan apartment in Business Bay", "Office for rent in JLT"]
+  : ["5 marla house near DHA Lahore under 1.5 crore", "2 bed apartment for rent in E-11 Islamabad", "Plots on installments in Multan", "Shop for sale in Gulberg Lahore"];
+const PLACEHOLDER = isUAE ? "I have AED 2M and want a 2 bed apartment in Dubai Marina…" : "I have 2 crore and want a 10 marla house in Lahore…";
 
 export function AiPromptBox() {
   const [q, setQ] = useState("");
@@ -19,8 +23,8 @@ export function AiPromptBox() {
         }}
         className="flex items-center gap-2 rounded-2xl bg-white p-2 shadow-xl"
       >
-        <Sparkles className="ml-2 h-5 w-5 shrink-0 text-gold-500" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="I have 2 crore and want a 10 marla house in Lahore…" className="min-w-0 flex-1 bg-transparent px-1 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400" aria-label="Describe the property you want" />
+        <Sparkles className="ms-2 h-5 w-5 shrink-0 text-gold-500" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={PLACEHOLDER} className="min-w-0 flex-1 bg-transparent px-1 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400" aria-label="Describe the property you want" />
         <button type="submit" className="btn-primary h-10 w-10 p-0" aria-label="Ask">
           <ArrowUp className="h-5 w-5" />
         </button>
