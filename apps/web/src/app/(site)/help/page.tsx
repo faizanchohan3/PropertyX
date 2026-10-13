@@ -1,3 +1,4 @@
+import { isUAE } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { StaticPage } from "@/components/static-page";
@@ -5,7 +6,7 @@ import { StaticPage } from "@/components/static-page";
 export const metadata: Metadata = { title: "Help & support", description: "Answers to common questions about searching, listing, messaging, verification and payments on Bismillah.", alternates: { canonical: "/help" } };
 
 const FAQ: { q: string; a: React.ReactNode }[] = [
-  { q: "How do I search for a property?", a: <>Use the search box on the <Link href="/">home page</Link>, browse <Link href="/buy">Buy</Link> or <Link href="/rent">Rent</Link>, or describe what you want to the <Link href="/ai">AI assistant</Link> in plain words — budget in lakh or crore, size in marla, and the area.</> },
+  { q: "How do I search for a property?", a: <>Use the search box on the <Link href="/">home page</Link>, browse <Link href="/buy">Buy</Link> or <Link href="/rent">Rent</Link>, or describe what you want to the <Link href="/ai">AI assistant</Link> in plain words — {isUAE ? "budget in AED, size in sq ft, and the community" : "budget in lakh or crore, size in marla, and the area"}.</> },
   { q: "How do I post my property?", a: <>Create a free account and press <Link href="/post-property">Post Property</Link>. The guided form takes a few minutes, and AI can help you write the title and description. Owners can list for free.</> },
   { q: "How do I contact a seller or agent?", a: <>On any property page, use the message box, call or WhatsApp buttons, or request a visit. Your conversations are in <Link href="/messages">Messages</Link>.</> },
   { q: "What do the verification badges mean?", a: <>Badges show what has been checked — from a verified phone number up to documents reviewed by our team. Always check ownership documents yourself before paying.</> },

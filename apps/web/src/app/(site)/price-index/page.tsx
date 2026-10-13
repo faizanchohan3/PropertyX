@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSetting, listAreaDirectory, priceIndex, propertyTrends } from "@propertyx/core";
-import { TYPE_GROUPS, areaPath, formatPKR, COUNTRY } from "@propertyx/shared";
+import { TYPE_GROUPS, areaPath, formatPKR, COUNTRY, isUAE } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { IndexBars, IndexChart } from "@/components/market/index-chart";
@@ -75,12 +75,16 @@ export default async function PriceIndexPage({ searchParams }: Props) {
       </form>
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label="Price per marla" value={s.pricePerMarla ? formatPKR(s.pricePerMarla) : "—"} hint={s.pricePerSqft ? `${COUNTRY.currency} ${s.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
+        {isUAE ? (
+          <Stat label="Price per sq ft" value={s.pricePerSqft ? `${COUNTRY.currency} ${s.pricePerSqft.toLocaleString()}` : "—"} />
+        ) : (
+          <Stat label="Price per marla" value={s.pricePerMarla ? formatPKR(s.pricePerMarla) : "—"} hint={s.pricePerSqft ? `${COUNTRY.currency} ${s.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
+        )}
         <Stat label="Average asking price" value={s.avgPrice ? formatPKR(s.avgPrice) : "—"} />
         <div className="card p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Price change</p>
           <p className="mt-1 text-xl font-extrabold"><ChangePill pct={s.growthPct} /></p>
-          <p className="mt-0.5 text-xs text-slate-500">{s.growthFrom ? `since ${new Date(s.growthFrom).toLocaleDateString("en-PK", { month: "short", year: "numeric" })}` : "not enough data yet"}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{s.growthFrom ? `since ${new Date(s.growthFrom).toLocaleDateString(COUNTRY.locale, { month: "short", year: "numeric" })}` : "not enough data yet"}</p>
         </div>
         <Stat label="Rental yield" value={s.rentalYield != null ? `${s.rentalYield}%` : "—"} hint="gross, per year" />
         <Stat label="Active listings" value={s.activeListings.toLocaleString()} />
@@ -89,9 +93,9 @@ export default async function PriceIndexPage({ searchParams }: Props) {
       {hasSeries ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <section className="card p-6 lg:col-span-2">
-            <h2 className="text-lg font-bold">Price per marla</h2>
+            <h2 className="text-lg font-bold">{isUAE ? "Price per sq ft" : "Price per marla"}</h2>
             <p className="mb-4 text-sm text-slate-500">Median asking price of {group} listed in each period</p>
-            <IndexChart data={index.points} series={[{ key: "salePricePerMarla", label: "Price / marla" }]} height={300} />
+            <IndexChart data={index.points} series={[isUAE ? { key: "salePricePerSqft", label: "Price / sq ft" } : { key: "salePricePerMarla", label: "Price / marla" }]} height={300} />
           </section>
           <section className="card p-6">
             <h2 className="text-lg font-bold">Rental yield</h2>

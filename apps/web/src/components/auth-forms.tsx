@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { api, fieldError } from "@/lib/client";
 import { FieldError, FormError } from "./modal";
-import { isUAE } from "@propertyx/shared";
+import { isUAE, COUNTRY } from "@propertyx/shared";
 
 /** One-click demo sign-ins: [label, email, staff]. Staff accounts are offered only in local development. */
 const PK_DEMO: [string, string, boolean][] = [
@@ -171,7 +171,7 @@ export function RegisterForm() {
       </div>
       <div>
         <label className="label" htmlFor="phone">Mobile number (optional)</label>
-        <input id="phone" className="input" autoComplete="tel" placeholder="03XX XXXXXXX" value={f.phone} onChange={set("phone")} />
+        <input id="phone" className="input" autoComplete="tel" placeholder={COUNTRY.phone.example} value={f.phone} onChange={set("phone")} />
         <FieldError msg={fieldError(err, "phone")} />
       </div>
       <div>

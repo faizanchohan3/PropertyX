@@ -2,7 +2,7 @@ import postgres from "postgres";
 import { publicAppUrl } from "@propertyx/shared";
 import { connectionOptions, db, sql as q } from "@propertyx/database";
 import { createSearchEngine } from "@propertyx/search";
-import { getSetting, listProjects, listPosts, listAgents } from "@propertyx/core";
+import { getSetting, listProjects, listPosts, listAgents, storageDriver } from "@propertyx/core";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     notificationProviders: { email: process.env.EMAIL_PROVIDER ?? "console", sms: process.env.SMS_PROVIDER ?? "console", whatsapp: process.env.WHATSAPP_PROVIDER ?? "console" },
     APP_URL: publicAppUrl() + (process.env.APP_URL ? "" : " (auto)"),
     region: process.env.VERCEL_REGION ?? null,
+    storage: storageDriver(),
   };
   const dbUrl = url || (process.env.NODE_ENV !== "production" ? "postgres://propertyx:propertyx_dev@127.0.0.1:54329/propertyx" : "");
   if (dbUrl) {

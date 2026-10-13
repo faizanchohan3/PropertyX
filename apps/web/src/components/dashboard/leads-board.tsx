@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Phone, MessageCircle, Mail, Star, Search, Flame, StickyNote, Loader2, UserPlus } from "lucide-react";
-import { LEAD_STATUSES, formatPKR, COUNTRY } from "@propertyx/shared";
+import { LEAD_STATUSES, formatPKR, COUNTRY, isUAE } from "@propertyx/shared";
 import { api } from "@/lib/client";
 import { StatusPill } from "../badges";
 import { toast } from "../toast";
@@ -192,7 +192,7 @@ function NoteModal({ lead, onClose, onSave, busy }: { lead: Lead | null; onClose
   const [text, setText] = useState("");
   return (
     <Modal open={!!lead} onClose={onClose} title={`Notes — ${lead?.name ?? ""}`}>
-      <textarea key={lead?.id} defaultValue={lead?.notes} onChange={(e) => setText(e.target.value)} className="input min-h-32" placeholder="e.g. Wants to visit Saturday, budget flexible up to 2.4 crore" maxLength={4000} />
+      <textarea key={lead?.id} defaultValue={lead?.notes} onChange={(e) => setText(e.target.value)} className="input min-h-32" placeholder={isUAE ? "e.g. Wants to visit Saturday, budget flexible up to AED 2.4M" : "e.g. Wants to visit Saturday, budget flexible up to 2.4 crore"} maxLength={4000} />
       <button onClick={() => onSave(text || lead?.notes || "")} disabled={busy} className="btn-primary mt-3 w-full">
         {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save note
       </button>

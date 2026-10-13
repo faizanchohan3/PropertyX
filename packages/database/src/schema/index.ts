@@ -8,3 +8,4 @@ export * from "./commerce";
 export * from "./trust";
 export * from "./content";
 export * from "./rentals";
+export * from "./files";

@@ -3,14 +3,18 @@
  *  - public:  listing photos, floor plans, avatars, chat images (served at /media/<key>)
  *  - private: CNIC / ownership documents, contracts (NEVER served statically; streamed
  *             only through the authorised /api/v1/documents/:id route)
- * The local driver writes under STORAGE_PUBLIC_DIR / STORAGE_PRIVATE_DIR. An S3 driver can
- * implement the same StorageDriver interface for production.
+ * Drivers (STORAGE_DRIVER):
+ *  - local:    files under STORAGE_PUBLIC_DIR / STORAGE_PRIVATE_DIR (development, a VPS with a disk)
+ *  - db:       the stored_files table — the default on Vercel, whose disk is temporary and per-instance
+ *  - supabase: Supabase Storage (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY), for large photo volumes
+ * Files are always served through our own routes, so URLs never change when the driver does.
  */
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile, unlink, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
+import { getSql } from "@propertyx/database";
 import { badRequest } from "./errors";
 
 export type Visibility = "public" | "private";
@@ -36,20 +40,69 @@ function safeKey(key: string) {
   return key;
 }
 
+type Driver = "local" | "db" | "supabase";
+export function storageDriver(): Driver {
+  const d = (process.env.STORAGE_DRIVER ?? "").toLowerCase();
+  if (d === "supabase" && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return "supabase";
+  if (d === "db") return "db";
+  // a local disk can't hold uploads on Vercel (temporary, not shared between instances)
+  if (process.env.VERCEL) return "db";
+  return "local";
+}
+
+/* --- Supabase Storage (private buckets; we serve the files ourselves) --- */
+const sbBucket = (v: Visibility) => (v === "public" ? "media" : "private");
+async function sb(pathname: string, init: RequestInit = {}) {
+  const base = process.env.SUPABASE_URL!.replace(/\/$/, "");
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return fetch(`${base}/storage/v1/${pathname}`, { ...init, headers: { authorization: `Bearer ${key}`, apikey: key, ...(init.headers ?? {}) } });
+}
+let bucketsReady: Promise<void> | null = null;
+function ensureBuckets() {
+  bucketsReady ??= Promise.all(
+    (["public", "private"] as const).map((v) => sb("bucket", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: sbBucket(v), name: sbBucket(v), public: false }) }).then(() => {})),
+  ).then(() => {});
+  return bucketsReady;
+}
+
 export async function putFile(v: Visibility, key: string, data: Buffer) {
-  const file = path.join(baseDir(v), safeKey(key));
-  await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, data);
+  safeKey(key);
+  const driver = storageDriver();
+  if (driver === "db") {
+    await getSql()`insert into stored_files (key, visibility, data, size_bytes) values (${key}, ${v}, ${data}, ${data.length})
+      on conflict (key) do update set data = excluded.data, size_bytes = excluded.size_bytes, visibility = excluded.visibility`;
+  } else if (driver === "supabase") {
+    await ensureBuckets();
+    const r = await sb(`object/${sbBucket(v)}/${key}`, { method: "POST", headers: { "x-upsert": "true", "content-type": "application/octet-stream" }, body: new Uint8Array(data) });
+    if (!r.ok) throw new Error(`Upload failed (${r.status})`);
+  } else {
+    const file = path.join(baseDir(v), key);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, data);
+  }
   return { key, url: v === "public" ? `/media/${key}` : null };
 }
 
-export async function getFile(v: Visibility, key: string) {
-  return readFile(path.join(baseDir(v), safeKey(key)));
+export async function getFile(v: Visibility, key: string): Promise<Buffer> {
+  safeKey(key);
+  const driver = storageDriver();
+  if (driver === "db") {
+    const rows = await getSql()<{ data: Buffer }[]>`select data from stored_files where key = ${key} and visibility = ${v}`;
+    if (!rows[0]) throw Object.assign(new Error("File not found"), { code: "ENOENT" });
+    return Buffer.from(rows[0].data);
+  }
+  if (driver === "supabase") {
+    const r = await sb(`object/${sbBucket(v)}/${key}`);
+    if (!r.ok) throw Object.assign(new Error("File not found"), { code: "ENOENT" });
+    return Buffer.from(await r.arrayBuffer());
+  }
+  return readFile(path.join(baseDir(v), key));
 }
 
 export async function fileExists(v: Visibility, key: string) {
   try {
-    await stat(path.join(baseDir(v), safeKey(key)));
+    if (storageDriver() === "local") await stat(path.join(baseDir(v), safeKey(key)));
+    else await getFile(v, key);
     return true;
   } catch {
     return false;
@@ -58,7 +111,11 @@ export async function fileExists(v: Visibility, key: string) {
 
 export async function deleteFile(v: Visibility, key: string) {
   try {
-    await unlink(path.join(baseDir(v), safeKey(key)));
+    safeKey(key);
+    const driver = storageDriver();
+    if (driver === "db") await getSql()`delete from stored_files where key = ${key}`;
+    else if (driver === "supabase") await sb(`object/${sbBucket(v)}/${key}`, { method: "DELETE" });
+    else await unlink(path.join(baseDir(v), key));
   } catch {
     /* already gone */
   }

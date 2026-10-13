@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Upload, FileText, Loader2, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
-import { VERIFICATION_LEVELS } from "@propertyx/shared";
+import { VERIFICATION_LEVELS, isUAE } from "@propertyx/shared";
 import { api } from "@/lib/client";
 import { toast } from "../toast";
 import { StatusPill } from "../badges";
@@ -14,8 +14,8 @@ type Req = { id: string; subjectType: string; subjectId: string; requestedLevel:
 type Subject = { type: string; id: string; label: string; currentLevel: number; maxLevel: number };
 
 const DOC_KINDS = [
-  { key: "cnic_front", label: "CNIC (front)" },
-  { key: "cnic_back", label: "CNIC (back)" },
+  { key: "cnic_front", label: isUAE ? "Emirates ID / passport (front)" : "CNIC (front)" },
+  { key: "cnic_back", label: isUAE ? "Emirates ID / passport (back)" : "CNIC (back)" },
   { key: "ownership", label: "Registry / ownership document" },
   { key: "allotment", label: "Allotment / transfer letter" },
   { key: "noc", label: "Society NOC / NDC" },
@@ -133,7 +133,11 @@ export function VerificationCenter({ subjects, docs: initialDocs, requests, phon
             </select>
           </div>
         </div>
-        <p className="mt-3 text-xs text-slate-500">{level === 2 ? "Required: CNIC front and back." : "Required: ownership document (registry, allotment or transfer letter). Level 5 also requires a site inspection appointment."}</p>
+        <p className="mt-3 text-xs text-slate-500">{level === 2
+            ? isUAE
+              ? "Required: Emirates ID (or passport) front and back."
+              : "Required: CNIC front and back."
+            : `Required: ownership document (${isUAE ? "title deed, Oqood or SPA" : "registry, allotment or transfer letter"}). Level 5 also requires a site inspection appointment.`}</p>
 
         <div className="mt-5 rounded-2xl border border-dashed border-slate-300 p-4">
           <div className="flex flex-wrap items-end gap-3">

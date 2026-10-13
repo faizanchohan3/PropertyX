@@ -218,7 +218,7 @@ function VisitModal({ open, onClose, onSubmit, busy, err, phone: initialPhone }:
           </div>
           <div>
             <label className="label" htmlFor="v-phone">Your phone</label>
-            <input id="v-phone" className="input" placeholder="03XX XXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            <input id="v-phone" className="input" placeholder={COUNTRY.phone.example} value={phone} onChange={(e) => setPhone(e.target.value)} required />
             <FieldError msg={fieldError(err, "phone")} />
           </div>
         </div>
@@ -267,7 +267,7 @@ function LeadModal({ mode, open, onClose, onSubmit, busy, err, user, price, purp
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label" htmlFor="l-phone">Phone</label>
-            <input id="l-phone" className="input" placeholder="03XX XXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            <input id="l-phone" className="input" placeholder={COUNTRY.phone.example} value={phone} onChange={(e) => setPhone(e.target.value)} required />
             <FieldError msg={fieldError(err, "phone")} />
           </div>
           <div>

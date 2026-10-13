@@ -1,4 +1,4 @@
-import { COUNTRY } from "@propertyx/shared";
+import { COUNTRY, isUAE } from "@propertyx/shared";
 import type { Metadata } from "next";
 import { StaticPage } from "@/components/static-page";
 
@@ -10,7 +10,7 @@ export default function SafetyPage() {
       <h2>Before you pay anything</h2>
       <ul>
         <li><strong>Never send token or advance money before visiting</strong> the property in person.</li>
-        <li>Meet the owner or authorised agent, and confirm their CNIC matches the ownership documents.</li>
+        <li>Meet the owner or authorised agent, and confirm their {isUAE ? "Emirates ID or passport" : "CNIC"} matches the ownership documents.</li>
         <li>Pay through a bank transfer or pay order — avoid cash, and get a signed receipt.</li>
       </ul>
       <h2>Check the documents</h2>

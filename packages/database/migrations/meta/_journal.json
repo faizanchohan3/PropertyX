@@ -29,6 +29,13 @@
       "when": 1791800859586,
       "tag": "0003_uae_property_types",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791913870462,
+      "tag": "0004_stored_files",
+      "breakpoints": true
     }
   ]
 }

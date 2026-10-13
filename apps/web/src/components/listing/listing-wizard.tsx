@@ -354,7 +354,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">{cat === "plot" ? "Plots" : cat}</p>
                   <div className="flex flex-wrap gap-2">
                     {types.map((t) => (
-                      <button key={t.key} onClick={() => set({ type: t.key, beds: t.hasRooms ? d.beds : null, baths: t.hasRooms ? d.baths : null, areaUnit: t.key === "agricultural_land" ? "acre" : ["flat", "apartment", "penthouse", "office", "shop", "warehouse", "room"].includes(t.key) ? "sqft" : d.areaUnit === "sqft" || d.areaUnit === "acre" ? "marla" : d.areaUnit })} className={`chip ${d.type === t.key ? "chip-active" : ""}`}>
+                      <button key={t.key} onClick={() => set({ type: t.key, beds: t.hasRooms ? d.beds : null, baths: t.hasRooms ? d.baths : null, areaUnit: t.key === "agricultural_land" ? "acre" : !COUNTRY.areaUnits.includes("marla") ? (d.areaUnit === "acre" ? "sqft" : d.areaUnit) : ["flat", "apartment", "penthouse", "office", "shop", "warehouse", "room"].includes(t.key) ? "sqft" : d.areaUnit === "sqft" || d.areaUnit === "acre" ? "marla" : d.areaUnit })} className={`chip ${d.type === t.key ? "chip-active" : ""}`}>
                         {t.label}
                       </button>
                     ))}
@@ -382,7 +382,7 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
                 {err("cityId")}
               </div>
               <div>
-                <label className="label" htmlFor="w-area">Area / housing society</label>
+                <label className="label" htmlFor="w-area">{isUAE ? "Area / community" : "Area / housing society"}</label>
                 <select
                   id="w-area"
                   className="input"
@@ -394,9 +394,9 @@ export function ListingWizard({ initial, listingId, contact, cities }: { initial
                     set({ societyId: k === "s" ? id : null, areaId: k === "a" ? id : null, blockId: null, lat: src?.lat ?? null, lng: src?.lng ?? null });
                   }}
                 >
-                  <option value="">Select area or society</option>
+                  <option value="">{isUAE ? "Select area or community" : "Select area or society"}</option>
                   {tree && tree.societies.length > 0 && (
-                    <optgroup label="Housing societies">
+                    <optgroup label={isUAE ? "Communities" : "Housing societies"}>
                       {tree.societies.map((s) => (
                         <option key={s.id} value={`s:${s.id}`}>
                           {s.name}

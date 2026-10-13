@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus, Loader2, Copy } from "lucide-react";
-import { AGENCY_MEMBER_ROLES } from "@propertyx/shared";
+import { AGENCY_MEMBER_ROLES, COUNTRY } from "@propertyx/shared";
 import { api, fieldError } from "@/lib/client";
 import { Modal, FieldError, FormError } from "../modal";
 import { toast } from "../toast";
@@ -125,7 +125,7 @@ export function TeamManager({ members, myRole, seats, myId }: { members: Member[
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="label" htmlFor="tm-phone">Mobile</label>
-              <input id="tm-phone" className="input" placeholder="03XX XXXXXXX" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+              <input id="tm-phone" className="input" placeholder={COUNTRY.phone.example} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
               <FieldError msg={fieldError(err, "phone")} />
             </div>
             <div>

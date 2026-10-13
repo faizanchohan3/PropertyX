@@ -1,5 +1,7 @@
 "use client";
 
+import { COUNTRY } from "@propertyx/shared";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, RefreshCw } from "lucide-react";
@@ -88,7 +90,7 @@ export function CreateAccountForm({ cities, agencies, initialRole = "agent" }: {
           )}
         {field(f.role === "agency" || f.role === "developer" || f.role === "construction_company" ? "Owner / contact person" : "Full name", "name", <input className={darkInput} value={f.name} onChange={set("name")} required />)}
         {field("Email (used to sign in)", "email", <input type="email" className={darkInput} value={f.email} onChange={set("email")} required />)}
-        {field("Mobile number", "phone", <input className={darkInput} value={f.phone} onChange={set("phone")} placeholder="03XX XXXXXXX" />)}
+        {field("Mobile number", "phone", <input className={darkInput} value={f.phone} onChange={set("phone")} placeholder={COUNTRY.phone.example} />)}
         {field("City", "cityId", <select className={darkInput} value={f.cityId} onChange={set("cityId")}><option value="">—</option>{cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>)}
         {field(
           "Temporary password",

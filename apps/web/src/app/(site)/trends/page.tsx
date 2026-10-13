@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Flame } from "lucide-react";
 import { getSetting, propertyTrends } from "@propertyx/core";
-import { areaPath, formatPKR, searchPath, COUNTRY } from "@propertyx/shared";
+import { areaPath, formatPKR, searchPath, COUNTRY, isUAE } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { ChangePill, MarketDataNote } from "@/components/market/data-note";
@@ -63,7 +63,7 @@ export default async function TrendsPage({ searchParams }: Props) {
                   <th className="px-5 py-3">Area</th>
                   {hasInterest && <th className="px-5 py-3">Views (30 days)</th>}
                   {hasInterest && <th className="px-5 py-3">Interest change</th>}
-                  <th className="px-5 py-3">{purpose === "rent" ? "Rent / marla" : "Price / marla"}</th>
+                  <th className="px-5 py-3">{isUAE ? (purpose === "rent" ? "Rent / sq ft" : "Price / sq ft") : purpose === "rent" ? "Rent / marla" : "Price / marla"}</th>
                   <th className="px-5 py-3">Price change</th>
                   <th className="px-5 py-3">Listings</th>
                 </tr>
@@ -78,7 +78,7 @@ export default async function TrendsPage({ searchParams }: Props) {
                     </td>
                     {hasInterest && <td className="px-5 py-3">{r.views.toLocaleString()}</td>}
                     {hasInterest && <td className="px-5 py-3"><ChangePill pct={r.interestChangePct} /></td>}
-                    <td className="px-5 py-3">{r.pricePerMarla ? formatPKR(r.pricePerMarla) : "—"}</td>
+                    <td className="px-5 py-3">{isUAE ? (r.pricePerSqft ? `${COUNTRY.currency} ${r.pricePerSqft.toLocaleString()}` : "—") : r.pricePerMarla ? formatPKR(r.pricePerMarla) : "—"}</td>
                     <td className="px-5 py-3"><ChangePill pct={r.priceChangePct} /></td>
                     <td className="px-5 py-3">
                       <Link href={searchPath({ purpose, city: r.citySlug, location: r.slug })} className="font-semibold text-brand-700 hover:text-brand-800">{r.activeListings}</Link>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ArrowRight, Check, ChevronRight, MapPinned, X } from "lucide-react";
 import { getBoundaries, getLocationPage } from "@propertyx/core";
-import { areaPath, agentPath, projectPath, searchPath, formatPKR, PROPERTY_TYPE_LABELS, PROJECT_STATUS_LABELS, COUNTRY } from "@propertyx/shared";
+import { areaPath, agentPath, projectPath, searchPath, formatPKR, PROPERTY_TYPE_LABELS, PROJECT_STATUS_LABELS, COUNTRY, isUAE } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { renderMarkdown } from "@/lib/markdown";
 import { VerificationBadge } from "@/components/badges";
@@ -93,7 +93,11 @@ export default async function AreaPage({ params }: Props) {
       <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="For sale" value={forSale.toLocaleString()} hint="active listings" />
         <Stat label="For rent" value={forRent.toLocaleString()} hint="active listings" />
-        <Stat label="Avg. price per marla" value={index.summary.pricePerMarla ? formatPKR(index.summary.pricePerMarla) : "—"} hint={index.summary.pricePerSqft ? `${COUNTRY.currency} ${index.summary.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
+        {isUAE ? (
+          <Stat label="Avg. price per sq ft" value={index.summary.pricePerSqft ? `${COUNTRY.currency} ${index.summary.pricePerSqft.toLocaleString()}` : "—"} />
+        ) : (
+          <Stat label="Avg. price per marla" value={index.summary.pricePerMarla ? formatPKR(index.summary.pricePerMarla) : "—"} hint={index.summary.pricePerSqft ? `${COUNTRY.currency} ${index.summary.pricePerSqft.toLocaleString()} / sq ft` : undefined} />
+        )}
         <div className="card p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Price change</p>
           <p className="mt-1 text-xl font-extrabold">
