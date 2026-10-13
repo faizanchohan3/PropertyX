@@ -6,7 +6,7 @@
 import { sql, eq, and } from "drizzle-orm";
 import type { Database } from "@propertyx/database";
 import * as s from "@propertyx/database";
-import { estimateValue, toSqft, type AreaUnit, type PropertyType, TYPE_GROUPS, type SearchQuery } from "@propertyx/shared";
+import { estimateValue, toSqft, type AreaUnit, type PropertyType, TYPE_GROUPS, type SearchQuery, COUNTRY } from "@propertyx/shared";
 import { createSearchEngine, type ListingCard } from "@propertyx/search";
 import { getSetting } from "./settings";
 
@@ -125,8 +125,19 @@ export async function getLocationPage(db: Database, slug: string) {
     { label: "10 Marla", sqft: 10 * marla },
     { label: "1 Kanal", sqft: 20 * marla },
   ];
-  const priceTable = [];
-  for (const b of bands) {
+  const priceTable: { size: string; house: number | null; plot: number | null; rent: number | null }[] = [];
+  // UAE: by bedrooms — apartment sale, villa / townhouse sale, yearly rent
+  if (COUNTRY.code === "ae")
+    for (const beds of [1, 2, 3, 4]) {
+      const [r] = await db.execute<Row>(sql`
+        select percentile_cont(0.5) within group (order by l.price) filter (where l.purpose='sale' and p.type in ('apartment','flat','penthouse','hotel_apartment')) as apt,
+          percentile_cont(0.5) within group (order by l.price) filter (where l.purpose='sale' and p.type in ('villa','townhouse','house')) as villa,
+          percentile_cont(0.5) within group (order by l.price) filter (where l.purpose='rent') as rent
+        from property_listings l join properties p on p.id = l.property_id join cities c on c.id = p.city_id
+        where l.status in ('active','sold','rented') and ${where} and ${beds === 4 ? sql`p.beds >= 4` : sql`p.beds = ${beds}`}`);
+      priceTable.push({ size: beds === 4 ? "4+ Bed" : `${beds} Bed`, house: r?.apt != null ? Math.round(Number(r.apt)) : null, plot: r?.villa != null ? Math.round(Number(r.villa)) : null, rent: r?.rent != null ? Math.round(Number(r.rent)) : null });
+    }
+  for (const b of COUNTRY.code === "ae" ? [] : bands) {
     const [r] = await db.execute<Row>(sql`
       select percentile_cont(0.5) within group (order by l.price) filter (where l.purpose='sale' and p.type in ('house','villa')) as house,
         percentile_cont(0.5) within group (order by l.price) filter (where l.purpose='sale' and p.type = 'residential_plot') as plot,

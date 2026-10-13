@@ -4,7 +4,7 @@ import * as s from "@propertyx/database";
 import { enabledGateways, getGateway, invoiceNumber, type CheckoutAction } from "@propertyx/payments";
 import { notify } from "@propertyx/notifications";
 import { audit } from "@propertyx/auth";
-import { FEATURED_PRICE_PKR, type PaymentPurpose } from "@propertyx/shared";
+import { FEATURED_PRICE, type PaymentPurpose } from "@propertyx/shared";
 import { badRequest, forbidden, notFound, requireActor, requirePerm, type Actor } from "./errors";
 
 export async function listPlans(db: Database) {
@@ -76,9 +76,9 @@ export async function startCheckout(db: Database, actor: Actor | null, req: Chec
     if (!l) throw notFound("Listing");
     if (l.postedById !== actor.id) throw forbidden();
     if (l.status !== "active") throw badRequest("Only active listings can be featured");
-    const days = Number(req.option ?? 7) as keyof typeof FEATURED_PRICE_PKR;
-    if (!FEATURED_PRICE_PKR[days]) throw badRequest("Choose 7, 15 or 30 days");
-    amount = FEATURED_PRICE_PKR[days];
+    const days = Number(req.option ?? 7) as keyof typeof FEATURED_PRICE;
+    if (!FEATURED_PRICE[days]) throw badRequest("Choose 7, 15 or 30 days");
+    amount = FEATURED_PRICE[days];
     description = `Featured listing — ${days} days`;
     metadata.days = days;
     returnUrl = "/dashboard/listings";

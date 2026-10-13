@@ -1,4 +1,4 @@
-import { COUNTRY } from "@propertyx/shared";
+import { COUNTRY, FEATURED_PRICE, formatPKRFull } from "@propertyx/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -34,12 +34,12 @@ export default async function PricingPage() {
                   <span className="text-3xl font-extrabold">Free</span>
                 ) : (
                   <>
-                    <span className="text-3xl font-extrabold">Rs {p.priceMonthly.toLocaleString("en-PK")}</span>
+                    <span className="text-3xl font-extrabold">{formatPKRFull(p.priceMonthly)}</span>
                     <span className="text-sm text-slate-500"> /month</span>
                   </>
                 )}
               </p>
-              {p.priceYearly > 0 && <p className="text-xs text-slate-500">or Rs {p.priceYearly.toLocaleString("en-PK")} / year (2 months free)</p>}
+              {p.priceYearly > 0 && <p className="text-xs text-slate-500">or {formatPKRFull(p.priceYearly)} / year (2 months free)</p>}
               <ul className="mt-5 flex-1 space-y-2 text-sm">
                 {p.features.map((f) => (
                   <li key={f} className="flex gap-2">
@@ -73,7 +73,7 @@ export default async function PricingPage() {
           );
         })}
       </div>
-      <p className="mt-10 text-center text-sm text-slate-500">Featured listings can also be bought individually from your dashboard: 7 days Rs 1,500 · 15 days Rs 2,500 · 30 days Rs 4,500.</p>
+      <p className="mt-10 text-center text-sm text-slate-500">Featured listings can also be bought individually from your dashboard: {([7, 15, 30] as const).map((n) => `${n} days ${formatPKRFull(FEATURED_PRICE[n])}`).join(" · ")}.</p>
     </div>
   );
 }

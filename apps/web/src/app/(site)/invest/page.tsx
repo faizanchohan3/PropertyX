@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Building2, Coins, Flame, Percent, Sprout, TrendingUp, Wallet, type LucideIcon } from "lucide-react";
 import { investmentOpportunities, type Opportunity } from "@propertyx/core";
-import { areaPath, formatPKR, projectPath, searchPath, COUNTRY } from "@propertyx/shared";
+import { areaPath, formatPKR, projectPath, searchPath, COUNTRY, isUAE } from "@propertyx/shared";
 import { db } from "@/lib/server";
 import { CITY_LINKS } from "@/components/nav-data";
 import { ProjectCard } from "@/components/directory/cards";
@@ -16,13 +16,16 @@ export const metadata: Metadata = {
 
 type Props = { searchParams: Promise<{ city?: string }> };
 
+/** price per local area unit: sq ft in the UAE, marla (225 sq ft) in Pakistan */
+const ppa = (ppsf: number) => (isUAE ? `${COUNTRY.currency} ${Math.round(ppsf).toLocaleString()}/sq ft` : `${formatPKR(ppsf * 225)}/marla`);
+
 const SECTIONS: { key: string; title: string; desc: string; icon: LucideIcon; metric: (o: Opportunity) => string }[] = [
   { key: "high_rental_yield", title: "Best rental yields", desc: "Yearly rent as a share of price", icon: Percent, metric: (o) => (o.rentalYield != null ? `${o.rentalYield}% yield` : "—") },
   { key: "high_appreciation", title: "Fastest price growth", desc: "Asking price change over about a year", icon: TrendingUp, metric: (o) => (o.appreciation12m != null ? `${o.appreciation12m > 0 ? "+" : ""}${o.appreciation12m}%` : "—") },
-  { key: "emerging_areas", title: "Emerging societies", desc: "Below-average prices with rising demand", icon: Sprout, metric: (o) => `${formatPKR(o.medianPricePerSqft * 225)}/marla` },
-  { key: "affordable_areas", title: "Affordable areas", desc: "Lowest price per marla with good supply", icon: Coins, metric: (o) => `${formatPKR(o.medianPricePerSqft * 225)}/marla` },
+  { key: "emerging_areas", title: isUAE ? "Emerging communities" : "Emerging societies", desc: "Below-average prices with rising demand", icon: Sprout, metric: (o) => ppa(o.medianPricePerSqft) },
+  { key: "affordable_areas", title: "Affordable areas", desc: `Lowest price per ${isUAE ? "sq ft" : "marla"} with good supply`, icon: Coins, metric: (o) => ppa(o.medianPricePerSqft) },
   { key: "commercial", title: "Commercial hotspots", desc: "Most shops, offices and commercial plots", icon: Building2, metric: (o) => `${o.commercialListings} commercial` },
-  { key: "installments", title: "Installment options", desc: "Most listings available on installments", icon: Wallet, metric: (o) => `${o.installmentListings} on installments` },
+  ...(isUAE ? [] : [{ key: "installments", title: "Installment options", desc: "Most listings available on installments", icon: Wallet, metric: (o: Opportunity) => `${o.installmentListings} on installments` }]),
 ];
 
 export default async function InvestPage({ searchParams }: Props) {
@@ -60,7 +63,7 @@ export default async function InvestPage({ searchParams }: Props) {
                 <tr>
                   <th className="px-6 py-2.5">Area</th>
                   <th className="px-6 py-2.5">Score</th>
-                  <th className="px-6 py-2.5">Price / marla</th>
+                  <th className="px-6 py-2.5">{isUAE ? "Price / sq ft" : "Price / marla"}</th>
                   <th className="px-6 py-2.5">Yield</th>
                   <th className="px-6 py-2.5">Growth</th>
                   <th className="px-6 py-2.5">Listings</th>
@@ -76,7 +79,7 @@ export default async function InvestPage({ searchParams }: Props) {
                     <td className="px-6 py-3">
                       <span className="inline-flex h-8 w-10 items-center justify-center rounded-lg bg-brand-700 font-bold text-white">{o.score}</span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3">{formatPKR(o.medianPricePerSqft * 225)}</td>
+                    <td className="whitespace-nowrap px-6 py-3">{ppa(o.medianPricePerSqft)}</td>
                     <td className="px-6 py-3">{o.rentalYield != null ? `${o.rentalYield}%` : "—"}</td>
                     <td className="px-6 py-3">{o.appreciation12m != null ? `${o.appreciation12m > 0 ? "+" : ""}${o.appreciation12m}%` : "—"}</td>
                     <td className="px-6 py-3"><Link href={searchPath({ purpose: "sale", city: o.citySlug, location: o.slug })} className="font-semibold text-brand-700">{o.activeListings}</Link></td>

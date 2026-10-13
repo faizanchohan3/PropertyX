@@ -38,6 +38,14 @@ async function main() {
     await sql.unsafe("CREATE EXTENSION IF NOT EXISTS pg_trgm");
     const folder = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../packages/database/migrations");
     await migrate(drizzle(sql), { migrationsFolder: folder });
+    // UAE databases created from the Pakistani defaults carry PKR plan prices: move untouched ones to AED
+    if ((process.env.NEXT_PUBLIC_COUNTRY ?? "").toLowerCase() === "ae") {
+      const fixes = [["agent_pro", 4999, 49990, 249, 2490], ["agency", 19999, 199990, 799, 7990], ["developer", 29999, 299990, 1499, 14990]];
+      let changed = 0;
+      for (const [key, pkM, pkY, m, y] of fixes) changed += (await sql`update subscription_plans set price_monthly = ${m}, price_yearly = ${y} where key = ${key} and price_monthly = ${pkM} and price_yearly = ${pkY}`).count;
+      changed += (await sql`update site_settings set value = '{"7":99,"15":169,"30":299}'::jsonb where key = 'featured_pricing' and value = '{"7":1500,"15":2500,"30":4500}'::jsonb`).count;
+      if (changed) log(`set UAE prices on ${changed} plan/pricing rows`);
+    }
     const [{ n }] = await sql`select count(*)::int as n from drizzle.__drizzle_migrations`;
     log(`up to date (${n} migrations) in ${Date.now() - t} ms`);
   } finally {

@@ -142,10 +142,10 @@ export default async function AreaPage({ params }: Props) {
                 <table className="mt-4 w-full text-sm">
                   <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                     <tr>
-                      <th className="px-6 py-2.5">Size</th>
-                      <th className="px-6 py-2.5">House (sale)</th>
-                      <th className="px-6 py-2.5">Plot (sale)</th>
-                      <th className="px-6 py-2.5">House rent / month</th>
+                      <th className="px-6 py-2.5">{isUAE ? "Bedrooms" : "Size"}</th>
+                      <th className="px-6 py-2.5">{isUAE ? "Apartment (sale)" : "House (sale)"}</th>
+                      <th className="px-6 py-2.5">{isUAE ? "Villa / townhouse (sale)" : "Plot (sale)"}</th>
+                      <th className="px-6 py-2.5">{isUAE ? "Rent / year" : "House rent / month"}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">

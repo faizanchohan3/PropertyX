@@ -1,5 +1,7 @@
 "use client";
 
+import { FEATURED_PRICE, formatPKRFull } from "@propertyx/shared";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -75,11 +77,7 @@ export function ListingActions({ id, slug, status, purpose, featuredCreditsLeft,
           </button>
         )}
         <div className="space-y-2">
-          {[
-            ["7", "7 days — Rs 1,500"],
-            ["15", "15 days — Rs 2,500"],
-            ["30", "30 days — Rs 4,500"],
-          ].map(([days, label]) => (
+          {([7, 15, 30] as const).map((n) => [String(n), `${n} days — ${formatPKRFull(FEATURED_PRICE[n])}`]).map(([days, label]) => (
             <CheckoutButton key={days} purpose="featured_listing" referenceId={id} option={days} label={label} className="btn-outline w-full" gateways={gateways} />
           ))}
         </div>

@@ -120,7 +120,7 @@ export default async function PriceIndexPage({ searchParams }: Props) {
               <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-6 py-2.5">Area</th>
-                  <th className="px-6 py-2.5">Price / marla</th>
+                  <th className="px-6 py-2.5">{isUAE ? "Price / sq ft" : "Price / marla"}</th>
                   <th className="px-6 py-2.5">Change (6 mo vs year before)</th>
                   <th className="px-6 py-2.5">Listings for sale</th>
                 </tr>
@@ -131,7 +131,7 @@ export default async function PriceIndexPage({ searchParams }: Props) {
                     <td className="px-6 py-3">
                       <Link href={`/price-index?${new URLSearchParams({ city, location: a.slug, group, period })}`} className="font-semibold text-brand-700 hover:text-brand-800">{a.name}</Link>
                     </td>
-                    <td className="px-6 py-3">{a.pricePerMarla ? formatPKR(a.pricePerMarla) : "—"}</td>
+                    <td className="px-6 py-3">{isUAE ? (a.pricePerSqft ? `${COUNTRY.currency} ${a.pricePerSqft.toLocaleString()}` : "—") : a.pricePerMarla ? formatPKR(a.pricePerMarla) : "—"}</td>
                     <td className="px-6 py-3"><ChangePill pct={a.priceChangePct} /></td>
                     <td className="px-6 py-3">{a.activeListings}</td>
                   </tr>
