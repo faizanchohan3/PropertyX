@@ -16,6 +16,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reference": "tsx scripts/seed.ts --reference-only",
     "db:add-listings": "tsx scripts/add-listings.ts",
+    "db:demo-uae": "tsx scripts/seed-uae.ts",
     "dev": "npm run dev -w @propertyx/web",
     "build": "npm run build -w @propertyx/web",
     "start": "npm run start -w @propertyx/web",
