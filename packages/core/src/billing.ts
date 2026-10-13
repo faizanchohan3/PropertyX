@@ -4,7 +4,7 @@ import * as s from "@propertyx/database";
 import { enabledGateways, getGateway, invoiceNumber, type CheckoutAction } from "@propertyx/payments";
 import { notify } from "@propertyx/notifications";
 import { audit } from "@propertyx/auth";
-import { FEATURED_PRICE, type PaymentPurpose } from "@propertyx/shared";
+import { FEATURED_PRICE, formatPKRFull, COUNTRY, type PaymentPurpose } from "@propertyx/shared";
 import { badRequest, forbidden, notFound, requireActor, requirePerm, type Actor } from "./errors";
 
 export async function listPlans(db: Database) {
@@ -93,7 +93,8 @@ export async function startCheckout(db: Database, actor: Actor | null, req: Chec
   } else if (req.purpose === "booking_fee" || req.purpose === "project_booking") {
     const [proj] = await db.select().from(s.projects).where(eq(s.projects.id, req.referenceId));
     if (!proj) throw notFound("Project");
-    amount = req.purpose === "project_booking" ? 50_000 : 5_000;
+    // booking token / fee in the site currency
+    amount = COUNTRY.code === "ae" ? (req.purpose === "project_booking" ? 5_000 : 500) : req.purpose === "project_booking" ? 50_000 : 5_000;
     description = `${req.purpose === "project_booking" ? "Booking token" : "Booking fee"} — ${proj.name}`;
     returnUrl = `/project/${proj.slug}`;
   } else throw badRequest("Unknown payment purpose");
@@ -121,6 +122,11 @@ export async function completePayment(db: Database, gatewayKey: string, params: 
   if (!payment) throw notFound("Payment");
   if (payment.provider !== gatewayKey) throw badRequest("Gateway mismatch");
   if (payment.status === "succeeded") return payment; // idempotent
+  // never accept a payment for less than the invoice
+  if (result.status === "succeeded" && result.amountPaid != null && Math.round(result.amountPaid) < payment.amount) {
+    result.status = "failed";
+    result.message = `Paid amount ${result.amountPaid} is less than the invoice ${payment.amount}`;
+  }
   if (result.status !== "succeeded") {
     const [p] = await db.update(s.payments).set({ status: result.status === "cancelled" ? "cancelled" : "failed", failureReason: result.message ?? "Payment was not completed", providerRef: result.providerRef }).where(eq(s.payments.id, payment.id)).returning();
     return p;
@@ -162,7 +168,7 @@ async function fulfil(db: Database, p: typeof s.payments.$inferSelect) {
     if (dev.ownerId) await notify(db, { userId: dev.ownerId, type: "payment", title: "Booking payment received", body: `${buyer.name} paid ${p.description}.`, link: "/dashboard/leads" });
   }
   await db.update(s.payments).set({ fulfilledAt: new Date() }).where(eq(s.payments.id, p.id));
-  await notify(db, { userId: p.userId, type: "payment", title: "Payment received", body: `${p.description} — PKR ${p.amount.toLocaleString("en-IN")} (invoice ${p.invoiceNumber}).`, link: `/dashboard/billing` });
+  await notify(db, { userId: p.userId, type: "payment", title: "Payment received", body: `${p.description} — ${formatPKRFull(p.amount)} (invoice ${p.invoiceNumber}).`, link: `/dashboard/billing` });
 }
 
 export async function getPaymentByInvoice(db: Database, invoice: string) {
