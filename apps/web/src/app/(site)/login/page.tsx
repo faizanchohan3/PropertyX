@@ -17,7 +17,8 @@ export default async function LoginPage() {
         <h1 className="mt-5 text-2xl font-extrabold">Welcome back</h1>
         <p className="mb-6 mt-1 text-sm text-slate-500">Sign in to save properties, message sellers and manage listings.</p>
         <Suspense>
-          <LoginForm showDemo={demo && process.env.NODE_ENV !== "production"} />
+          {/* demo accounts are public sample users; staff (admin) demo accounts only in local development */}
+          <LoginForm showDemo={demo} showStaffDemo={demo && process.env.NODE_ENV !== "production"} />
         </Suspense>
       </div>
     </div>

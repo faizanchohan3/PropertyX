@@ -6,26 +6,37 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { api, fieldError } from "@/lib/client";
 import { FieldError, FormError } from "./modal";
+import { isUAE } from "@propertyx/shared";
 
-const DEMO = [
-  ["Buyer", "buyer"],
-  ["Seller", "seller"],
-  ["Agent", "agent"],
-  ["Agency", "agency"],
-  ["Developer", "developer"],
-  ["Landlord", "landlord"],
-  ["Tenant", "tenant"],
-  ["Prop. manager", "manager"],
-  ["Admin", "admin"],
-  ["Moderator", "moderator"],
-  ["Super admin", "superadmin"],
-] as const;
+/** One-click demo sign-ins: [label, email, staff]. Staff accounts are offered only in local development. */
+const PK_DEMO: [string, string, boolean][] = [
+  ["Buyer", "buyer@bismillah.test", false],
+  ["Seller", "seller@bismillah.test", false],
+  ["Agent", "agent@bismillah.test", false],
+  ["Agency", "agency@bismillah.test", false],
+  ["Developer", "developer@bismillah.test", false],
+  ["Landlord", "landlord@bismillah.test", false],
+  ["Tenant", "tenant@bismillah.test", false],
+  ["Prop. manager", "manager@bismillah.test", false],
+  ["Admin", "admin@bismillah.test", true],
+  ["Moderator", "moderator@bismillah.test", true],
+  ["Super admin", "superadmin@bismillah.test", true],
+];
+// accounts created by the UAE demo data (npm run db:demo-uae)
+const AE_DEMO: [string, string, boolean][] = [
+  ["Buyer", "buyer.priya.menon@demo-uae.bismillah.test", false],
+  ["Seller / Landlord", "seller.daniel.morgan@demo-uae.bismillah.test", false],
+  ["Agent", "agent.sara.haddad@demo-uae.bismillah.test", false],
+  ["Agency", "owner.khalid.kapoor@demo-uae.bismillah.test", false],
+  ["Developer", "developer.priya.wang@demo-uae.bismillah.test", false],
+];
+const DEMO = isUAE ? AE_DEMO : PK_DEMO;
 
 function safeNext(n: string | null) {
   return n && n.startsWith("/") && !n.startsWith("//") ? n : "/dashboard";
 }
 
-export function LoginForm({ showDemo }: { showDemo: boolean }) {
+export function LoginForm({ showDemo, showStaffDemo = false }: { showDemo: boolean; showStaffDemo?: boolean }) {
   const router = useRouter();
   const sp = useSearchParams();
   const [email, setEmail] = useState("");
@@ -78,8 +89,8 @@ export function LoginForm({ showDemo }: { showDemo: boolean }) {
           <p className="text-sm font-semibold text-gold-900">Demo accounts</p>
           <p className="mb-3 text-xs text-gold-800">One click signs in as a sample user (password Demo@12345). Available only while demo mode is on.</p>
           <div className="flex flex-wrap gap-1.5">
-            {DEMO.map(([label, key]) => (
-              <button key={key} type="button" disabled={busy} onClick={() => submit(undefined, { email: `${key}@bismillah.test`, password: "Demo@12345" })} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-gold-200 hover:ring-gold-400">
+            {DEMO.filter(([, , staff]) => showStaffDemo || !staff).map(([label, demoEmail]) => (
+              <button key={demoEmail} type="button" disabled={busy} onClick={() => submit(undefined, { email: demoEmail, password: "Demo@12345" })} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-gold-200 hover:ring-gold-400">
                 {label}
               </button>
             ))}
