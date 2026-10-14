@@ -22,13 +22,16 @@ const PK_DEMO: [string, string, boolean][] = [
   ["Moderator", "moderator@bismillah.test", true],
   ["Super admin", "superadmin@bismillah.test", true],
 ];
-// accounts created by the UAE demo data (npm run db:demo-uae)
+// UAE demo logins (uae-demo-accounts.sql); staff accounts use a private password and get no button
 const AE_DEMO: [string, string, boolean][] = [
-  ["Buyer", "buyer.priya.menon@demo-uae.bismillah.test", false],
-  ["Seller / Landlord", "seller.daniel.morgan@demo-uae.bismillah.test", false],
-  ["Agent", "agent.sara.haddad@demo-uae.bismillah.test", false],
-  ["Agency", "owner.khalid.kapoor@demo-uae.bismillah.test", false],
-  ["Developer", "developer.priya.wang@demo-uae.bismillah.test", false],
+  ["Buyer", "buyer@uae.bismillah.test", false],
+  ["Seller", "seller@uae.bismillah.test", false],
+  ["Agent", "agent@uae.bismillah.test", false],
+  ["Agency", "agency@uae.bismillah.test", false],
+  ["Developer", "developer@uae.bismillah.test", false],
+  ["Landlord", "landlord@uae.bismillah.test", false],
+  ["Tenant", "tenant@uae.bismillah.test", false],
+  ["Prop. manager", "manager@uae.bismillah.test", false],
 ];
 const DEMO = isUAE ? AE_DEMO : PK_DEMO;
 
