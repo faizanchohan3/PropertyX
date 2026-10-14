@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CITY_LINKS } from "../nav-data";
 import { estimateConstructionCost, formatPKR, formatPKRFull, formatNumber, sqftPerUnit, type ConstructionInput, type ConstructionRates, type FinishingQuality, COUNTRY } from "@propertyx/shared";
+import { ToolLeadForm } from "./tool-lead-form";
 
 export type CityRates = { slug: string; name: string; rates: ConstructionRates };
 
@@ -156,6 +157,10 @@ export function ConstructionCalculator({ cities }: { cities: CityRates[] }) {
                 </li>
               ))}
             </ul>
+            <ToolLeadForm
+              tool="construction_cost"
+              context={{ City: city, "Plot size": `${plotSize} ${unit}`, Floors: floors, "House type": houseType, Finishing: finishing, "Covered area": `${result.coveredAreaSqft.toLocaleString()} sq ft`, Estimate: formatPKR(result.total) }}
+            />
             <p className="mt-5 text-xs text-slate-400">
               Estimate only, excluding plot cost, approvals, boundary wall and furnishing. Rates effective {new Date(rates.effectiveDate).toLocaleDateString("en-PK", { dateStyle: "medium" })}.
             </p>

@@ -16,6 +16,7 @@ import {
   type UaeEmirate,
   type UaeResidency,
 } from "@propertyx/shared";
+import { ToolLeadForm } from "./tool-lead-form";
 
 export function HomeLoanCalculator({ products, initialPrice }: { products: FinancingProduct[]; initialPrice?: number }) {
   const [productKey, setProductKey] = useState(products[0].key);
@@ -220,6 +221,19 @@ export function HomeLoanCalculator({ products, initialPrice }: { products: Finan
                 </table>
               </div>
             </details>
+            <ToolLeadForm
+              tool="home_loan"
+              context={{
+                "Property price": formatPKR(propertyPrice),
+                "Down payment": `${formatPKR(downPayment)} (${effDownPct}%)`,
+                Loan: formatPKR(result.financedAmount),
+                "Monthly payment": formatPKR(Math.round(result.monthlyPayment)),
+                Product: product.name,
+                Rate: `${annualRate}%`,
+                Tenure: `${tenure} years`,
+                ...(isUAE ? { Residency: residency === "national" ? "UAE national" : "Expat", "First home": firstHome ? "Yes" : "No", Purchase: offPlan ? "Off-plan" : "Ready", Emirate: emirate } : {}),
+              }}
+            />
             <p className="mt-5 text-xs text-slate-400">
               {isUAE
                 ? "Estimate only. Banks also require life and property insurance, a maximum loan term of 25 years (ending by age 65 for most expats, 70 for nationals) and monthly debts below 50% of your income. Fees follow published land-department schedules and change from time to time."

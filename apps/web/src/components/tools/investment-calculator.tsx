@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import { analyseInvestment, formatPKR, type DevelopmentStatus, COUNTRY } from "@propertyx/shared";
+import { ToolLeadForm } from "./tool-lead-form";
 
 const STATUSES: { key: DevelopmentStatus; label: string }[] = [
   { key: "developed", label: "Developed" },
@@ -167,6 +168,10 @@ export function InvestmentCalculator() {
                 </table>
               </div>
             </details>
+            <ToolLeadForm
+              tool="investment"
+              context={{ "Purchase price": formatPKR(purchasePrice), "Monthly rent": formatPKR(Number(rent) || 0), "Holding period": `${years} years`, "Gross yield": `${r.grossRentalYield.toFixed(1)}%`, ROI: `${r.roi.toFixed(0)}%`, Score: `${r.score}/100`, Financed: financed ? `Yes, ${downPct}% down` : "No" }}
+            />
             <p className="mt-5 text-xs text-slate-400">Estimate only, based on your assumptions. It is not financial advice.</p>
           </>
         ) : (

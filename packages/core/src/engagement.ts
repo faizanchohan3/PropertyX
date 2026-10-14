@@ -8,6 +8,7 @@ import { leadInputSchema, appointmentInputSchema, messageInputSchema, leadUpdate
 import { badRequest, forbidden, notFound, requireActor, tooMany, type Actor } from "./errors";
 import { messageSpamScore } from "./fraud";
 import { getSetting } from "./settings";
+import { forwardLead } from "./lead-tools";
 
 /* ------------------------------------------------------------------ */
 /* Leads                                                                */
@@ -95,16 +96,21 @@ export async function createLead(db: Database, actor: Actor | null, raw: unknown
       link,
       data: { leadId: lead.id },
     });
+  await forwardLead(db, lead.id);
   return lead;
 }
 
 /** Leads visible to the actor: own leads, plus team leads for agency admins/managers. */
-export async function listLeads(db: Database, actor: Actor, opts: { status?: string; scope?: "mine" | "team"; saved?: boolean; q?: string; listingId?: string } = {}) {
+export async function listLeads(db: Database, actor: Actor, opts: { status?: string; scope?: "mine" | "team" | "platform"; saved?: boolean; q?: string; listingId?: string } = {}) {
   let scope = sql`ld.recipient_id = ${actor.id}`;
   if (opts.scope === "team") {
     const [m] = await db.select().from(s.agencyMembers).where(and(eq(s.agencyMembers.userId, actor.id), inArray(s.agencyMembers.role, ["admin", "manager"])));
     if (!m) throw forbidden("Team leads are available to agency admins and managers");
     scope = sql`ld.agency_id = ${m.agencyId}`;
+  } else if (opts.scope === "platform") {
+    // calculator / valuation requests with no lister: handled by the site team
+    if (!actor.permissions.includes("support.access")) throw forbidden();
+    scope = sql`ld.recipient_id is null`;
   }
   const rows = await db.execute<Record<string, unknown>>(sql`
     select ld.*, l.title as listing_title, l.slug as listing_slug, l.price as listing_price, pr.name as project_name, pr.slug as project_slug,
@@ -534,5 +540,6 @@ export async function recordContactLead(db: Database, actor: Actor | null, listi
     body: `${lead.name} tapped ${label} on “${l.title}”.`,
     link: "/dashboard/leads",
   });
+  await forwardLead(db, lead.id);
   return lead;
 }

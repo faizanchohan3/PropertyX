@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { calculateInstallmentPlan, formatPKR, formatPKRFull, COUNTRY } from "@propertyx/shared";
+import { ToolLeadForm } from "./tool-lead-form";
 
 const DURATIONS = [12, 24, 36, 48, 60];
 
@@ -113,6 +114,10 @@ export function InstallmentCalculator() {
                 </table>
               </div>
             </details>
+            <ToolLeadForm
+              tool="installment"
+              context={{ "Total price": formatPKR(totalPrice), "Down payment": `${formatPKR(downPayment)} (${downPct}%)`, Duration: `${months} months`, "Monthly installment": formatPKR(Math.round(plan.monthlyInstallment)) }}
+            />
           </>
         ) : (
           <p className="py-16 text-center text-slate-500">Enter a price to build the plan.</p>
