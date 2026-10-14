@@ -94,7 +94,9 @@ export function LeadsBoard({ leads: initial, team, members = [] }: { leads: Lead
                         <Flame className="h-3 w-3" /> {l.aiScore >= 70 ? "Hot" : l.aiScore >= 45 ? "Warm" : "Cold"} · {l.aiScore}
                       </span>
                     )}
-                    <span className="badge bg-slate-100 text-slate-600">{l.source.replace("_", " ")}</span>
+                    <span className={`badge ${l.source === "whatsapp" ? "bg-[#25D366]/10 text-[#128C7E]" : "bg-slate-100 text-slate-600"}`}>
+                      {l.source === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : l.source === "call" ? <Phone className="h-3 w-3" /> : null} {l.source === "whatsapp" ? "WhatsApp" : l.source.replace("_", " ")}
+                    </span>
                   </div>
                   <p className="mt-1 text-sm text-slate-500">
                     {l.listingSlug ? (
@@ -108,7 +110,7 @@ export function LeadsBoard({ leads: initial, team, members = [] }: { leads: Lead
                     ) : (
                       "Profile enquiry"
                     )}{" "}
-                    · {new Date(l.createdAt).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short" })}
+                    · {new Date(l.createdAt).toLocaleString(COUNTRY.locale, { dateStyle: "medium", timeStyle: "short" })}
                     {team && l.recipientName && ` · assigned to ${l.recipientName}`}
                   </p>
                   {l.offerAmount && (
@@ -126,12 +128,18 @@ export function LeadsBoard({ leads: initial, team, members = [] }: { leads: Lead
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                <a href={`tel:${l.phone}`} onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
-                  <Phone className="h-3.5 w-3.5" /> {l.phone.replace(COUNTRY.phone.dial, "0")}
-                </a>
-                <a href={`https://wa.me/${l.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
-                  <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-                </a>
+                {l.phone ? (
+                  <>
+                    <a href={`tel:${l.phone}`} onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
+                      <Phone className="h-3.5 w-3.5" /> {l.phone.replace(COUNTRY.phone.dial, "0")}
+                    </a>
+                    <a href={`https://wa.me/${l.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={() => l.status === "new" && patch(l.id, { status: "contacted" })} className="btn-outline btn-sm">
+                      <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                    </a>
+                  </>
+                ) : (
+                  <span className="text-xs text-slate-500">Visitor wasn&apos;t signed in — find them in your {l.source === "call" ? "call log" : "WhatsApp chats"}.</span>
+                )}
                 {l.email && (
                   <a href={`mailto:${l.email}`} className="btn-outline btn-sm">
                     <Mail className="h-3.5 w-3.5" /> Email

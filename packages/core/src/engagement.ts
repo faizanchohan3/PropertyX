@@ -473,3 +473,66 @@ export async function markPastVisits(db: Database) {
   await db.update(s.appointments).set({ status: "cancelled", responseNote: "Expired without confirmation" }).where(and(eq(s.appointments.status, "requested"), lt(s.appointments.scheduledAt, new Date())));
 }
 
+
+/**
+ * WhatsApp / Call taps on a listing become leads for the advertiser. Signed-in visitors are
+ * recorded with their own name and number; anonymous ones as "WhatsApp visitor" (their number
+ * reaches the advertiser through WhatsApp itself). One lead per visitor, listing and channel per
+ * 24 hours; taps on your own listing are ignored. Demo listings never create leads.
+ */
+export async function recordContactLead(db: Database, actor: Actor | null, listingId: string, channel: "whatsapp" | "call", anonId?: string | null) {
+  const [l] = await db
+    .select({ id: s.propertyListings.id, title: s.propertyListings.title, postedById: s.propertyListings.postedById, agentId: s.propertyListings.agentId, agencyId: s.propertyListings.agencyId, status: s.propertyListings.status, isSeed: s.propertyListings.isSeed })
+    .from(s.propertyListings)
+    .where(eq(s.propertyListings.id, listingId));
+  if (!l || l.status !== "active" || !l.postedById) return null;
+  if (actor && actor.id === l.postedById) return null;
+  if (!actor && !anonId) return null;
+
+  const since = new Date(Date.now() - 86400_000);
+  if (actor) {
+    const [dup] = await db.select({ id: s.leads.id }).from(s.leads).where(and(eq(s.leads.listingId, listingId), eq(s.leads.source, channel), gt(s.leads.createdAt, since), eq(s.leads.userId, actor.id))).limit(1);
+    if (dup) return null;
+  } else {
+    // anonymous: the click event for this tap is already recorded, so more than one means a repeat
+    const [{ n }] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(s.listingEvents)
+      .where(and(eq(s.listingEvents.listingId, listingId), eq(s.listingEvents.type, `${channel}_click`), eq(s.listingEvents.anonId, anonId!), gt(s.listingEvents.createdAt, since)));
+    if (n > 1) return null;
+  }
+
+  const [u] = actor ? await db.select({ name: s.users.name, phone: s.users.phone, email: s.users.email, phoneVerifiedAt: s.users.phoneVerifiedAt }).from(s.users).where(eq(s.users.id, actor.id)) : [];
+  const label = channel === "whatsapp" ? "WhatsApp" : "phone";
+  const message = u
+    ? `Tapped ${label} on this listing.`
+    : `Tapped ${label} on this listing without signing in — their number will be in your ${channel === "whatsapp" ? "WhatsApp chats" : "call log"}.`;
+  const q = qualifyLead({ message, source: channel, phoneVerified: !!u?.phoneVerifiedAt, hasAccount: !!actor, previousEnquiries: 0, savedListing: false });
+  const [lead] = await db
+    .insert(s.leads)
+    .values({
+      listingId,
+      agentId: l.agentId,
+      agencyId: l.agencyId,
+      recipientId: l.postedById,
+      userId: actor?.id ?? null,
+      name: u?.name ?? (channel === "whatsapp" ? "WhatsApp visitor" : "Phone caller"),
+      phone: u?.phone ?? "",
+      email: u?.email ?? null,
+      message,
+      source: channel,
+      aiScore: q.score,
+      aiSummary: q.summary,
+      isSeed: l.isSeed,
+    })
+    .returning();
+  await db.update(s.propertyListings).set({ leadsCount: sql`${s.propertyListings.leadsCount} + 1` }).where(eq(s.propertyListings.id, listingId));
+  await notify(db, {
+    userId: l.postedById,
+    type: "new_lead",
+    title: channel === "whatsapp" ? "New WhatsApp lead" : "New call lead",
+    body: `${lead.name} tapped ${label} on “${l.title}”.`,
+    link: "/dashboard/leads",
+  });
+  return lead;
+}

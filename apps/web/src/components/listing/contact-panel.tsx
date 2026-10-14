@@ -25,7 +25,7 @@ export interface ContactProps {
   user: { name: string; email: string; phone: string | null } | null;
 }
 
-const track = (listingId: string, type: string) => fetch(`/api/v1/listings/${listingId}/events`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, anonId: anonId() }) }).catch(() => {});
+const track = (listingId: string, type: string) => fetch(`/api/v1/listings/${listingId}/events`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, anonId: anonId() }), keepalive: true }).catch(() => {});
 
 export function ContactPanel(p: ContactProps) {
   const router = useRouter();
