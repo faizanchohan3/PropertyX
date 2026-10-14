@@ -8,6 +8,7 @@ import { agentPath } from "@propertyx/shared";
 import { db, getUser } from "@/lib/server";
 import { Avatar, Rating } from "@/components/directory/cards";
 import { ContactBox } from "@/components/directory/contact-box";
+import { LeadRequestBox } from "@/components/directory/lead-request";
 import { ReviewsList } from "@/components/directory/reviews";
 import { PropertyGrid } from "@/components/property-card";
 
@@ -87,6 +88,8 @@ export default async function AgencyPage({ params }: Props) {
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           {ag.ownerId && ag.ownerId !== user?.id && (
             <div className="card p-5">
+              <LeadRequestBox target={{ agencyId: ag.id }} to={ag.name} defaultMessage={`Hi, I found ${ag.name} on Bismillah and I'm looking for a property. Can you help?`} />
+              <p className="my-4 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or send a message<span className="h-px flex-1 bg-slate-200" /></p>
               <ContactBox to={ag.name} target={{ userId: ag.ownerId }} defaultText={`Hi, I found ${ag.name} on Bismillah and I'm looking for a property. Can you help?`} loggedIn={!!user} next={`/agencies/${ag.slug}`} />
             </div>
           )}

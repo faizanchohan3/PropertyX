@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatPKR, formatPKRFull, uaeBuyingCosts, uaeMaxLtv, UAE_EMIRATE_LABELS, type UaeEmirate, type UaePurchase } from "@propertyx/shared";
+import { ToolLeadForm } from "./tool-lead-form";
 
 /** UAE one-off buying costs: land department fees, trustee, mortgage registration, agent and bank fees. */
 export function BuyingCostsCalculator({ initialPrice }: { initialPrice?: number }) {
@@ -131,6 +132,10 @@ export function BuyingCostsCalculator({ initialPrice }: { initialPrice?: number 
             Monthly payment for this loan →
           </Link>
         )}
+        <ToolLeadForm
+          tool="buying_costs"
+          context={{ "Property price": formatPKR(p), Emirate: UAE_EMIRATE_LABELS[emirate], Purchase: purchase === "off_plan" ? "Off-plan" : "Resale", Mortgage: mortgage ? formatPKR(loan) : "Cash", "Buying costs": formatPKR(r.total), "Cash needed": formatPKR(down + r.total) }}
+        />
         <p className="mt-5 text-xs text-slate-400">
           Estimate based on the published Dubai Land Department, ADREC and Sharjah fee schedules. Off-plan purchases from a developer normally have no agent commission or trustee fee; some developers also cover part of the DLD fee. Confirm the exact amounts with your agent, bank and the land department before you transfer.
         </p>

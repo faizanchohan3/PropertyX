@@ -23,6 +23,8 @@ import {
   setSetting,
   setConstructionRates,
   runScheduledJobs,
+  updateLead,
+  testLeadWebhook,
   badRequest,
   forbidden,
 } from "@propertyx/core";
@@ -59,6 +61,11 @@ const ACTIONS: Record<string, (u: AuthUser, b: B) => Promise<unknown>> = {
   "payment.refund": (u, b) => refundPayment(db, u, b.id, b.reason ?? ""),
   "setting.set": (u, b) => setSetting(db, u, b.key, b.value),
   "rates.set": (u, b) => setConstructionRates(db, u, b.cityId ?? null, b.rates as ConstructionRates),
+  "lead.update": (u, b) => {
+    if (!u.permissions.includes("support.access")) throw forbidden();
+    return updateLead(db, u, b.id, { status: b.status, notes: b.notes });
+  },
+  "lead.webhook.test": (u) => testLeadWebhook(db, u),
   "jobs.run": async (u) => {
     if (!u.permissions.includes("settings.manage")) throw forbidden();
     return runScheduledJobs(db);

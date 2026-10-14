@@ -6,6 +6,7 @@ import { getDeveloperProfile } from "@propertyx/core";
 import { db, getUser } from "@/lib/server";
 import { Avatar, ProjectCard, Rating } from "@/components/directory/cards";
 import { ContactBox } from "@/components/directory/contact-box";
+import { LeadRequestBox } from "@/components/directory/lead-request";
 import { ReviewsList } from "@/components/directory/reviews";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -71,6 +72,8 @@ export default async function DeveloperPage({ params }: Props) {
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           {dev.ownerId && dev.ownerId !== user?.id && (
             <div className="card p-5">
+              <LeadRequestBox target={{ developerId: dev.id }} to={dev.name} defaultMessage="Hi, I'd like to know more about your projects and current payment plans." />
+              <p className="my-4 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or send a message<span className="h-px flex-1 bg-slate-200" /></p>
               <ContactBox to={dev.name} target={{ userId: dev.ownerId }} defaultText={`Hi, I'd like to know more about your projects and current payment plans.`} loggedIn={!!user} next={`/developers/${dev.slug}`} />
             </div>
           )}

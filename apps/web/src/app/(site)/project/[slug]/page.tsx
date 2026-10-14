@@ -8,6 +8,7 @@ import { getProject } from "@propertyx/core";
 import { PROJECT_STATUS_LABELS, areaPath, developerPath, formatPKR, describeSqft } from "@propertyx/shared";
 import { db, getUser } from "@/lib/server";
 import { ContactBox } from "@/components/directory/contact-box";
+import { LeadRequestBox, BrochureButton } from "@/components/directory/lead-request";
 import { Stat } from "@/components/market/data-note";
 
 export const revalidate = 300;
@@ -186,13 +187,15 @@ export default async function ProjectPage({ params }: Props) {
               <Link href={`/dashboard/projects/${p.id}`} className="btn-primary mt-4 w-full">Edit project</Link>
             ) : (
               <div className="mt-4">
+                <LeadRequestBox target={{ projectId: p.id }} to={developer.name} paymentPlan defaultMessage={`Hi, I'm interested in ${p.name}. Please share the latest prices, availability and payment plan.`} />
+                <p className="my-4 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or send a message<span className="h-px flex-1 bg-slate-200" /></p>
                 <ContactBox to={developer.name} target={{ projectId: p.id }} defaultText={`Hi, I'm interested in ${p.name}. Please share the latest prices, availability and payment plan.`} loggedIn={!!user} next={`/project/${p.slug}`} />
               </div>
             )}
           </div>
           {(p.brochureUrl || p.masterPlanUrl) && (
             <div className="card space-y-2 p-5">
-              {p.brochureUrl && <a href={p.brochureUrl} target="_blank" rel="noopener noreferrer" className="btn-outline w-full"><FileText className="h-4 w-4" /> Download brochure</a>}
+              {p.brochureUrl && (d.isOwner ? <a href={p.brochureUrl} target="_blank" rel="noopener noreferrer" className="btn-outline w-full"><FileText className="h-4 w-4" /> Download brochure</a> : <BrochureButton projectId={p.id} projectName={p.name} url={p.brochureUrl} />)}
               {p.masterPlanUrl && <a href={p.masterPlanUrl} target="_blank" rel="noopener noreferrer" className="btn-outline w-full"><CalendarDays className="h-4 w-4" /> View master plan</a>}
             </div>
           )}

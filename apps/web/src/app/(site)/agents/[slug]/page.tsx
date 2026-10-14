@@ -8,6 +8,7 @@ import { agencyPath, areaPath } from "@propertyx/shared";
 import { db, getUser } from "@/lib/server";
 import { Avatar, Rating } from "@/components/directory/cards";
 import { ContactBox } from "@/components/directory/contact-box";
+import { LeadRequestBox } from "@/components/directory/lead-request";
 import { ReviewsList } from "@/components/directory/reviews";
 import { PropertyGrid } from "@/components/property-card";
 import { Stat } from "@/components/market/data-note";
@@ -106,7 +107,11 @@ export default async function AgentPage({ params }: Props) {
             {isMe ? (
               <Link href="/dashboard/profile" className="btn-primary w-full">Edit your profile</Link>
             ) : (
-              <ContactBox to={a.displayName.split(" ")[0]} target={{ userId: a.userId }} defaultText="Hi, I found your profile on Bismillah. I'm looking for a property and would like your help." loggedIn={!!user} next={`/agents/${a.slug}`} />
+              <>
+                <LeadRequestBox target={{ agentId: a.id }} to={a.displayName.split(" ")[0]} defaultMessage="Hi, I found your profile on Bismillah. I'm looking for a property and would like your help." />
+                <p className="my-4 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or send a message<span className="h-px flex-1 bg-slate-200" /></p>
+                <ContactBox to={a.displayName.split(" ")[0]} target={{ userId: a.userId }} defaultText="Hi, I found your profile on Bismillah. I'm looking for a property and would like your help." loggedIn={!!user} next={`/agents/${a.slug}`} />
+              </>
             )}
           </div>
           <p className="text-xs text-slate-400">Member since {new Date(d.memberSince).toLocaleDateString("en-PK", { month: "long", year: "numeric" })}. Never pay advance money before visiting a property and checking its documents.</p>

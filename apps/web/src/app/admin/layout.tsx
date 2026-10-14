@@ -15,7 +15,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       (select count(*)::int from reports where status = 'open') as reports,
       (select count(*)::int from reviews where status = 'pending') as reviews,
       (select count(*)::int from projects where publish_status = 'pending') as projects,
-      (select count(*)::int from advertisements where status = 'pending') as ads`);
+      (select count(*)::int from advertisements where status = 'pending') as ads,
+      (select count(*)::int from leads where recipient_id is null and status = 'new') as leads`);
   const p = (x: string) => user.permissions.includes(x as never);
   const items: (AdminNavItem & { show: boolean })[] = [
     { href: "/admin", label: "Overview", icon: "LayoutDashboard", show: true },
@@ -24,6 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/fraud", label: "Fraud alerts", icon: "ShieldAlert", count: c.fraud, alert: c.fraud > 0, show: p("fraud.manage") },
     { href: "/admin/reports", label: "Reports", icon: "Flag", count: c.reports, alert: c.reports > 0, show: p("report.manage") },
     { href: "/admin/reviews", label: "Reviews", icon: "Star", count: c.reviews, show: p("review.moderate") },
+    { href: "/admin/leads", label: "Leads", icon: "Inbox", count: c.leads, alert: c.leads > 0, show: p("support.access") },
     { href: "/admin/users", label: "Users", icon: "Users", show: p("user.read") },
     { href: "/admin/accounts", label: "Agents & developers", icon: "Briefcase", show: p("user.read") },
     { href: "/admin/projects", label: "Projects", icon: "HardHat", count: c.projects, show: p("project.manage.any") },

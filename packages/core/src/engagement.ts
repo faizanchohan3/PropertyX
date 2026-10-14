@@ -8,6 +8,7 @@ import { leadInputSchema, appointmentInputSchema, messageInputSchema, leadUpdate
 import { badRequest, forbidden, notFound, requireActor, tooMany, type Actor } from "./errors";
 import { messageSpamScore } from "./fraud";
 import { getSetting } from "./settings";
+import { forwardLead } from "./lead-tools";
 
 /* ------------------------------------------------------------------ */
 /* Leads                                                                */
@@ -54,7 +55,29 @@ export async function createLead(db: Database, actor: Actor | null, raw: unknown
     agentId = a.id;
     agencyId = a.agencyId;
     subject = "your profile";
+  } else if (input.agencyId) {
+    const [a] = await db.select().from(s.agencies).where(eq(s.agencies.id, input.agencyId));
+    if (!a) throw notFound("Agency");
+    recipientId = a.ownerId;
+    agencyId = a.id;
+    subject = a.name;
+  } else if (input.developerId) {
+    const [d] = await db.select().from(s.developers).where(eq(s.developers.id, input.developerId));
+    if (!d) throw notFound("Developer");
+    recipientId = d.ownerId;
+    developerId = d.id;
+    subject = d.name;
   } else throw badRequest("Missing listing, project or agent");
+  if (actor && recipientId === actor.id) throw badRequest("You can't send an enquiry to yourself");
+  // brochure downloads: the same person downloading again isn't a new lead
+  if (input.source === "brochure" && input.projectId) {
+    const [dup] = await db
+      .select()
+      .from(s.leads)
+      .where(and(eq(s.leads.projectId, input.projectId), eq(s.leads.source, "brochure"), eq(s.leads.phone, input.phone), gt(s.leads.createdAt, new Date(Date.now() - 7 * 86400_000))))
+      .limit(1);
+    if (dup) return dup;
+  }
   if (input.source === "offer" && !input.offerAmount) throw badRequest("Enter your offer amount");
 
   const [prev] = actor ? await db.select({ n: sql<number>`count(*)::int` }).from(s.leads).where(and(eq(s.leads.userId, actor.id), gt(s.leads.createdAt, new Date(Date.now() - 7 * 86400_000)))) : [{ n: 0 }];
@@ -90,21 +113,29 @@ export async function createLead(db: Database, actor: Actor | null, raw: unknown
     await notify(db, {
       userId: recipientId,
       type: "new_lead",
-      title: input.source === "offer" ? `New offer: ${formatPKR(input.offerAmount!)}` : "New lead",
+      title: input.source === "offer" ? `New offer: ${formatPKR(input.offerAmount!)}` : input.source === "brochure" ? "Brochure downloaded" : input.source === "payment_plan" ? "Payment plan requested" : "New lead",
       body: `${input.name} enquired about ${subject}. ${q.tier === "hot" ? "High intent." : ""}`.trim(),
       link,
       data: { leadId: lead.id },
     });
+  await forwardLead(db, lead.id);
   return lead;
 }
 
 /** Leads visible to the actor: own leads, plus team leads for agency admins/managers. */
-export async function listLeads(db: Database, actor: Actor, opts: { status?: string; scope?: "mine" | "team"; saved?: boolean; q?: string; listingId?: string } = {}) {
+export async function listLeads(db: Database, actor: Actor, opts: { status?: string; scope?: "mine" | "team" | "platform" | "all"; saved?: boolean; q?: string; listingId?: string } = {}) {
   let scope = sql`ld.recipient_id = ${actor.id}`;
   if (opts.scope === "team") {
     const [m] = await db.select().from(s.agencyMembers).where(and(eq(s.agencyMembers.userId, actor.id), inArray(s.agencyMembers.role, ["admin", "manager"])));
     if (!m) throw forbidden("Team leads are available to agency admins and managers");
     scope = sql`ld.agency_id = ${m.agencyId}`;
+  } else if (opts.scope === "platform") {
+    // calculator / valuation requests with no lister: handled by the site team
+    if (!actor.permissions.includes("support.access")) throw forbidden();
+    scope = sql`ld.recipient_id is null`;
+  } else if (opts.scope === "all") {
+    if (!actor.permissions.includes("support.access")) throw forbidden();
+    scope = sql`true`;
   }
   const rows = await db.execute<Record<string, unknown>>(sql`
     select ld.*, l.title as listing_title, l.slug as listing_slug, l.price as listing_price, pr.name as project_name, pr.slug as project_slug,
@@ -155,7 +186,7 @@ async function loadLeadForActor(db: Database, actor: Actor, leadId: string) {
   throw forbidden();
 }
 
-export async function updateLead(db: Database, actor: Actor | null, leadId: string, raw: unknown & { isSaved?: boolean; assignToUserId?: string }) {
+export async function updateLead(db: Database, actor: Actor | null, leadId: string, raw: { status?: string; notes?: string; isSaved?: boolean; assignToUserId?: string }) {
   requireActor(actor);
   const lead = await loadLeadForActor(db, actor, leadId);
   const parsed = leadUpdateSchema.extend({}).safeParse(raw);
@@ -534,5 +565,6 @@ export async function recordContactLead(db: Database, actor: Actor | null, listi
     body: `${lead.name} tapped ${label} on “${l.title}”.`,
     link: "/dashboard/leads",
   });
+  await forwardLead(db, lead.id);
   return lead;
 }

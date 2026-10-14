@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { listLeads, myAgency, agencyTeam } from "@propertyx/core";
 import { requirePermission, db } from "@/lib/server";
 import { PageHeader } from "@/components/dashboard/ui";
@@ -22,7 +23,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         title="Leads"
         subtitle="Every enquiry, call-back request and offer — scored by intent."
         actions={
-          canTeam && (
+          <div className="flex flex-wrap items-center gap-2">
+            <a href={`/api/v1/leads/export?scope=${team ? "team" : "mine"}`} className="btn-outline btn-sm" title="Open in Excel or Google Sheets, or import into a CRM">
+              <Download className="h-4 w-4" /> Export CSV
+            </a>
+            {canTeam && (
             <div className="flex rounded-xl bg-slate-100 p-1 text-sm font-semibold">
               <Link href="/dashboard/leads" className={`rounded-lg px-3 py-1.5 ${!team ? "bg-white shadow-sm" : "text-slate-500"}`}>
                 My leads
@@ -31,7 +36,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                 Agency leads
               </Link>
             </div>
-          )
+            )}
+          </div>
         }
       />
       {sp.listing && (

@@ -6,6 +6,7 @@ import { CITY_LINKS } from "@/components/nav-data";
 import { PropertyGrid } from "@/components/property-card";
 import { MarketDataNote } from "@/components/market/data-note";
 import { AutoSubmitSelect } from "@/components/tools/auto-submit-select";
+import { ToolLeadForm } from "@/components/tools/tool-lead-form";
 
 export const metadata: Metadata = {
   title: "What's my property worth? — free property valuation",
@@ -161,6 +162,18 @@ export default async function PropertyValuePage({ searchParams }: Props) {
               <div className="mt-5">
                 <MarketDataNote demo={result.isDemoData} />
               </div>
+              <ToolLeadForm
+                tool="property_value"
+                context={{
+                  Location: placeName,
+                  Type: VALUE_TYPES.find((t) => t.key === type)!.label,
+                  Purpose: purpose === "rent" ? "Rent out" : "Sell",
+                  Size: `${areaValue} ${AREA_UNIT_LABELS[unit]}`,
+                  ...(hasRooms && beds ? { Bedrooms: beds } : {}),
+                  Estimate: formatPKR(est.estimate.avg),
+                  Range: `${formatPKR(est.estimate.low)} – ${formatPKR(est.estimate.high)}`,
+                }}
+              />
             </>
           )}
         </div>

@@ -116,12 +116,39 @@ export const leadInputSchema = z.object({
   listingId: z.string().uuid().optional(),
   projectId: z.string().uuid().optional(),
   agentId: z.string().uuid().optional(),
+  agencyId: z.string().uuid().optional(),
+  developerId: z.string().uuid().optional(),
   name: z.string().trim().min(2).max(80),
   phone: pkPhone,
   email: z.string().trim().email().optional().or(z.literal("")),
   message: z.string().trim().max(2000).optional().default(""),
   source: z.enum(["form", "call", "whatsapp", "offer", "payment_plan", "brochure", "ai_assistant"]).default("form"),
   offerAmount: z.coerce.number().int().positive().optional(),
+});
+
+/** Calculators and the valuation tool: visitors ask the site team for help (mortgage advice, selling, quotes). */
+export const TOOL_LEAD_KINDS = ["home_loan", "buying_costs", "property_value", "investment", "construction_cost", "installment"] as const;
+export type ToolLeadKind = (typeof TOOL_LEAD_KINDS)[number];
+export const TOOL_LEAD_LABELS: Record<ToolLeadKind, string> = {
+  home_loan: "Mortgage calculator",
+  buying_costs: "Buying costs calculator",
+  property_value: "Property valuation",
+  investment: "Investment calculator",
+  construction_cost: "Construction cost calculator",
+  installment: "Installment calculator",
+};
+export function toolLeadSource(tool: ToolLeadKind): "mortgage" | "valuation" | "tool" {
+  return tool === "home_loan" ? "mortgage" : tool === "property_value" ? "valuation" : "tool";
+}
+
+export const toolLeadInputSchema = z.object({
+  tool: z.enum(TOOL_LEAD_KINDS),
+  name: z.string().trim().min(2).max(80),
+  phone: pkPhone,
+  email: z.string().trim().email().optional().or(z.literal("")),
+  message: z.string().trim().max(1000).optional().default(""),
+  /** what the visitor entered / saw in the tool, shown to the team (label -> value) */
+  context: z.record(z.string().max(60), z.union([z.string().max(120), z.number()])).optional().default({}),
 });
 
 export const appointmentInputSchema = z.object({
